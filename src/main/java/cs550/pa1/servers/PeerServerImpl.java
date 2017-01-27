@@ -73,8 +73,9 @@ public class PeerServerImpl implements Peer{
                 //out.println(outputLine);
 
             }
-            socket.shutdownInput();
-            //socket.close();
+            //socket.shutdownInput();
+
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

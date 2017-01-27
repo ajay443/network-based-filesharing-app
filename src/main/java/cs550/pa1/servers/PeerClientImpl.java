@@ -109,7 +109,7 @@ public class PeerClientImpl implements Peer {
         PrintWriter out = new PrintWriter( peerClientSocket.getOutputStream(), true );
         //BufferedReader in = new BufferedReader(new InputStreamReader(peerClientSocket.getInputStream()));
         InputStream in = peerClientSocket.getInputStream();
-        OutputStream fout = new FileOutputStream(fileName);
+        OutputStream fout = new FileOutputStream("output/"+fileName);
         try{
             out.println("Download "+fileName);
             String message = "";
