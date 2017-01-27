@@ -34,7 +34,7 @@ public class Server {
         }
 
         try {
-            out = new FileOutputStream("peers/8075/test1.txt");
+            out = new FileOutputStream("peers/test1.txt");
         } catch (FileNotFoundException ex) {
             System.out.println("File not found. ");
         }

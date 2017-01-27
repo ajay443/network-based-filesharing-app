@@ -59,53 +59,58 @@ public class PeerServerImpl implements Peer{
 
     public void peerRun() {
         try (
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                //PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(
                                 socket.getInputStream()));
         ) {
             String inputLine, outputLine;
-            outputLine = processInput("");
-            out.println(outputLine);
+            outputLine = "";
+            //out.println(outputLine);
 
-            while ((inputLine = in.readLine()) != null) {
-                outputLine = processInput(inputLine);
-                out.println(outputLine);
+            if ((inputLine = in.readLine()) != null) {
+                processInput(inputLine);
+                //out.println(outputLine);
 
             }
-            socket.shutdownInput();
+            //socket.shutdownInput();
+
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String  processInput(String input) {
+    private void processInput(String input) {
         System.out.println(input);
-        String fileContent = "";
+        //String fileContent = "";
         String params[] = input.split(" ");
         if (params[0].equals("Download")){
-            File f = new File("peers/8075/"+params[1]);
+            File f = new File("peers/"+params[1]);
             try(
-                    FileInputStream fip = new FileInputStream(f);
-
+                    InputStream fip = new FileInputStream(f);
+            		OutputStream out = socket.getOutputStream();
             )
             {
-
-                int content = 0;
-                while((content = fip.read()) != -1){
-                    fileContent += (char)content;
+                //int content = 0;
+                byte b[] = new byte[16 * 1024];
+                int count;
+                while ((count = fip.read(b)) > 0) {
+                    out.write(b, 0, count);
                 }
-                System.out.println("File Content : Server " + fileContent);
+                /*while((content = fip.read(b)) != -1){
+                    fileContent += (char)content;
+                }*/
+                //System.out.println("File Content : Server " + fileContent);
                 //out.println(fileContent);
-                return fileContent;
+                //return fileContent;
             }
             catch(Exception e){
             }
             finally{
             }
         }
-        return  fileContent;
+        //return  fileContent;
     }
 
 
