@@ -15,7 +15,7 @@ public class Client {
 
         socket = new Socket(host, 4444);
 
-        File file = new File("peers/8085/test.txt");
+        File file = new File("peers/file1.txt");
         // Get the size of the file
         long length = file.length();
         byte[] bytes = new byte[16 * 1024];

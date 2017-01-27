@@ -53,7 +53,7 @@ public  class IndexImpl implements Index {
                     }
                     else if (params[0].equals("register")){
                         registry(params[1],params[2],"file");
-                        clientSocket.shutdownInput();
+                        //clientSocket.shutdownInput();
                     }
                 }
                 clientSocket.shutdownInput();

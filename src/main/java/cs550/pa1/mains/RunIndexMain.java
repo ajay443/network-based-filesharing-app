@@ -22,7 +22,7 @@ public class RunIndexMain {
 
         int portNumber = Integer.parseInt(args[0]);*/
 
-        Util.LOGGER.info("IndexServer Started ");
+       // Util.LOGGER.info("IndexServer Started ");
 
 
         IndexImpl indexServer = new IndexImpl();

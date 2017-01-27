@@ -107,13 +107,22 @@ public class PeerClientImpl implements Peer {
 
         Socket peerClientSocket = new Socket(host,port);
         PrintWriter out = new PrintWriter( peerClientSocket.getOutputStream(), true );
-        BufferedReader in = new BufferedReader(new InputStreamReader(peerClientSocket.getInputStream()));
-
+        //BufferedReader in = new BufferedReader(new InputStreamReader(peerClientSocket.getInputStream()));
+        InputStream in = peerClientSocket.getInputStream();
+        OutputStream fout = new FileOutputStream(fileName);
         try{
             out.println("Download "+fileName);
             String message = "";
             PrintWriter p = new PrintWriter(fileName,"UTF-8");
-            while((message = in.readLine()) != null){
+            
+            byte[] bytes = new byte[16*1024];
+
+            int count;
+            while ((count = in.read(bytes)) > 0) {
+                fout.write(bytes, 0, count);
+            }
+            
+            /*while((message = in.readLine()) != null){
                 System.out.println(message);
                 p.println(message);
 
@@ -127,13 +136,16 @@ public class PeerClientImpl implements Peer {
                     while((content = fip.read()) != -1){
                         fileContent += (char)content;
                     }
+                    
+                    
+                    
                     System.out.println("File Content : " + fileContent);
                     out.println(fileContent);
                     fip.close();
                     peerClientSocket.shutdownInput();
 
                 }
-            }
+            }*/
             p.close();
 
         }
