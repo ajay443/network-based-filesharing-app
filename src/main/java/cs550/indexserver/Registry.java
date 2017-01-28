@@ -7,15 +7,18 @@ package cs550.indexserver;
  */
 // Producer
 public class Registry implements Runnable {
-    IndexServerBrain indexServerBrain;
-    Registry(IndexServerBrain indexServerBrain) {
-        this.indexServerBrain = indexServerBrain;
+    Processor processor;
+    Registry(Processor processor) {
+        this.processor = processor;
         new Thread(this, "Registry").start();
     }
     public void run() {
-        int i = 0;
-        while(true) {
-            this.indexServerBrain.registry("p1","a1",i++);
+        try {
+            this.processor.doit("registry");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
+
     }
 }

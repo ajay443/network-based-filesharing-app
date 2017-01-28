@@ -4,16 +4,21 @@ package cs550.indexserver;
  * Created by Ajay on 1/27/17.
  */
 public class LookUp implements Runnable {
-    IndexServerBrain indexServerBrain;
-    public LookUp(IndexServerBrain indexServerBrain) {
-        this.indexServerBrain = indexServerBrain;
-        new Thread(this, "LookUp").start();
+    Processor processor;
+    public LookUp(Processor processor) {
+        this.processor = processor;
+        new Thread(this, "lookUp").start();
+
     }
 
     public void run() {
-        while(true) {
-            this.indexServerBrain.lookup();
+        try {
+            this.processor.doit("lookup");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
+
     }
 
 }
