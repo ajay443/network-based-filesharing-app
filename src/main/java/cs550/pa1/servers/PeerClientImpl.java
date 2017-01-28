@@ -6,27 +6,63 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
+import static java.nio.file.StandardWatchEventKinds.*;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.Map;
+
+//class WatcherThread;
 /**
  * Created by Ajay on 1/26/17.
  */
 public class PeerClientImpl implements Peer {
 
-    public String hostname_client ;
+    public String hostName ;
     public int port_client ;
+    public int port_server;
+    WatcherThread wt;
 
+    //private final WatchService watcher;
+    //private final Map<WatchKey, Path> keys;
 
-    public PeerClientImpl() {
-        this.hostname_client = Constants.CLIENT_HOST_DEFAULT;
+    public PeerClientImpl() throws IOException {
+        this.port_server = Constants.INDEX_SERVER_PORT_DEFAULT;
         this.port_client = Constants.CLIENT_PORT_DEFAULT;
+	this.hostName = "localhost";
+	
+	wt = new WatcherThread(hostName, port_client, port_server);
+
+	//this.watcher = FileSystems.getDefault().newWatchService();
+        //this.keys = new HashMap<WatchKey, Path>();
+        //Path dir = Paths.get(".");
+        //registerDirectory(dir);
     }
 
-    public PeerClientImpl(String hostname_client, int port_client) {
-        this.hostname_client = hostname_client;
+    public PeerClientImpl(String hostName, int port_client, int port_server) throws IOException {
+        this.hostName = hostName;
         this.port_client = port_client;
+	this.port_server = port_server;
+        wt = new WatcherThread(hostName, port_client, port_server);
+	/*
+	this.watcher = FileSystems.getDefault().newWatchService();
+        this.keys = new HashMap<WatchKey, Path>();
+        Path dir = Paths.get(".");
+        registerDirectory(dir);
+	*/
     }
 
     @Override
     public void init() {
+	wt.start();
         peerClientInterface();
 
     }
@@ -79,7 +115,8 @@ public class PeerClientImpl implements Peer {
 
     private void lookupFile(String fileName) throws IOException{
         // TODO change the default host and peer config
-        Socket socketToIndexServer = new Socket( Constants.INDEX_SERVER_HOST, Constants.INDEX_SERVER_PORT_DEFAULT );
+        //Socket socketToIndexServer = new Socket( Constants.INDEX_SERVER_HOST, Constants.INDEX_SERVER_PORT_DEFAULT );
+	Socket socketToIndexServer = new Socket( this.hostName, this.port_server );
         PrintWriter out = new PrintWriter( socketToIndexServer.getOutputStream(), true );
         BufferedReader in = new BufferedReader( new InputStreamReader( socketToIndexServer.getInputStream() ) );
 
@@ -158,10 +195,111 @@ public class PeerClientImpl implements Peer {
     }
 
     private void registerFile(String fileLocation) throws IOException{
-        Socket sock = new Socket(Constants.INDEX_SERVER_HOST, Constants.INDEX_SERVER_PORT_DEFAULT);
+        //Socket sock = new Socket(Constants.INDEX_SERVER_HOST, Constants.INDEX_SERVER_PORT_DEFAULT);
+	Socket sock = new Socket( this.hostName, this.port_server );
         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
-        out.println("register "+ fileLocation+", "+this.hostname_client+":"+this.port_client);
+        out.println("register "+ fileLocation+", "+this.hostName+":"+this.port_client);
         sock.shutdownInput();
     }
-
 }
+class WatcherThread extends Thread{
+
+    private WatchService watcher;
+    private Map<WatchKey, Path> keys;
+
+    String hn;
+    int port_server;
+    int port_client;
+
+    public WatcherThread(){
+        try {
+            this.watcher = FileSystems.getDefault().newWatchService();
+            this.keys = new HashMap<WatchKey, Path>();
+            this.hn = "localhost";
+            this.port_server = 8080;
+            this.port_client = 8100;
+            Path dir = Paths.get(".");
+            registerDirectory(dir);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public WatcherThread(String hn, int port_client, int port_server ){
+        try {
+            this.watcher = FileSystems.getDefault().newWatchService();
+            this.keys = new HashMap<WatchKey, Path>();
+            this.hn = hn;
+            this.port_server = port_server;
+            this.port_client = port_client;
+            Path dir = Paths.get(".");
+            registerDirectory(dir);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private void registerDirectory(Path dir) throws IOException
+    {
+	    WatchKey key = dir.register(watcher, /*ENTRY_CREATE,*/ ENTRY_DELETE, ENTRY_MODIFY);
+	    keys.put(key, dir);
+    }
+
+    public void run(){
+	    for (;;) {
+
+		    // wait for key to be signalled
+		    WatchKey key;
+		    try {
+			    key = watcher.take();
+		    } catch (InterruptedException x) {
+			    return;
+		    }
+
+		    Path dir = keys.get(key);
+		    if (dir == null) {
+			    System.err.println("WatchKey not recognized!!");
+			    continue;
+		    }
+
+		    for (WatchEvent<?> event : key.pollEvents()) {
+			    @SuppressWarnings("rawtypes")
+				    WatchEvent.Kind kind = event.kind();
+
+			    // Context for directory entry event is the file name of entry
+			    @SuppressWarnings("unchecked")
+				    Path name = ((WatchEvent<Path>)event).context();
+			    Path child = dir.resolve(name);
+
+			    // print out event
+			    System.out.format("%s: %s\n", event.kind().name(), child);
+
+			    // if directory is created, and watching recursively, then register it and its sub-directories
+			    if (kind == ENTRY_DELETE || kind == ENTRY_MODIFY) {
+				    try{
+					    //Socket sock = new Socket(Constants.INDEX_SERVER_HOST, Constants.INDEX_SERVER_PORT_DEFAULT);
+					    Socket sock = new Socket( hn, port_server );
+					    PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
+
+					    out.println("Delete " + name.toString() + port_client);
+				    }
+				    catch(Exception e){
+					    e.printStackTrace();
+				    }
+			    } 
+			    }
+			    // reset key and remove from set if directory no longer accessible
+			    boolean valid = key.reset();
+			    if (!valid) {
+				    keys.remove(key);
+
+				    // all directories are inaccessible
+				    if (keys.isEmpty()) {
+					    break;
+				    }
+			    }
+		    }
+	    }
+    }
+

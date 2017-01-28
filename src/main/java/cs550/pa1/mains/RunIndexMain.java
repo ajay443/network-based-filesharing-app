@@ -12,7 +12,7 @@ public class RunIndexMain {
 
     public static void main(String[] args) throws IOException {
 
-        /*if (args.length != 1) {
+        if (args.length != 1) {
             System.err.println("Usage: java RunIndexMain <port number>");
             System.err.println("example: java RunIndexMain 8080");
             System.exit(1);
@@ -20,12 +20,12 @@ public class RunIndexMain {
 
 
 
-        int portNumber = Integer.parseInt(args[0]);*/
+        int portNumber = Integer.parseInt(args[0]);
 
        // Util.LOGGER.info("IndexServer Started ");
 
 
-        IndexImpl indexServer = new IndexImpl();
+        IndexImpl indexServer = new IndexImpl(portNumber);
 
 
 

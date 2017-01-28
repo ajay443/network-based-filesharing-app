@@ -55,6 +55,9 @@ public  class IndexImpl implements Index {
                         registry(params[1],params[2],"file");
                         //clientSocket.shutdownInput();
                     }
+		    else if(params[0].equals("Delete")){
+			Delete(params[1],params[2]);
+		    }
                 }
                 clientSocket.shutdownInput();
             }
@@ -93,5 +96,9 @@ public  class IndexImpl implements Index {
 
         return false;
     }
+	
+   public void Delete(String fileName, String hostingClient){
+	Util.DeleteSingleLineInFile(fileName,hostingClient);	
+   }
 
 }
