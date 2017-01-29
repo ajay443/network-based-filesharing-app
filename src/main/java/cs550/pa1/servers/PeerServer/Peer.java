@@ -6,5 +6,4 @@ package cs550.pa1.servers.PeerServer;
 public interface Peer {
 
     void init();
-    void display();
 }

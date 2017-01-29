@@ -31,7 +31,7 @@ class WatcherThread extends Thread{
             this.hostName = Constants.INDEX_SERVER_HOST;
             this.indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT;
             this.peerServerPort = Constants.SERVER_PORT_DEFAULT;
-            Path dir = Paths.get("peer_" + this.peerServerPort);
+            Path dir = Paths.get(Constants.PEER_FOLDER_PREFIX + this.peerServerPort);
             registerDirectory(dir);
         }
         catch(Exception e) {
@@ -46,7 +46,7 @@ class WatcherThread extends Thread{
             this.hostName = hostName;
             this.indexServerPort = indexServerPort;
             this.peerServerPort = peerServerPort;
-            Path dir = Paths.get("peer_" + this.peerServerPort);
+            Path dir = Paths.get(Constants.PEER_FOLDER_PREFIX + this.peerServerPort);
             registerDirectory(dir);
         }
         catch(Exception e) {

@@ -27,9 +27,12 @@ public class FileProcessor{
         lockIndexFile();
         List<String> results = search(text);
         System.out.println(results.size());
+        if(results.size()==0){
+            out.println("No results...");
+            out.flush();
+        }
         for (String i:results) {
             System.out.println(i+"\n");
-            //System.out.println(out.);
             out.println(i);
             out.flush();
         }
