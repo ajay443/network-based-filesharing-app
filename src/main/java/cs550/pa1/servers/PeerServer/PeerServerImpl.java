@@ -1,4 +1,4 @@
-package cs550.pa1.servers;
+package cs550.pa1.servers.PeerServer;
 
 import cs550.pa1.helpers.Constants;
 

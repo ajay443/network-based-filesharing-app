@@ -25,7 +25,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>cs550.indexserver.IndexServerTest</mainClass>
+                            <mainClass>cs550.pa1.servers.IndexServer.IndexServerMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

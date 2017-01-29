@@ -1,4 +1,4 @@
-package cs550.indexserver;
+package cs550.pa1.servers.IndexServer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,12 +10,12 @@ import java.net.Socket;
  * Created by Ajay on 1/28/17.
  */
 public class IndexServerThread extends  Thread{
-
     private Socket socket = null;
-
-    public IndexServerThread(Socket socket) {
+    FileProcessor fileProcessor;
+    public IndexServerThread(Socket socket,FileProcessor fileProcessor) {
         super("IndexServerThread");
         this.socket = socket;
+        this.fileProcessor = fileProcessor;
     }
 
     public void run() {
@@ -38,7 +38,17 @@ public class IndexServerThread extends  Thread{
     }
 
     private void process(String inputLine) {
-
+        String params[] = inputLine.split(" ");
+        if(params[0].equals("lookup")){
+            new LookUp(fileProcessor);
+        }else if (params[0].equals("register")) {
+            new Registry(fileProcessor);
+        }else{
+            System.out.println("Invalid Input");
+        }
 
     }
+
+
+
 }

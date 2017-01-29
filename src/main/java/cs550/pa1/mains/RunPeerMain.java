@@ -1,8 +1,8 @@
 package cs550.pa1.mains;
 
 import cs550.pa1.helpers.Util;
-import cs550.pa1.servers.PeerClientImpl;
-import cs550.pa1.servers.PeerServerImpl;
+import cs550.pa1.servers.PeerServer.PeerClientImpl;
+import cs550.pa1.servers.PeerServer.PeerServerImpl;
 
 /**
  * Created by Ajay on 1/26/17.

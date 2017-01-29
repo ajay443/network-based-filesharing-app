@@ -1,8 +1,5 @@
 package cs550.pa1.mains;
 
-import cs550.pa1.helpers.Util;
-import cs550.pa1.servers.IndexImpl;
-
 import java.io.IOException;
 
 /**

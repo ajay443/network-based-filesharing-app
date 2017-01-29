@@ -1,4 +1,4 @@
-package cs550.indexserver;
+package cs550.pa1.servers.IndexServer;
 
 
 /*
