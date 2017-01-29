@@ -1,6 +1,5 @@
 package cs550.pa1.mains;
 
-import cs550.pa1.helpers.Util;
 import cs550.pa1.servers.PeerServer.PeerClientImpl;
 import cs550.pa1.servers.PeerServer.PeerServerImpl;
 
@@ -12,10 +11,8 @@ public class RunPeerMain {
     public RunPeerMain() {
 
         try {
-            Util.LOGGER.info("Peer Server started");
             peerServer.start();
             peerServer.join(500);
-            Util.LOGGER.info("Peer Client started");
             peerClient.start();
         } catch (InterruptedException e) {
             e.printStackTrace();

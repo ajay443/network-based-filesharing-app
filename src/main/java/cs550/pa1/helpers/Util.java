@@ -1,8 +1,5 @@
 package cs550.pa1.helpers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +8,6 @@ import java.util.List;
  * Created by Ajay on 1/25/17.
  */
 public  class Util {
-    public static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
-
 
     public static List<String> searchInFile(String fileName){
 

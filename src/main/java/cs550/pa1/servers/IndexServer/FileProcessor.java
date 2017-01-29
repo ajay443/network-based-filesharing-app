@@ -2,6 +2,7 @@ package cs550.pa1.servers.IndexServer;
 
 import cs550.pa1.helpers.Util;
 
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -21,26 +22,19 @@ public class FileProcessor{
         unlockIndexFile();
 
     }
-    public synchronized List<String> lookup(String text) throws InterruptedException{
+    public synchronized void lookup(String text, PrintWriter out) throws InterruptedException{
         while(fileUnlocked == 1) wait(2000);
         lockIndexFile();
         List<String> results = search(text);
+        for (String i:results)
+            out.print(i);
+
         unlockIndexFile();
-        return results;
     }
 
 
-    public boolean registry(String loc,String portRequested,String type) {
-        String[] locArray;
-        if(type.equals("folder"))
-            for(String result: Util.listFiles(loc))
-                Util.appendDataToFile(result+", "+portRequested+"\n");
-
-        if(type.equals("file")){
-            Util.appendDataToFile(loc+", "+portRequested+"\n");
-        }
-
-        return false;
+    public void registry(String loc,String portRequested,String type) {
+        Util.appendDataToFile(loc+", "+portRequested+"\n");
     }
 
 
@@ -49,8 +43,11 @@ public class FileProcessor{
     }
 
     private void lockIndexFile(){
+
         fileUnlocked = 1;
     }
+
+
     private void unlockIndexFile(){
         fileUnlocked = 0;
         notify();

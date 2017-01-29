@@ -28,7 +28,7 @@ public class IndexServerThread extends  Thread{
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                process(inputLine);
+                process(inputLine, out);
                 out.println(inputLine);
             }
             socket.close();
@@ -37,10 +37,11 @@ public class IndexServerThread extends  Thread{
         }
     }
 
-    private void process(String inputLine) {
+    private void process(String inputLine,  PrintWriter out) throws IOException {
         String params[] = inputLine.split(" ");
         if(params[0].equals("lookup")){
-            new LookUp(fileProcessor);
+            new LookUp(fileProcessor,out);
+            socket.shutdownOutput();
         }else if (params[0].equals("register")) {
             new Registry(fileProcessor);
         }else{
