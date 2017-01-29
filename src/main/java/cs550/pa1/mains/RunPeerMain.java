@@ -53,7 +53,7 @@ public class RunPeerMain {
 
     static void main() {
         Scanner in = new Scanner(System.in);
-        System.out.println("Enter Host Name : ");
+        System.out.println("Enter Host Name Example : localhost: ");
         String hostName = in.next();
         System.out.println("Enter Index Server Port Address  : ");
         int indexServerPort = in.nextInt();

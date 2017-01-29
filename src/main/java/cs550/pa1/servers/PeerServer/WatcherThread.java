@@ -55,6 +55,7 @@ class WatcherThread extends Thread{
     }
     private void registerDirectory(Path dir) throws IOException
     {
+
         WatchKey key = dir.register(watcher, /*ENTRY_CREATE,*/ ENTRY_DELETE, ENTRY_MODIFY);
         keys.put(key, dir);
     }
