@@ -37,7 +37,7 @@ public class PeerClientImpl implements Peer {
     }
 
 
-    public void peerClientInterface(){
+    public void peerClientInterface() throws  IOException{
 
         String fileName="";
         try {
@@ -77,9 +77,12 @@ public class PeerClientImpl implements Peer {
 
     }
 
-    private void lookupFile(String fileName) throws IOException{
+    private void lookupFile(String fileName) {
         // TODO change the default host and peer config
-        Socket socketToIndexServer = new Socket( Constants.INDEX_SERVER_HOST, Constants.INDEX_SERVER_PORT_DEFAULT );
+        Socket socketToIndexServer = null;
+        try {
+            socketToIndexServer = new Socket( Constants.INDEX_SERVER_HOST, Constants.INDEX_SERVER_PORT_DEFAULT );
+
         PrintWriter out = new PrintWriter( socketToIndexServer.getOutputStream(), true );
         BufferedReader in = new BufferedReader( new InputStreamReader( socketToIndexServer.getInputStream() ) );
 
@@ -99,6 +102,10 @@ public class PeerClientImpl implements Peer {
         System.out.println("***********************************************");
 
         socketToIndexServer.close();
+        } catch ( IOException e ) {
+            System.out.print("Exception : "+e.getMessage());
+           // e.printStackTrace();
+        }
     }
 
 
@@ -121,31 +128,6 @@ public class PeerClientImpl implements Peer {
             while ((count = in.read(bytes)) > 0) {
                 fout.write(bytes, 0, count);
             }
-            
-            /*while((message = in.readLine()) != null){
-                System.out.println(message);
-                p.println(message);
-
-                if(message.contains("Download")){
-                    String params[] = message.split(" ");
-                    File f = new File("peers/"+params[1]);
-                    FileInputStream fip = new FileInputStream(f);
-
-                    String fileContent = "";
-                    int content = 0;
-                    while((content = fip.read()) != -1){
-                        fileContent += (char)content;
-                    }
-                    
-                    
-                    
-                    System.out.println("File Content : " + fileContent);
-                    out.println(fileContent);
-                    fip.close();
-                    peerClientSocket.shutdownInput();
-
-                }
-            }*/
             p.close();
 
         }
