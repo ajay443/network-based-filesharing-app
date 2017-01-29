@@ -5,39 +5,22 @@ package cs550.pa1.servers.IndexServer;
  */
 public class Registry implements  Runnable {
     FileProcessor fileProcessor;
+    String peerID;
+    String fileName;
 
-    public Registry(FileProcessor fileProcessor) {
+    public Registry(FileProcessor fileProcessor,String peerID, String fileName) {
         this.fileProcessor = fileProcessor;
+        this.peerID = peerID;
+        this.fileName = fileName;
         new Thread(this, "registry").start();
     }
 
     @Override
     public void run() {
         try {
-            fileProcessor.registry("test","test");
+            fileProcessor.registry(peerID,fileName);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 }
-
-/*
-public class LookUp implements Runnable {
-    FileProcessor fileProcessor;
-
-    public LookUp(FileProcessor fileProcessor) {
-        this.fileProcessor = fileProcessor;
-        new Thread("Lookup").start();
-    }
-
-    @Override
-    public void run() {
-        try {
-            System.out.print("LookUP");
-            fileProcessor.lookup("test");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-}
-*/

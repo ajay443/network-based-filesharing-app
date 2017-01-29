@@ -39,4 +39,17 @@ public class UtilTest {
         }
     }
 
+    @Test
+    public void searchInFile2(){
+
+        List<String> results = Util.searchInFile("test");
+        int  count=0;
+        for(String r : results){
+            if(r.contains("test")) count++;
+        }
+        assertEquals(1,results.size());
+    }
+
+
+
 }

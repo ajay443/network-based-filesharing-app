@@ -9,7 +9,7 @@ import java.util.List;
  */
 public  class Util {
 
-    public static List<String> searchInFile(String fileName){
+    public static List<String> searchInFile(String text){
 
         BufferedReader br = null;
         List<String> lst = new ArrayList<String>();
@@ -30,7 +30,7 @@ public  class Util {
 
             while((txt = br.readLine()) != null){
                 //System.out.println("File content : "+txt);
-                if(txt.contains(fileName)){
+                if(txt.contains(text)){
                     String temp[] = txt.split(" ");
                     lst.add(txt);
                 }
