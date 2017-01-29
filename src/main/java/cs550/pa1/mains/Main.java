@@ -3,9 +3,9 @@ package cs550.pa1.mains;
 import java.util.Scanner;
 
 /**
- * Created by Ajay on 1/28/17.
+ * Main java
  */
-
+// ajaycomment
 
 public class Main {
     public static void main(String[] args) {
