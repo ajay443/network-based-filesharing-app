@@ -37,7 +37,7 @@ public class PeerClientImpl implements Peer {
     }
 
 
-    public void peerClientInterface() throws  IOException{
+    public void peerClientInterface() {
 
         String fileName="";
         try {
