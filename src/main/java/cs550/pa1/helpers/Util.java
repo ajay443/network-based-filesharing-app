@@ -176,4 +176,19 @@ public  class Util {
             e.printStackTrace();
         }
     }
+
+    public static void createFolder(String rootDirName){
+        try {
+            File file = new File(rootDirName);
+            if (!file.exists()) {
+                if (file.mkdir()) {
+                } else {
+                    System.out.println("Failed to create directory!");
+                }
+            }
+        }catch ( Exception e ){
+            e.printStackTrace();
+        }
+
+    }
 }

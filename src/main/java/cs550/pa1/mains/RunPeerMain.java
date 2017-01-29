@@ -1,5 +1,6 @@
 package cs550.pa1.mains;
 
+import cs550.pa1.helpers.Util;
 import cs550.pa1.servers.PeerServer.PeerClientImpl;
 import cs550.pa1.servers.PeerServer.PeerServerImpl;
 
@@ -52,13 +53,34 @@ public class RunPeerMain {
     }
 
     static void main() {
+        String hostName,choice;
+        int indexServerPort,peerServerPort;
+
         Scanner in = new Scanner(System.in);
-        System.out.println("Enter Host Name Example : localhost: ");
-        String hostName = in.next();
-        System.out.println("Enter Index Server Port Address  : ");
-        int indexServerPort = in.nextInt();
-        System.out.println("Enter PeerServer Port Address  : ");
-	    int peerServerPort = in.nextInt();
+        System.out.println("Default config / Manual config ? (yes/no)");
+        choice = in.next();
+        if(choice.equalsIgnoreCase("yes") ||choice.equalsIgnoreCase("y") ){
+            hostName = "localhost";
+            indexServerPort = 5000 ;
+            peerServerPort = 6100;
+
+
+        }else{
+            System.out.println("Enter Host Name Example : localhost: ");
+            hostName = in.next();
+            System.out.println("Enter Index Server Port Address  : ");
+            indexServerPort = in.nextInt();
+            System.out.println("Enter PeerServer Port Address  : ");
+            peerServerPort = in.nextInt();
+        }
+
+        Util.createFolder("peer_"+peerServerPort);
+        System.out.println("------------------------------------------");
+        System.out.println("Configuration : ");
+        System.out.println("Index Server Address : "+hostName+":"+indexServerPort);
+        System.out.println("Peer Server Address : "+hostName+":"+peerServerPort);
+        System.out.println("------------------------------------------");
+
         RunPeerMain runPeerMain = new RunPeerMain(hostName, indexServerPort, peerServerPort);
 
     }

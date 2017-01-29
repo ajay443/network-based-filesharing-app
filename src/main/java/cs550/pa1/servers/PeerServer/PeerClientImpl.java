@@ -6,20 +6,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
-import static java.nio.file.StandardWatchEventKinds.*;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.HashMap;
-import java.util.Map;
-
 //class WatcherThread;
 /**
  * Created by Ajay on 1/26/17.
@@ -52,6 +38,8 @@ public class PeerClientImpl implements Peer {
         this.hostName = hostName;
         this.indexServerPort = indexServerPort;
         this.peerServerPort = peerServerPort;
+        // create folder if doesnt exit
+
 
 	    //this.port_server = port_server;
         wt = new WatcherThread(this.hostName,this.indexServerPort, this.peerServerPort);
