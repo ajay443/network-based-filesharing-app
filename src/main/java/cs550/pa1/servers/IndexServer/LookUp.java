@@ -18,7 +18,7 @@ public class LookUp implements Runnable {
 
     @Override
     public void run() {
-        try {
+        try {// todo remove hard coded value
             fileProcessor.lookup("test", out);
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -27,6 +27,7 @@ public class RunIndexMain {
         } catch (IOException e) {
             System.err.println("Could not listen on port " + port);
             System.exit(-1);
+
         }
 
     }

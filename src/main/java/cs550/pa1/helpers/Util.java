@@ -9,11 +9,12 @@ import java.util.List;
  */
 public  class Util {
 
+
     public static List<String> searchInFile(String text){
 
         BufferedReader br = null;
         List<String> lst = new ArrayList<String>();
-        try{
+        try {
             // creates the directory for root..
             File dir = new File(Constants.INDEX_FILE_NAME.split("/")[0]);
             boolean successful = dir.mkdirs();
@@ -28,25 +29,21 @@ public  class Util {
             br = new BufferedReader(new FileReader(file));
             String txt = null;
 
-            while((txt = br.readLine()) != null){
+            while ((txt = br.readLine()) != null) {
                 //System.out.println("File content : "+txt);
                 if(txt.contains(text)){
                     String temp[] = txt.split(" ");
                     lst.add(txt);
                 }
             }
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally{
-            try{
+        } finally {
+            try {
                 br.close();
-            }
-            catch(IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -54,15 +51,14 @@ public  class Util {
     }
 
 
-
     public static List<String> listFiles(String loc) {
-        try{
+        try {
             List<String> results = new ArrayList<String>();
             File folder = new File(loc);
             File[] listOfFiles = folder.listFiles();
             for (int i = 0; i < listOfFiles.length; i++) {
                 if (listOfFiles[i].isFile()) {
-                    results.add(loc+"/"+listOfFiles[i].getName());
+                    results.add(loc + "/" + listOfFiles[i].getName());
                     // System.out.println("Peer "+port+"," + listOfFiles[i].getName());
                 } else if (listOfFiles[i].isDirectory()) {
                     //todo out of scope for PA1
@@ -70,7 +66,7 @@ public  class Util {
                 }
             }
             return results;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -121,7 +117,7 @@ public  class Util {
 
     }
 
-    public boolean removeLines(List<String> lines){
+    public boolean removeLines(List<String> lines) {
         //todo - remove the lines when peer updates
         /*
         http://stackoverflow.com/questions/1377279/find-a-line-in-a-file-and-remove-it
@@ -147,6 +143,35 @@ public  class Util {
         return false;
     }
 
+    public static void DeleteSingleLineInFile(String fn, String portNumber) {
+        //todo - remove the lines when peer updates
+        try {
 
+            //http://stackoverflow.com/questions/1377279/find-a-line-in-a-file-and-remove-it
+            File inputFile = new File(fn);
+            File tempFile = new File("myTempFile.tx");
 
+            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+            String lineToRemove = fn + " " + portNumber;
+            String currentLine;
+
+            while ((currentLine = reader.readLine()) != null) {
+                // trim newline when comparing with lineToRemove
+                String trimmedLine = currentLine.trim();
+                if (trimmedLine.equals(lineToRemove))
+                    continue;
+                writer.write(currentLine + System.getProperty("line.separator"));
+            }
+            writer.close();
+            reader.close();
+            if (inputFile.delete())
+                tempFile.renameTo(inputFile);
+
+            //return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
