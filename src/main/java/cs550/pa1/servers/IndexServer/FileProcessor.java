@@ -26,20 +26,30 @@ public class FileProcessor{
         while(fileUnlocked == 1) wait(2000);
         lockIndexFile();
         List<String> results = search(text);
-        for (String i:results)
-            out.print(i);
-
+        System.out.println(results.size());
+        for (String i:results) {
+            System.out.println(i+"\n");
+            //System.out.println(out.);
+            out.println(i);
+            out.flush();
+        }
         unlockIndexFile();
+        System.out.println("Inside FileProcessor");
     }
 
 
     public void registry(String loc,String portRequested,String type) {
-        Util.appendDataToFile(loc+", "+portRequested+"\n");
+        Util.appendDataToFile(loc+" "+portRequested+"\n");
     }
 
 
     public List<String> search(String text) {
+
         return Util.searchInFile(text);
+    }
+
+    public void RemoveDeletedFile(){
+
     }
 
     private void lockIndexFile(){

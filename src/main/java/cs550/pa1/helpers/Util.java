@@ -32,8 +32,9 @@ public  class Util {
             while ((txt = br.readLine()) != null) {
                 //System.out.println("File content : "+txt);
                 if(txt.contains(text)){
+                    System.out.println(txt+"\n");
                     String temp[] = txt.split(" ");
-                    lst.add(txt);
+                    lst.add(temp[1]);
                 }
             }
         } catch (IOException e) {
@@ -81,7 +82,7 @@ public  class Util {
 
             File file = new File(Constants.INDEX_FILE_NAME);
 
-            // if file doesnt exists, then create it
+            // if file doesnt exists, then create itportRequested
             if (!file.exists()) {
                 file.createNewFile();
             }
@@ -143,18 +144,19 @@ public  class Util {
         return false;
     }
 
-    public static void DeleteSingleLineInFile(String fn, String portNumber) {
+    public static void DeleteSingleLineInFile(String fileName, String portNumber) {
         //todo - remove the lines when peer updates
         try {
 
-            //http://stackoverflow.com/questions/1377279/find-a-line-in-a-file-and-remove-it
-            File inputFile = new File(fn);
-            File tempFile = new File("myTempFile.tx");
+            //http://stackoverflow.com/questions/1377279/find-a-l
+            // ine-in-a-file-and-remove-it
+            File inputFile = new File("output/index.txt");
+            File tempFile = new File("output/myTempFile.txt");
 
             BufferedReader reader = new BufferedReader(new FileReader(inputFile));
             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
-            String lineToRemove = fn + " " + portNumber;
+            String lineToRemove = fileName + " " + portNumber;
             String currentLine;
 
             while ((currentLine = reader.readLine()) != null) {

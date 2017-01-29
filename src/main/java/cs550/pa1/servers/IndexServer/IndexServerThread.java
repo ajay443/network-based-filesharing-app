@@ -1,5 +1,7 @@
 package cs550.pa1.servers.IndexServer;
 
+import cs550.pa1.helpers.Util;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,11 +27,11 @@ public class IndexServerThread extends  Thread{
                         new InputStreamReader(
                                 socket.getInputStream()));
         ) {
-
+            System.out.println("Socket at peer client from index server : "+ socket.getPort());
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 process(inputLine, out);
-                out.println(inputLine);
+                //out.println(inputLine);
             }
             socket.close();
         } catch (IOException e) {
@@ -41,15 +43,39 @@ public class IndexServerThread extends  Thread{
         String params[] = inputLine.split(" ");
         if(params[0].equals("lookup")){
             // comments
-            new LookUp(fileProcessor,out);
+            try {
+               LookUp lkup =  new LookUp(fileProcessor, out, params[1]);
+                Thread lkup_thread = new Thread(lkup);
+                lkup_thread.start();
+                lkup_thread.join();
+                System.out.println("Inside IndexServerThread");
 
-            socket.shutdownOutput();
+                socket.shutdownOutput();
+                return;
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
 
         }else if (params[0].equals("register")) {
+            try {
+                Registry rgstr = new Registry(fileProcessor, params[1], params[2]);
+                Thread rgstr_thread = new Thread(rgstr);
+                rgstr_thread.start();
+                rgstr_thread.join();
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
 
-            new Registry(fileProcessor,params[0],params[1]);
+        }else if(params[0].equals("delete")){
+            for(String t : params){
+                System.out.println(t + "\n");
+            }
+            Util.DeleteSingleLineInFile(params[1], params[2]);
 
-        }else{
+        }
+        else{
             System.out.println("Invalid Input");
         }
 

@@ -1,5 +1,7 @@
 package cs550.pa1.servers.PeerServer;
 
+import cs550.pa1.helpers.Constants;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -18,18 +20,18 @@ class WatcherThread extends Thread{
     private WatchService watcher;
     private Map<WatchKey, Path> keys;
 
-    String hn;
-    int port_server;
-    int port_client;
+    String hostName;
+    int indexServerPort;
+    int peerServerPort;
 
     public WatcherThread(){
         try {
             this.watcher = FileSystems.getDefault().newWatchService();
             this.keys = new HashMap<WatchKey, Path>();
-            this.hn = "localhost";
-            this.port_server = 8080;
-            this.port_client = 8100;
-            Path dir = Paths.get(".");
+            this.hostName = Constants.INDEX_SERVER_HOST;
+            this.indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT;
+            this.peerServerPort = Constants.SERVER_PORT_DEFAULT;
+            Path dir = Paths.get("peer_" + this.peerServerPort);
             registerDirectory(dir);
         }
         catch(Exception e) {
@@ -37,14 +39,14 @@ class WatcherThread extends Thread{
         }
     }
 
-    public WatcherThread(String hn, int port_client, int port_server ){
+    public WatcherThread(String hostName, int indexServerPort, int peerServerPort ){
         try {
             this.watcher = FileSystems.getDefault().newWatchService();
             this.keys = new HashMap<WatchKey, Path>();
-            this.hn = hn;
-            this.port_server = port_server;
-            this.port_client = port_client;
-            Path dir = Paths.get(".");
+            this.hostName = hostName;
+            this.indexServerPort = indexServerPort;
+            this.peerServerPort = peerServerPort;
+            Path dir = Paths.get("peer_" + this.peerServerPort);
             registerDirectory(dir);
         }
         catch(Exception e) {
@@ -84,16 +86,17 @@ class WatcherThread extends Thread{
                 Path child = dir.resolve(name);
 
                 // print out event
-                System.out.format("%s: %s\n", event.kind().name(), child);
-
+                System.out.println(event.kind().name()+"\n");
+                System.out.println(child+"\n");
+                Socket sock = null;
                 // if directory is created, and watching recursively, then register it and its sub-directories
                 if (kind == ENTRY_DELETE || kind == ENTRY_MODIFY) {
                     try{
                         //Socket sock = new Socket(Constants.INDEX_SERVER_HOST, Constants.INDEX_SERVER_PORT_DEFAULT);
-                        Socket sock = new Socket( hn, port_server );
+                        sock = new Socket( hostName, indexServerPort );
                         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
 
-                        out.println("Delete " + name.toString() + port_client);
+                        out.println("delete " + name.toString() + " " + peerServerPort);
                     }
                     catch(Exception e){
                         e.printStackTrace();

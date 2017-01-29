@@ -11,36 +11,36 @@ import java.net.Socket;
  */
 public class PeerServerImpl implements Peer{
 
-    public String hostname_server ;
-    public int port_server ;
-    public ServerSocket serverSocket;
+    //public String hostname_server ;
+    public int port ;
+    //public ServerSocket serverSocket;
 
     private Socket socket = null;
 
     public PeerServerImpl() {
-        this.hostname_server = Constants.SERVER_HOST_DEFAULT;
-        this.port_server = Constants.SERVER_PORT_DEFAULT;
+        //this.hostname_server = Constants.SERVER_HOST_DEFAULT;
+        this.port = Constants.SERVER_PORT_DEFAULT;
 
     }
 
-    public PeerServerImpl(String hostname_server, int port_server) {
-        this.hostname_server = hostname_server;
-        this.port_server = port_server;
+    public PeerServerImpl(int port_server) {
+        //this.hostname_server = hostname_server;
+        this.port = port_server;
     }
 
     @Override
     public void init() {
         boolean listening = true;
-        try (ServerSocket serverSocket = new ServerSocket(this.port_server)) {
+        try (ServerSocket serverSocket = new ServerSocket(this.port)) {
             while (listening) {
-                System.out.println("Server is listening to port:"+this.port_server);
+                System.out.println("Server is listening to port:"+this.port);
                 socket = serverSocket.accept();
                 peerRun();
 
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Could not listen on port " + this.port_server);
+            System.err.println("Could not listen on port " + this.port);
             System.exit(-1);
         }
 
@@ -49,10 +49,10 @@ public class PeerServerImpl implements Peer{
 
     @Override
     public void display() {
-        System.out.println( "PeerServerImpl{" +
+        /*System.out.println( "PeerServerImpl{" +
                 "hostname_server='" + hostname_server + '\'' +
                 ", port_server=" + port_server +
-                '}');
+                '}');*/
     }
 
 
@@ -86,7 +86,7 @@ public class PeerServerImpl implements Peer{
         //String fileContent = "";
         String params[] = input.split(" ");
         if (params[0].equals("Download")){
-            File f = new File("peers/"+params[1]);
+            File f = new File("peer_" + this.port + "/" + params[1]);
             try(
                     InputStream fip = new FileInputStream(f);
             		OutputStream out = socket.getOutputStream();

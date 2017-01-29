@@ -8,18 +8,22 @@ import java.io.PrintWriter;
 public class LookUp implements Runnable {
     FileProcessor fileProcessor;
     PrintWriter out;
+    String fileName;
 
 
-    public LookUp(FileProcessor fileProcessor, PrintWriter out) {
+    public LookUp(FileProcessor fileProcessor, PrintWriter out, String fileName) {
         this.fileProcessor = fileProcessor;
         this.out = out;
-        new Thread(this,"Lookup").start();
+        this.fileName = fileName;
+        //new Thread(this,"Lookup").start();
     }
 
     @Override
     public void run() {
         try {// todo remove hard coded value
-            fileProcessor.lookup("test", out);
+            fileProcessor.lookup(fileName, out);
+            System.out.println("Inside Lookup");
+            return;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

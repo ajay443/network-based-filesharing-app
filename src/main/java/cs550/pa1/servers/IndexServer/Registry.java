@@ -5,20 +5,20 @@ package cs550.pa1.servers.IndexServer;
  */
 public class Registry implements  Runnable {
     FileProcessor fileProcessor;
-    String peerID;
+    String peerServerID;
     String fileName;
 
-    public Registry(FileProcessor fileProcessor,String peerID, String fileName) {
+    public Registry(FileProcessor fileProcessor,String fileName, String peerServerID) {
         this.fileProcessor = fileProcessor;
-        this.peerID = peerID;
+        this.peerServerID = peerServerID;
         this.fileName = fileName;
-        new Thread(this, "registry").start();
+        //new Thread(this, "registry").start();
     }
 
     @Override
     public void run() {
         try {
-            fileProcessor.registry(peerID,fileName);
+            fileProcessor.registry(fileName, peerServerID);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
