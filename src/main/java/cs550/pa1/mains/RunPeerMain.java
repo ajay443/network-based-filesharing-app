@@ -53,9 +53,11 @@ public class RunPeerMain {
 
     static void main() {
         Scanner in = new Scanner(System.in);
-        // todo take input from command line
-	    String hostName = in.next();
-	    int portNumber = in.nextInt();
+        System.out.println("Enter Host Name : ");
+        String hostName = in.next();
+        System.out.println("Enter Port Address  : ");
+        int portNumber = in.nextInt();
+        System.out.println("Enter PeerServer Port Address  : ");
 	    int server_PN = in.nextInt();
         RunPeerMain runPeerMain = new RunPeerMain(hostName, portNumber, server_PN);
 
