@@ -37,10 +37,10 @@ public class RunPeerMain {
 
 
     public static void main(String[] args) {
-        runMain();
+        main();
     }
 
-    private static void runMain() {
+    static void main() {
         RunPeerMain runPeerMain = new RunPeerMain();
     }
 }

@@ -12,7 +12,7 @@ import java.util.Scanner;
  */
 public class RunIndexMain {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(){
         System.out.print("Enter Port Address : ");
         Scanner io = new Scanner(System.in);
         int port = io.nextInt();
@@ -28,6 +28,11 @@ public class RunIndexMain {
             System.err.println("Could not listen on port " + port);
             System.exit(-1);
         }
+
+    }
+
+    public static void main(String[] args) throws IOException {
+        main();
 
     }
 }
