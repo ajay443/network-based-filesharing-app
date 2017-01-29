@@ -19,7 +19,6 @@ public class LookUp implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.print("LookUP");
             fileProcessor.lookup("test", out);
         } catch (InterruptedException e) {
             e.printStackTrace();
