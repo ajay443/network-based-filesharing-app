@@ -1,7 +1,6 @@
 package cs550.pa1.helpers;
 
 import java.io.*;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -192,22 +191,5 @@ public  class Util {
         }
 
     }
-    public static void downloadFile(String filename,Socket socket){
-        File f = new File(filename);
-        try(
-                InputStream fip = new FileInputStream(f);
-                OutputStream out = socket.getOutputStream();
-        )
-        {
-            //int content = 0;
-            byte b[] = new byte[16 * 1024];
-            int count;
-            while ((count = fip.read(b)) > 0) {
-                out.write(b, 0, count);
-            }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
+
 }

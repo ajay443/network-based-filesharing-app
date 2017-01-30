@@ -1,3 +1,8 @@
+/**
+ * Main java
+ * Starts Index Server or Peer based on the user selection
+ */
+
 package cs550.pa1.mains;
 
 import java.util.Scanner;

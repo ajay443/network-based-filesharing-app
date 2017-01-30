@@ -1,3 +1,11 @@
+/**
+ * File Name : RunIndexMain.java
+ * Description : Starts the Index Server. Index Server runs on a specific port, upon request creates a thread to process each request.
+ * @authors : Ajay Ramesh and Chandra Kumar Basavaraju
+ * version : 1.0
+ * @date : 01/28/2017
+ */
+
 package cs550.pa1.mains;
 
 import cs550.pa1.helpers.Constants;
@@ -9,10 +17,13 @@ import java.net.ServerSocket;
 import java.util.Scanner;
 
 /**
- * Created by Ajay on 1/25/17.
+ * Index Server class
  */
 public class RunIndexMain {
-
+    
+/**
+ * Created by Ajay on 1/25/17.
+ */
     public static void main(){
 
 
@@ -39,14 +50,14 @@ public class RunIndexMain {
         String quit;
         try (ServerSocket serverSocket = new ServerSocket(indexServerPort)) {
             while (listening) {
-                System.out.println("Index Server is running .. \nType 'quit'  or 'q' at any point of time to stop ");
+               // System.out.println("Index Server is running .. \nType 'quit'  or 'q' at any point of time to stop ");
                 new IndexServerThread(serverSocket.accept(),fileProcessor).start();
-                quit = in.next();
-                if(quit.equalsIgnoreCase("quit") ||
+              //  quit = in.next();
+                /*if(quit.equalsIgnoreCase("quit") ||
                         quit.equalsIgnoreCase("q")) {
                     System.out.println("***************************************");
                     return;
-                }
+                }*/
 
             }
         } catch (IOException e) {
