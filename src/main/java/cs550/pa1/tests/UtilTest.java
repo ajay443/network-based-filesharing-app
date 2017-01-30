@@ -30,14 +30,7 @@ public class UtilTest {
     }
 
 
-    @Test
-    public void listFiles(){
 
-        List<String> results = Util.listFiles("peers/8085");
-        for(String r : results){
-            System.out.println(r);
-        }
-    }
 
     @Test
     public void searchInFile2(){
