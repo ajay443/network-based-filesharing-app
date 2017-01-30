@@ -12,7 +12,7 @@ public  class Constants {
     public static final int PEER_SERVER_PORT_DEFAULT = 6100;
     public static final String HOST_DEFAULT="localhost";
     public static final int SERVER_PORT_DEFAULT=8100;
-    public static final int CLIENT_PORT_DEFAULT=8200;
+    public static final int CLIENT_PORT_DEFAULT=6200;
     public static final String INDEX_SERVER_HOST ="localhost" ;
     public static final String PEER_FOLDER_PREFIX ="peer_" ;
 

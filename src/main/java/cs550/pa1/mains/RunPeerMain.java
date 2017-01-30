@@ -15,6 +15,13 @@ public class RunPeerMain {
     int indexServerPort;
     int peerServerPort;
 
+    public RunPeerMain() {
+        this.hostName = Constants.HOST_DEFAULT;
+        this.indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT;
+        this.peerServerPort = Constants.PEER_SERVER_PORT_DEFAULT;
+
+    }
+
     public RunPeerMain(String hn, int pc, int ps) {
         this.hostName = hn;
         this.indexServerPort = pc;

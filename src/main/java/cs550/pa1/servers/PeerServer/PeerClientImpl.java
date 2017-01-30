@@ -22,9 +22,16 @@ public class PeerClientImpl implements Peer {
     //private final WatchService watcher;
     //private final Map<WatchKey, Path> keys;
 
+    public PeerClientImpl(String hostName, int peerServerPort) {
+        this.hostName = hostName;
+        this.peerServerPort = peerServerPort;
+        this.indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT;
+        wt = new WatcherThread(this.hostName, this.indexServerPort, this.peerServerPort);
+    }
+
     public PeerClientImpl() throws IOException {
         this.indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT;
-        this.peerServerPort = Constants.CLIENT_PORT_DEFAULT;
+        this.peerServerPort = Constants.PEER_SERVER_PORT_DEFAULT;
 	    this.hostName = "localhost";
 	
 	    wt = new WatcherThread(this.hostName, this.indexServerPort, this.peerServerPort);
@@ -54,7 +61,7 @@ public class PeerClientImpl implements Peer {
 
     @Override
     public void init() {
-	wt.start();
+	    wt.start();
         peerClientInterface();
 
     }
@@ -113,7 +120,7 @@ public class PeerClientImpl implements Peer {
 
     }
 
-    private void lookupFile(String fileName) {
+    public void lookupFile(String fileName) {
         Socket socketToIndexServer = null;
         try {
             socketToIndexServer = new Socket( this.hostName, this.indexServerPort );
@@ -177,7 +184,7 @@ public class PeerClientImpl implements Peer {
         }
     }
 
-    private void registerFile(String fileLocation, String requestPeerAddress) throws IOException{
+    public void registerFile(String fileLocation, String requestPeerAddress) throws IOException{
         Socket sock = new Socket( this.hostName, this.indexServerPort );
         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
         out.println("register " + fileLocation + " " + requestPeerAddress );
