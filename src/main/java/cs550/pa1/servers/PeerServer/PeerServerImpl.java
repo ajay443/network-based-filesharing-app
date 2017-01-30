@@ -1,3 +1,10 @@
+/**
+ * File Name : PeerServerImpl.java
+ * Description : Implementation of Peer Server
+ * @authors : Ajay Ramesh and Chandra Kumar Basavaraju
+ * version : 1.0
+ * @date : 01/28/2017
+ */
 package cs550.pa1.servers.PeerServer;
 
 import cs550.pa1.helpers.Constants;
@@ -8,13 +15,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Created by Ajay on 1/26/17.
+ * Peer server class
  */
 public class PeerServerImpl implements Peer,Runnable{
 
-    public int port ;
+    public int port;//port on which server is listening
 
-    private Socket socket = null;
+    private Socket socket = null;//server socket
 
 
     public PeerServerImpl(int port_server) {
@@ -27,8 +34,9 @@ public class PeerServerImpl implements Peer,Runnable{
         try (ServerSocket serverSocket = new ServerSocket(this.port)) {
             while (listening) {
                 System.out.println(",listening to port:"+this.port);
-                socket = serverSocket.accept();
-                peerRun();
+                socket = serverSocket.accept();//accept download request
+
+                peerRun();//serve download request
 
             }
         } catch (IOException e) {
@@ -42,12 +50,11 @@ public class PeerServerImpl implements Peer,Runnable{
         }
     }
 
-
-
+    //creates a thread for the download request
     public void peerRun() throws InterruptedException {
         Thread t = new Thread( this,"PeerRun");
         t.start();
-        t.join();
+        //t.join();
     }
 
 
@@ -55,6 +62,7 @@ public class PeerServerImpl implements Peer,Runnable{
     @Override
     public void run() {
         System.out.println("Sending the file...");
+
         try (
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(
@@ -65,7 +73,7 @@ public class PeerServerImpl implements Peer,Runnable{
             if ((inputLine = in.readLine()) != null) {
                 processInput(inputLine);
             }
-            socket.close();
+            socket.close();//close the socket
             System.out.println("Sending the file completed ...");
         } catch (IOException e) {
             e.printStackTrace();
@@ -73,6 +81,7 @@ public class PeerServerImpl implements Peer,Runnable{
 
     }
 
+    //call util function to serve download request
     private void processInput(String input) {
         String params[] = input.split(" ");
         if (params[0].equals("Download"))

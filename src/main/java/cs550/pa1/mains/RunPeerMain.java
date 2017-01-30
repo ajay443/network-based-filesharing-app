@@ -1,3 +1,12 @@
+/**
+ * File Name : RunPeerMain.java
+ * Description : implementaion of a Peer
+ * @authors : Ajay Ramesh and Chandra Kumar Basavaraju
+ * version : 1.0
+ * @date : 01/28/2017
+ */
+
+
 package cs550.pa1.mains;
 
 import cs550.pa1.helpers.Constants;
@@ -8,17 +17,25 @@ import cs550.pa1.servers.PeerServer.PeerServerImpl;
 import java.util.Scanner;
 
 /**
- * Created by Ajay on 1/26/17.
+ * Peer Class : starts two threads one as client and another as a server
  */
 public class RunPeerMain {
-    String hostName;
-    int indexServerPort;
-    int peerServerPort;
+    String hostName;//hostname of index server
+    int indexServerPort;//port number the index server is listening on
+    int peerServerPort;//port number this peer server is listening on
 
-    public RunPeerMain(String hn, int pc, int ps) {
-        this.hostName = hn;
-        this.indexServerPort = pc;
-        this.peerServerPort = ps;
+    /**
+     * arguement constructor
+     * @param : hostName - String, address of the Index Server
+     * @param : indexServerPort - int, port on which indexing server is listening
+     * @param : peerServerPort - int, port on which this peer server is listening
+     * @return
+     */
+
+    public RunPeerMain(String hostName, int indexServerPort, int peerServerPort) {
+        this.hostName = hostName;
+        this.indexServerPort = indexServerPort;
+        this.peerServerPort = peerServerPort;
         try {
             peerServer.start();
             peerServer.join(500);
@@ -28,6 +45,7 @@ public class RunPeerMain {
         }
     }
 
+    //creating new thread to act as a server
     Thread peerServer = new Thread () {
         public void run () {
             System.out.print("Peer Server Started");
@@ -35,6 +53,8 @@ public class RunPeerMain {
             peerServerImpl.init();
         }
     };
+
+    //creating new thread to act as a client
     Thread peerClient = new Thread () {
         public void run () {
 

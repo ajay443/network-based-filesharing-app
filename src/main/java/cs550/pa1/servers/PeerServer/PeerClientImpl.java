@@ -1,3 +1,10 @@
+/**
+ * File Name : PeerClientImpl.java
+ * Description : Implementation of Peer Client
+ * @authors : Ajay Ramesh and Chandra Kumar Basavaraju
+ * version : 1.0
+ * @date : 01/28/2017
+ */
 package cs550.pa1.servers.PeerServer;
 
 import cs550.pa1.helpers.Constants;
@@ -7,60 +14,44 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
-//class WatcherThread;
 /**
- * Created by Ajay on 1/26/17.
+ * Peer Client class
  */
 public class PeerClientImpl implements Peer {
 
-    public String hostName ;
-    public int indexServerPort;
-    public int peerServerPort;
-    //public int port_server;
-    WatcherThread wt;
+    public String hostName;//address of the index server
+    public int indexServerPort;//port to contact on Index Server
+    public int peerServerPort;//port on which this peer is listening
 
-    //private final WatchService watcher;
-    //private final Map<WatchKey, Path> keys;
+    WatcherThread wt;// watcher to monitor this peers directory for file creation/deletion
 
+
+    //default constructor
     public PeerClientImpl() throws IOException {
         this.indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT;
         this.peerServerPort = Constants.CLIENT_PORT_DEFAULT;
 	    this.hostName = "localhost";
 	
 	    wt = new WatcherThread(this.hostName, this.indexServerPort, this.peerServerPort);
-
-	    //this.watcher = FileSystems.getDefault().newWatchService();
-        //this.keys = new HashMap<WatchKey, Path>();
-        //Path dir = Paths.get(".");
-        //registerDirectory(dir);
     }
 
+    //parameterized constructor
     public PeerClientImpl(String hostName, int indexServerPort, int peerServerPort) throws IOException {
         this.hostName = hostName;
         this.indexServerPort = indexServerPort;
         this.peerServerPort = peerServerPort;
-        // create folder if doesnt exit
 
-
-	    //this.port_server = port_server;
         wt = new WatcherThread(this.hostName,this.indexServerPort, this.peerServerPort);
-	    /*
-	    this.watcher = FileSystems.getDefault().newWatchService();
-        this.keys = new HashMap<WatchKey, Path>();
-        Path dir = Paths.get(".");
-        registerDirectory(dir);
-	    */
     }
 
     @Override
     public void init() {
-	wt.start();
+	    wt.start();
         peerClientInterface();
 
     }
 
-
-
+    //based on the user selection makes requests
     public void peerClientInterface() {
 
         String fileName="";
@@ -113,25 +104,26 @@ public class PeerClientImpl implements Peer {
 
     }
 
+    //Send lookup request for a file to the Index Server port
     private void lookupFile(String fileName) {
         Socket socketToIndexServer = null;
         try {
             socketToIndexServer = new Socket( this.hostName, this.indexServerPort );
-        PrintWriter out = new PrintWriter( socketToIndexServer.getOutputStream(), true );
-        BufferedReader in = new BufferedReader( new InputStreamReader( socketToIndexServer.getInputStream() ) );
-        System.out.print("Socket port at client from peer client file : " + socketToIndexServer.getLocalPort()+"\n");
-        out.println("lookup "+fileName);
-        String message;
-        System.out.println("File available location : ");
-        System.out.println("***********************************************");
-        //socketToIndexServer.shutdownOutput();
-        while((message = in.readLine()) != null){
-            System.out.println(message);
-            if(message.length() == 0){
-                in.close();
-                out.close();
-                return;
-            }
+            PrintWriter out = new PrintWriter( socketToIndexServer.getOutputStream(), true );
+            BufferedReader in = new BufferedReader( new InputStreamReader( socketToIndexServer.getInputStream() ) );
+            System.out.print("Socket port at client from peer client file : " + socketToIndexServer.getLocalPort()+"\n");
+            out.println("lookup "+fileName);
+            String message;
+            System.out.println("File available location : ");
+            System.out.println("***********************************************");
+            //socketToIndexServer.shutdownOutput();
+            while((message = in.readLine()) != null){
+                System.out.println(message);
+                if(message.length() == 0){
+                    in.close();
+                    out.close();
+                    return;
+                }
 
         }
         System.out.println("***********************************************");
@@ -144,7 +136,7 @@ public class PeerClientImpl implements Peer {
     }
 
 
-
+    //send download request to another peer on that peer port
     private void downloadFrom(String fileName, String hostName, int port) throws IOException {
         Socket peerClientSocket = null;
 
@@ -156,17 +148,20 @@ public class PeerClientImpl implements Peer {
 
             out.println("Download "+fileName);
             System.out.println("Downloading ...");
+
             String message = "";
-            //PrintWriter p = new PrintWriter(fileName,"UTF-8");
             byte[] bytes = new byte[16*1024];
             int count;
+
             while ((count = in.read(bytes)) > 0) {
                 fout.write(bytes, 0, count);
             }
+
             System.out.println("Download Complete ...");
             System.out.println("Printing downloaded file contents : \n");
+
             Util.printFile(Constants.PEER_FOLDER_PREFIX + this.peerServerPort + "/" + fileName);
-            //p.close();
+
 
         }
         catch(Exception e){
@@ -177,6 +172,7 @@ public class PeerClientImpl implements Peer {
         }
     }
 
+    //sends register request to Index server port to register a file
     private void registerFile(String fileLocation, String requestPeerAddress) throws IOException{
         Socket sock = new Socket( this.hostName, this.indexServerPort );
         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
