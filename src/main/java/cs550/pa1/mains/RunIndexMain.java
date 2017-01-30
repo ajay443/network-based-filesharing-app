@@ -1,3 +1,11 @@
+/**
+ * File Name : RunIndexMain.java
+ * Description : Starts the Index Server. Index Server runs on a specific port, upon request creates a thread to process each request.
+ * @authors : Ajay Ramesh and Chandra Kumar Basavaraju
+ * version : 1.0
+ * @date : 01/28/2017
+ */
+
 package cs550.pa1.mains;
 
 import cs550.pa1.helpers.Constants;
@@ -9,10 +17,13 @@ import java.net.ServerSocket;
 import java.util.Scanner;
 
 /**
- * Created by Ajay on 1/25/17.
+ * Index Server class
  */
 public class RunIndexMain {
-
+    
+/**
+ * Created by Ajay on 1/25/17.
+ */
     public static void main(){
 
 
