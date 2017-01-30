@@ -16,9 +16,7 @@ public  class Util {
         BufferedReader br = null;
         List<String> lst = new ArrayList<String>();
         try {
-            // creates the directory for root..
-            File dir = new File(Constants.INDEX_FILE_NAME.split("/")[0]);
-            boolean successful = dir.mkdirs();
+            createFolder(Constants.INDEX_FILE_NAME.split("/")[0]);
             //if(!successful) throw new Exception();
             File file = new File(Constants.INDEX_FILE_NAME);
 
@@ -82,6 +80,7 @@ public  class Util {
         try {
 
             File file = new File(Constants.INDEX_FILE_NAME);
+            createFolder(Constants.INDEX_FILE_NAME.split("/")[0]);
 
             // if file doesnt exists, then create itportRequested
             if (!file.exists()) {
@@ -204,6 +203,25 @@ public  class Util {
             int count;
             while ((count = fip.read(b)) > 0) {
                 out.write(b, 0, count);
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public static  void printFile(String filePath){
+        //File f = new File(filePath);
+        try(
+                BufferedReader br = new BufferedReader(new FileReader(filePath));
+        )
+        {
+            int lineCount = 0;
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+                ++lineCount;
+                if(lineCount > 10) return;
             }
         }
         catch(Exception e){

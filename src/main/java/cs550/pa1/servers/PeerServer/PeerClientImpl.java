@@ -1,6 +1,7 @@
 package cs550.pa1.servers.PeerServer;
 
 import cs550.pa1.helpers.Constants;
+import cs550.pa1.helpers.Util;
 
 import java.io.*;
 import java.net.Socket;
@@ -156,14 +157,16 @@ public class PeerClientImpl implements Peer {
             out.println("Download "+fileName);
             System.out.println("Downloading ...");
             String message = "";
-            PrintWriter p = new PrintWriter(fileName,"UTF-8");
+            //PrintWriter p = new PrintWriter(fileName,"UTF-8");
             byte[] bytes = new byte[16*1024];
             int count;
             while ((count = in.read(bytes)) > 0) {
                 fout.write(bytes, 0, count);
             }
             System.out.println("Download Complete ...");
-            p.close();
+            System.out.println("Printing downloaded file contents : \n");
+            Util.printFile(Constants.PEER_FOLDER_PREFIX + this.peerServerPort + "/" + fileName);
+            //p.close();
 
         }
         catch(Exception e){
