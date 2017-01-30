@@ -1,3 +1,10 @@
+/**
+ * File Name : Util.java
+ * Description : Implementation of all utility functions
+ * @authors : Ajay Ramesh and Chandra Kumar Basavaraju
+ * version : 1.0
+ * @date : 01/28/2017
+ */
 package cs550.pa1.helpers;
 
 import java.io.*;
@@ -10,14 +17,18 @@ import java.util.List;
  */
 public  class Util {
 
-
+    /**Searches if the provided file is registered with the Index Server
+     *
+     * @param text file name
+     * @return list of all peers containing the file
+     */
     public static List<String> searchInFile(String text){
 
         BufferedReader br = null;
         List<String> lst = new ArrayList<String>();
         try {
             createFolder(Constants.INDEX_FILE_NAME.split("/")[0]);
-            //if(!successful) throw new Exception();
+
             File file = new File(Constants.INDEX_FILE_NAME);
 
             // if file doesnt exists, then create it
@@ -50,29 +61,11 @@ public  class Util {
         return lst;
     }
 
-
-    public static List<String> listFiles(String loc) {
-        try {
-            List<String> results = new ArrayList<String>();
-            File folder = new File(loc);
-            File[] listOfFiles = folder.listFiles();
-            for (int i = 0; i < listOfFiles.length; i++) {
-                if (listOfFiles[i].isFile()) {
-                    results.add(loc + "/" + listOfFiles[i].getName());
-                    // System.out.println("Peer "+port+"," + listOfFiles[i].getName());
-                } else if (listOfFiles[i].isDirectory()) {
-                    //todo out of scope for PA1
-                    System.out.println("Directory " + listOfFiles[i].getName());
-                }
-            }
-            return results;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
+    /**
+     * Register the file with Index Server : appends the file to index list on server
+     * @param data, file name
+     * @return append was success or failure
+     */
     public static boolean appendDataToFile(String data) {
         BufferedWriter bw = null;
         FileWriter fw = null;
@@ -106,11 +99,8 @@ public  class Util {
 
                 if (fw != null)
                     fw.close();
-
             } catch (IOException ex) {
-
                 ex.printStackTrace();
-
             }
 
 
@@ -118,40 +108,12 @@ public  class Util {
 
     }
 
-    public boolean removeLines(List<String> lines) {
-        //todo - remove the lines when peer updates
-        /*
-        http://stackoverflow.com/questions/1377279/find-a-line-in-a-file-and-remove-it
-        File inputFile = new File("myFile.txt");
-        File tempFile = new File("myTempFile.txt");
-
-        BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-
-        String lineToRemove = "bbb";
-        String currentLine;
-
-        while((currentLine = reader.readLine()) != null) {
-            // trim newline when comparing with lineToRemove
-            String trimmedLine = currentLine.trim();
-            if(trimmedLine.equals(lineToRemove)) continue;
-            writer.write(currentLine + System.getProperty("line.separator"));
-        }
-        writer.close();
-        reader.close();
-        boolean successful = tempFile.renameTo(inputFile);*/
-
-        return false;
-    }
-
     public static void DeleteSingleLineInFile(String fileName, String portNumber) {
-        //todo - remove the lines when peer updates
+
         try {
 
-            //http://stackoverflow.com/questions/1377279/find-a-l
-            // ine-in-a-file-and-remove-it
-            File inputFile = new File("output/index.txt");
-            File tempFile = new File("output/myTempFile.txt");
+            File inputFile = new File(Constants.INDEX_FILE_NAME);
+            File tempFile = new File(Constants.TEMP_FILE_NAME);
 
             BufferedReader reader = new BufferedReader(new FileReader(inputFile));
             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
@@ -177,6 +139,10 @@ public  class Util {
         }
     }
 
+    /**
+     * Creates a folder is not already existing
+     * @param rootDirName, path of the directory
+     */
     public static void createFolder(String rootDirName){
         try {
             File file = new File(rootDirName);
@@ -191,6 +157,12 @@ public  class Util {
         }
 
     }
+
+    /**
+     * Opens the file, and writes the contents to a socket output stream
+     * @param filename, file name to download
+     * @param socket, socket to which the file contents has to be written
+     */
     public static void downloadFile(String filename,Socket socket){
         File f = new File(filename);
         try(
@@ -210,8 +182,12 @@ public  class Util {
         }
     }
 
+    /**
+     * Prints the file contents
+     * @param filePath, file to be printed out
+     */
     public static  void printFile(String filePath){
-        //File f = new File(filePath);
+
         try(
                 BufferedReader br = new BufferedReader(new FileReader(filePath));
         )

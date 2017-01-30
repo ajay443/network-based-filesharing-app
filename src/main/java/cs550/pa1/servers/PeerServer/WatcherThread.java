@@ -1,3 +1,11 @@
+/**
+ * File Name : WatcherThread.java
+ * Description : implementation of WatcherThread to monitor a folder of the client for addition/deletion of file
+ *                if there is an addition/deletion, sends a notification to Index Server to update the registered files
+ * @authors : Ajay Ramesh and Chandra Kumar Basavaraju
+ * version : 1.0
+ * @date : 01/28/2017
+ */
 package cs550.pa1.servers.PeerServer;
 
 import cs550.pa1.helpers.Constants;
@@ -47,20 +55,23 @@ class WatcherThread extends Thread{
             this.hostName = hostName;
             this.indexServerPort = indexServerPort;
             this.peerServerPort = peerServerPort;
-            Path dir = Paths.get(Constants.PEER_FOLDER_PREFIX + this.peerServerPort);
-            registerDirectory(dir);
+            Path dir = Paths.get(Constants.PEER_FOLDER_PREFIX + this.peerServerPort);//this peer's directory
+            registerDirectory(dir);//register watcher to monitor peer's directory
         }
         catch(Exception e) {
             e.printStackTrace();
         }
     }
+    //register watcher to monitor peer's directory
+    //@param : Absolute path of the peer's directory
     private void registerDirectory(Path dir) throws IOException
     {
 
-        WatchKey key = dir.register(watcher, /*ENTRY_CREATE,*/ ENTRY_DELETE, ENTRY_MODIFY);
+        WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
         keys.put(key, dir);
     }
 
+    //monitor the directory forever
     public void run(){
         for (;;) {
 
@@ -87,18 +98,13 @@ class WatcherThread extends Thread{
                 Path name = ((WatchEvent<Path>)event).context();
                 Path child = dir.resolve(name);
 
-                // Debug lines
-                /*System.out.println(event.kind().name()+"\n");
-                System.out.println(child+"\n");
-                */
-
                 Socket sock = null;
                 // if directory is created, and watching recursively, then register it and its sub-directories
                 if (kind == ENTRY_DELETE )  {
                     try{
                         sock = new Socket( hostName, indexServerPort );
                         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
-                        out.println("delete " + name.toString() + " " + peerServerPort);
+                        out.println("delete " + name.toString() + " " + hostName + ":" + peerServerPort);//send delete notification to server
                     }
                     catch(Exception e){
                         e.printStackTrace();
@@ -107,7 +113,7 @@ class WatcherThread extends Thread{
                     try{
                         sock = new Socket( hostName, indexServerPort );
                         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
-                        out.println("register " + name.toString() + " " + hostName+":"+peerServerPort);
+                        out.println("register " + name.toString() + " " + hostName + ":" + peerServerPort);//notify server of the new file added in the peer's directory
                     }
                     catch(Exception e){
                         e.printStackTrace();

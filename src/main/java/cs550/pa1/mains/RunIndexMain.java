@@ -1,6 +1,6 @@
 /**
  * File Name : RunIndexMain.java
- * Description : Starts the Index Server. Index Server runs on a specific port, upon request creates a thread to process each request.
+ * Description : implementaion of Index Server
  * @authors : Ajay Ramesh and Chandra Kumar Basavaraju
  * version : 1.0
  * @date : 01/28/2017
@@ -17,7 +17,8 @@ import java.net.ServerSocket;
 import java.util.Scanner;
 
 /**
- * Index Server class
+ * Index Server class : Starts the Index Server. Index Server runs on a specific port.
+ * upon request from any of the peers ,creates a thread i.e IndexServerThread to process each request.
  */
 public class RunIndexMain {
     
@@ -26,7 +27,7 @@ public class RunIndexMain {
  */
     public static void main(){
 
-
+        //taking use input
         String  choice;
         int indexServerPort;
         System.out.print("Default config / Manual config ? (yes/no or y/n): ");
@@ -48,8 +49,11 @@ public class RunIndexMain {
         boolean listening = true;
         FileProcessor fileProcessor = new FileProcessor();
         String quit;
+
         try (ServerSocket serverSocket = new ServerSocket(indexServerPort)) {
             while (listening) {
+                //creating new thread for a request, so that Index server can handle multiple requests at a time.
+                //accepts the request and cretaes a new thread
                  new IndexServerThread(serverSocket.accept(),fileProcessor).start();
             }
         } catch (IOException e) {
