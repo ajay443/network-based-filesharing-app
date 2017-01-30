@@ -107,7 +107,7 @@ class WatcherThread extends Thread{
                     try{
                         sock = new Socket( hostName, indexServerPort );
                         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
-                        out.println("register " + name.toString() + " " + peerServerPort);
+                        out.println("register " + name.toString() + " " + hostName+":"+peerServerPort);
                     }
                     catch(Exception e){
                         e.printStackTrace();

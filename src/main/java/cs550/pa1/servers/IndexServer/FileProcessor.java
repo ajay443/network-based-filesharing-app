@@ -37,7 +37,6 @@ public class FileProcessor{
             out.flush();
         }
         unlockIndexFile();
-        System.out.println("Inside FileProcessor");
     }
 
 

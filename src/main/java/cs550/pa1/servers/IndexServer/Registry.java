@@ -5,12 +5,12 @@ package cs550.pa1.servers.IndexServer;
  */
 public class Registry implements  Runnable {
     FileProcessor fileProcessor;
-    String peerServerID;
+    String peerServerAddress;
     String fileName;
 
-    public Registry(FileProcessor fileProcessor,String fileName, String peerServerID) {
+    public Registry(FileProcessor fileProcessor,String fileName, String peerServerAddress) {
         this.fileProcessor = fileProcessor;
-        this.peerServerID = peerServerID;
+        this.peerServerAddress = peerServerAddress;
         this.fileName = fileName;
         //new Thread(this, "registry").start();
     }
@@ -18,7 +18,7 @@ public class Registry implements  Runnable {
     @Override
     public void run() {
         try {
-            fileProcessor.registry(fileName, peerServerID);
+            fileProcessor.registry(fileName, peerServerAddress);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

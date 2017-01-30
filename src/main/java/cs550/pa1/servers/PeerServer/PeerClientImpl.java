@@ -96,7 +96,7 @@ public class PeerClientImpl implements Peer {
                     case 3:
                         System.out.println("Enter file location : ");
                         System.out.println("Example: /user/files/text1.txt  ");
-                        registerFile(in.next());
+                        registerFile(in.next(),""+this.hostName+":"+peerServerPort);
                         break;
                     case 4:
                         System.exit(0);
@@ -174,10 +174,10 @@ public class PeerClientImpl implements Peer {
         }
     }
 
-    private void registerFile(String fileLocation) throws IOException{
+    private void registerFile(String fileLocation, String requestPeerAddress) throws IOException{
         Socket sock = new Socket( this.hostName, this.indexServerPort );
         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
-        out.println("register " + fileLocation + " " + this.peerServerPort);
+        out.println("register " + fileLocation + " " + requestPeerAddress );
         sock.shutdownInput();
     }
 }
