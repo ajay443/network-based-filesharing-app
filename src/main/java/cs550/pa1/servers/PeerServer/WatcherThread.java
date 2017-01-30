@@ -9,6 +9,7 @@ import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
@@ -86,18 +87,27 @@ class WatcherThread extends Thread{
                 Path name = ((WatchEvent<Path>)event).context();
                 Path child = dir.resolve(name);
 
-                // print out event
-                System.out.println(event.kind().name()+"\n");
+                // Debug lines
+                /*System.out.println(event.kind().name()+"\n");
                 System.out.println(child+"\n");
+                */
+
                 Socket sock = null;
                 // if directory is created, and watching recursively, then register it and its sub-directories
-                if (kind == ENTRY_DELETE || kind == ENTRY_MODIFY) {
+                if (kind == ENTRY_DELETE )  {
                     try{
-                        //Socket sock = new Socket(Constants.INDEX_SERVER_HOST, Constants.INDEX_SERVER_PORT_DEFAULT);
                         sock = new Socket( hostName, indexServerPort );
                         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
-
                         out.println("delete " + name.toString() + " " + peerServerPort);
+                    }
+                    catch(Exception e){
+                        e.printStackTrace();
+                    }
+                }else if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY){
+                    try{
+                        sock = new Socket( hostName, indexServerPort );
+                        PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
+                        out.println("register " + name.toString() + " " + peerServerPort);
                     }
                     catch(Exception e){
                         e.printStackTrace();

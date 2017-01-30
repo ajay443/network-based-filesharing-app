@@ -121,7 +121,7 @@ public class PeerClientImpl implements Peer {
         System.out.print("Socket port at client from peer client file : " + socketToIndexServer.getLocalPort()+"\n");
         out.println("lookup "+fileName);
         String message;
-        System.out.println("File location ,peer port address to down load  ");
+        System.out.println("File available location : ");
         System.out.println("***********************************************");
         //socketToIndexServer.shutdownOutput();
         while((message = in.readLine()) != null){
