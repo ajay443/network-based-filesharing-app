@@ -70,7 +70,7 @@ public class RunPeerMain {
             indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT ;
             peerServerPort = Constants.PEER_SERVER_PORT_DEFAULT;
         }else{
-            System.out.println("Enter Host Name Example : localhost: ");
+            System.out.println("Enter Host Name Example: 'localhost' or 127.0.0.1 ");
             hostName = in.next();
             System.out.println("Enter Index Server Port Address  : ");
             indexServerPort = in.nextInt();

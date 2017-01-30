@@ -50,15 +50,7 @@ public class RunIndexMain {
         String quit;
         try (ServerSocket serverSocket = new ServerSocket(indexServerPort)) {
             while (listening) {
-               // System.out.println("Index Server is running .. \nType 'quit'  or 'q' at any point of time to stop ");
-                new IndexServerThread(serverSocket.accept(),fileProcessor).start();
-              //  quit = in.next();
-                /*if(quit.equalsIgnoreCase("quit") ||
-                        quit.equalsIgnoreCase("q")) {
-                    System.out.println("***************************************");
-                    return;
-                }*/
-
+                 new IndexServerThread(serverSocket.accept(),fileProcessor).start();
             }
         } catch (IOException e) {
             System.err.println("Could not listen on port " + indexServerPort);

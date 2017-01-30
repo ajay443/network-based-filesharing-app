@@ -20,7 +20,7 @@ public class LookUp implements Runnable {
 
     @Override
     public void run() {
-        try {// todo remove hard coded value
+        try {
             fileProcessor.lookup(fileName, out);
             System.out.println("Inside Lookup");
             return;

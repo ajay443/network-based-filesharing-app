@@ -7,10 +7,7 @@ package cs550.pa1.mains;
 
 import java.util.Scanner;
 
-/**
- * Main java
- */
-// ajaycomment
+
 
 public class Main {
     public static void main(String[] args) {
