@@ -40,11 +40,9 @@ public class PeerImpl implements Peer {
             query_id = host.address().replace(":","_") + "_" + Integer.toString(++messageID);
             ttl = 7;
         }
-
-         try{
-                // transmits the query to all neighbours
+        try{
+             if(!seenMessages.containsKey(query_id)) this.seenMessages.put(query_id,host.getUrl());// transmits the query to all neighbours
                 for (Host neighbour:neighbours) {
-                    if(!seenMessages.containsKey(query_id)) this.seenMessages.put(query_id,neighbour.getUrl());
                     sock = new Socket(neighbour.getUrl(),neighbour.getPort());
                     PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
                     out.println("query " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
@@ -214,8 +212,8 @@ public class PeerImpl implements Peer {
     @Override
     public void displayPeerInfo(){
         System.out.printf("Peer address %s. \nMy Neighbours are \n",host.address());
-        for(String neighbour : neighbours){
-            System.out.println(neighbour);
+        for(Host neighbour : neighbours){
+            System.out.println(neighbour.address());
         }
     }
 
