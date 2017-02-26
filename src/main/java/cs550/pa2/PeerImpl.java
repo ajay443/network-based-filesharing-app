@@ -74,34 +74,7 @@ public class PeerImpl implements Peer{
 		}
 	@Override
 	public void ForwardSearchQuery(String quer_id, String fileName, int ttl){
-		Socket sock = null;
-		/*
-		int ttl = Integer.valueOf(params[4]);
-		ttl = ttl - 1; 
-		//looking up to check I have already forwarded this msg or if the TTL has expired
-		if(seenMessages.containsKey(params[1]) || ttl <= 0){
-			System.out.printf("3. Not forwarding the message again");
-			return;
-		}
-		*/
 		SendSearchQuery(quer_id, fileName, ttl,true);
-		/*
-		Collection port_collection = this.neighbors.values();
-                Iterator i = port_collection.iterator();
-                while(i.hasNext()){
-                            try{
-                                    sock = new Socket("localhost",(int)i.next());
-                                    PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
-                                    out.println(params[0] + " " + params[1] + " " + params[2] + " " + this.myport + " " + Integer.toString(ttl));
-                                    out.close();
-                            }
-                            catch(IOException e){
-                                    e.printStackTrace();
-                            }
-
-                    }
-
-	*/	
 	}
 
 		  @Override
@@ -164,29 +137,9 @@ public class PeerImpl implements Peer{
 
     @Override
     public boolean SearchInMyFileDB(String fileName) {
-	//To do:
-	//update the list of messages seen
-	/*
-	if(seenMessages.containsKey(params[1])){
-		List ports = (List)seenMessages.get(params[1]);
-		if(!ports.contains(params[3])){
-			ports.add(params[3]);
-		}
-		System.out.println("Duplicate message.. Not forwarding");
-		DisplaySeenMessages("query");
-		return;
-	}
-	*/
-	//String msg_attrs = params[1].split(":");
 	boolean isFound = false;
-	//List ports = new ArrayList<Integer>();
-	//ports.add(params[3]);
-	//this.seenMessages.put(params[1],ports);
-	//DisplaySeenMessages("query");
-	//ForwardSearchQuery(params);
 	File file = new File("sharedFolder/" + fileName);
 	if (file.exists()) {
-                //SendQueryHit(params[1],params[2],this.myport,7);
 		isFound = true;
         }
 	return isFound;
@@ -230,16 +183,7 @@ public class PeerImpl implements Peer{
 
 	@Override
 		public void ForwardQueryHit(String queryHit_id, String fileName, int port, int ttl){
-			/*if(!seenQueryHitMessages.containsKey(params[1])){
-				int ttl = Integer.valueOf(params[4]);
-				ttl = ttl - 1;
-				if(ttl > 0){*/
 					SendQueryHit(queryHit_id,fileName,port,ttl,true);
-				/*}
-			}
-			else{
-				System.out.println("3. Not forwarding this message as already seen and forwarded");
-			}*/
 		}
 
     @Override
@@ -250,7 +194,6 @@ public class PeerImpl implements Peer{
     @Override
 	    public void initConfig(String hostName, int id, int port, int n[][]) {
 		    this.peerID = id;
-		    //this.neighbors = n;
 		    this.myport = port;
 		    this.msg_id = 0;
 		    this.seenMessages = new HashMap<String,List<Integer>>();
@@ -277,9 +220,6 @@ public class PeerImpl implements Peer{
 		    serverThread = new Thread () {
 			    public void run () {
 				    System.out.println("Peer Server Started");
-				    //PeerServerImpl peerServerImpl = new PeerServerImpl(hn,ps);
-				    //peerServerImpl.init();
-				    //peerServerImpl.display();
 				    startServer();
 			    }
 		    };
@@ -287,8 +227,6 @@ public class PeerImpl implements Peer{
 			    public void run () {
 				    System.out.println("\n\nPeer Client Started");
 				    try {
-					    //PeerClientImpl peerClient = new PeerClientImpl(hn,pc,ps);
-					    //peerClient.init();
 					    startClient();
 				    } catch (Exception e) {
 					    e.printStackTrace();
@@ -388,9 +326,6 @@ public class PeerImpl implements Peer{
 			Map.Entry me = (Map.Entry)it.next();
 			System.out.println(me.getKey() + ": " + me.getValue());
 		}
-	    /*for(int i[] : neighbors){
-		    System.out.printf("%d : %d\n",i[0],i[1]);
-	    }*/
 	    System.out.println();
     }
 
@@ -402,25 +337,6 @@ public class PeerImpl implements Peer{
 	    String params[] = input.split(" ");
 	    if (params[0].equals("Download")){
 		    HandleDownloadRequest(params[1],socket);
-		/*
-		    File f = new File("sharedFolder/"+params[1]);
-		    try(
-				    InputStream fip = new FileInputStream(f);
-				    OutputStream out = socket.getOutputStream();
-		       )
-		    {
-			    senderPort = socket.getPort();
-			    byte b[] = new byte[16 * 1024];
-			    int count;
-			    while ((count = fip.read(b)) > 0) {
-				    out.write(b, 0, count);
-			    }
-		    }
-		    catch(Exception e){
-		    }
-		    finally{
-		    }
-		*/
 	    }
 	    else if(params[0].equals("query")){
 		    DisplaySeenMessages(params[0]);
@@ -491,7 +407,6 @@ public class PeerImpl implements Peer{
 		}
 		Iterator i = set.iterator();
 		while(i.hasNext()){
-			//System.out.printf("Key : %d ",k);
 			Map.Entry entry = (Map.Entry)i.next();
 			System.out.println(entry.getKey() + ":" + entry.getValue());
 		}
