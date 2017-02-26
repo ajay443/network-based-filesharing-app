@@ -23,14 +23,14 @@ public class PeerImpl implements Peer {
 
     HashMap seenMessages;
     HashMap seenQueryHitMessages;
-    List<String> neighbours;
+    List<Host> neighbours;
 
     Host host;
 
     public PeerImpl() {
         this.seenMessages = new HashMap<String,List<Integer>>();
         this.seenQueryHitMessages = new HashMap<String,List<Integer>>();
-        neighbours = new ArrayList<String>();
+        neighbours = new ArrayList<Host>();
     }
 
     @Override
@@ -43,9 +43,9 @@ public class PeerImpl implements Peer {
 
          try{
                 // transmits the query to all neighbours
-                for (String neighbour:neighbours) {
-                    if(!seenMessages.containsKey(query_id)) this.seenMessages.put(query_id,neighbour);
-                    sock = new Socket(neighbour.split(":")[0], Integer.parseInt(neighbour.split(":")[1]));
+                for (Host neighbour:neighbours) {
+                    if(!seenMessages.containsKey(query_id)) this.seenMessages.put(query_id,neighbour.getUrl());
+                    sock = new Socket(neighbour.getUrl(),neighbour.getPort());
                     PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
                     out.println("query " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
                     out.close();
@@ -224,9 +224,8 @@ public class PeerImpl implements Peer {
 	    //String fileContent = "";
 	    int senderPort = 0;
 	    String params[] = input.split(" ");
-	    if (params[0].equals("Download")){ // params = Download filename socket
+	    if (params[0].equals("Download")){
             Util.downloadFile(params[1],socket);
-            //handleDownloadRequest();
 	    }
 	    else if(params[0].equals(Constants.QUERY)){
 		    //DisplaySeenMessages(params[0]);
@@ -300,13 +299,16 @@ public class PeerImpl implements Peer {
     public void initConfig(String hostName, int port) {
 
         host = new Host(hostName,port);
-	    neighbours = new ArrayList<String>();
+	    neighbours = new ArrayList<Host>();
 
         // Read the list of config files
         String line = null;
 	    File file = new File(port+Constants.CONFIG_FILE);
 	    try(BufferedReader br = new BufferedReader(new FileReader(file))){
-            while((line = br.readLine()) != null) neighbours.add(line);
+
+            while((line = br.readLine()) != null) neighbours.add(
+                    new Host(line.split(":")[0],
+                              Integer.parseInt(line.split(":")[1])));
         }
 	    catch(IOException e){
 		    e.printStackTrace();
