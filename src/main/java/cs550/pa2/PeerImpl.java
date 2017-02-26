@@ -45,7 +45,7 @@ public class PeerImpl implements Peer {
                     if(!query_id.contains(host.address())){
                         sock = new Socket(neighbour.getUrl(),neighbour.getPort());
                         PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
-                        out.println("query " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
+                        out.println("query " + query_id + " " + fileName + " " + Integer.toString(ttl));
                         out.close();
                     }
                 }
@@ -233,8 +233,7 @@ public class PeerImpl implements Peer {
 
 		    //not searching or forwarding already seen message
 		    if(!seenMessages.containsKey(params[1]) && ttl > 0){
-
-			    List addresses = new ArrayList<Host>();
+                List addresses = new ArrayList<String>();
                 addresses.add(params[1].split("_"));
 			    this.seenMessages.put(params[1],addresses);
                 forwardQuery(params[1],params[2],ttl);
