@@ -45,7 +45,7 @@ public class PeerImpl implements Peer {
                     if(!query_id.contains(host.address())){
                         sock = new Socket(neighbour.getUrl(),neighbour.getPort());
                         PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
-                        out.println("query " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
+                        out.println(Constants.QUERY + " " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
                         out.close();
                     }
                 }
@@ -72,7 +72,7 @@ public class PeerImpl implements Peer {
               InputStream in = peerClientSocket.getInputStream();
               OutputStream fout = new FileOutputStream("sharedFolder/" + fileName);
 
-              out.println("Download "+fileName);
+              out.println(Constants.DOWNLOAD + " " + fileName);
               String message = "";
               PrintWriter p = new PrintWriter(fileName,"UTF-8");
 
@@ -110,7 +110,7 @@ public class PeerImpl implements Peer {
                 sock = new Socket("localhost",Integer.valueOf((String)i.next()));
                 PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
 
-                out.println("queryhit " + msgid + " " + fileName + " " + port + " " + ttl);
+                out.println(Constants.QUERYIT + " " + msgid + " " + fileName + " " + port + " " + ttl);
                 out.close();
 
                 if(!seenQueryHitMessages.containsKey(msgid)){
@@ -223,7 +223,7 @@ public class PeerImpl implements Peer {
 	    //String fileContent = "";
 	    int senderPort = 0;
 	    String params[] = input.split(" ");
-	    if (params[0].equals("Download")){
+	    if (params[0].equals(Constants.DOWNLOAD)){
             Util.downloadFile(params[1],socket);
 	    }
 	    else if(params[0].equals(Constants.QUERY)){
@@ -281,7 +281,7 @@ public class PeerImpl implements Peer {
     public void displaySeenMessages(String type){
 		System.out.println("Displaying seen " + type + " messages");
 		Set set = null;
-		if(type.equals("query")){
+		if(type.equals(Constants.QUERY)){
 		set = seenMessages.entrySet();
 		}
 		else{
