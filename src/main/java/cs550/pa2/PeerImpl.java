@@ -41,12 +41,13 @@ public class PeerImpl implements Peer {
             ttl = 7;
         }
         try{
-             if(!seenMessages.containsKey(query_id)) this.seenMessages.put(query_id,host.getUrl());// transmits the query to all neighbours
                 for (Host neighbour:neighbours) {
-                    sock = new Socket(neighbour.getUrl(),neighbour.getPort());
-                    PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
-                    out.println("query " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
-                    out.close();
+                    if(host.address() != neighbour.address()){
+                        sock = new Socket(neighbour.getUrl(),neighbour.getPort());
+                        PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
+                        out.println("query " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
+                        out.close();
+                    }
                 }
             }
             catch(IOException e){
