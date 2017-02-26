@@ -207,5 +207,12 @@ public  class Util {
 
 
 
-
+    public static boolean searchInMyFileDB(String fileName) {
+        boolean isFound = false;
+        File file = new File("sharedFolder/" + fileName);
+        if (file.exists()) {
+            isFound = true;
+        }
+        return isFound;
+    }
 }

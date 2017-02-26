@@ -1,17 +1,15 @@
-//package pa2;
+package cs550.pa2;
 import java.io.IOException;
-/**
- *
- */
-public interface Peer {
 
-    void SendDownloadRequest(String fileName, String host, int port) throws IOException;
-    void SendSearchQuery(String message_id, String fileName, int ttl, boolean forward);
-    void ForwardSearchQuery(String message_id, String fileName, int ttl);
-    void SendQueryHit(String msgid, String fileName, int port,int ttl,boolean forward);
-    void ForwardQueryHit(String msg_id, String fileName, int port,int ttl);
-    void initialize();
-    void DisplayPeerInfo();
-    boolean SearchInMyFileDB(String fileName);
-    void initialize(String hostName, int id, int port, int[][] arr );
+
+public interface Peer {
+    void download(String fileName, String host, int port) throws IOException;
+    void search(String message_id, String fileName, int ttl, boolean forward);
+    void forwardQuery(String message_id, String fileName, int ttl);
+    void returnQueryHit(String msgid, String fileName, int port, int ttl, boolean forward);
+    void forwardQueryHit(String msg_id, String fileName, int port, int ttl);
+    void displayPeerInfo();
+    void initConfig(String hostName, int port);
+    void runPeerServer();
+    void runPeerClient();
 }
