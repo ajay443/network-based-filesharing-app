@@ -53,7 +53,7 @@ public class PeerImpl implements Peer{
 					sock = new Socket("localhost",(int)i.next());
 					PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
 
-					out.println("query " + query_id + " " + fileName + " " + this.myport + " " + "7");
+					out.println("query " + query_id + " " + fileName + " " + this.myport + " " + Integer.toString(ttl));
 					out.close();
 
 					//pushing the msgid to seenMessages so that I dont have to forward again later when I get back the same
@@ -63,9 +63,9 @@ public class PeerImpl implements Peer{
 						//ports.add(this.myport);
 						this.seenMessages.put(query_id,ports);
 					}
-					else{
-						System.out.println("2. Not forwarding query message");
-					}
+					//else{
+					//	System.out.println("2. Not forwarding query message");
+					//}
 				}
 				catch(IOException e){
 					e.printStackTrace();
@@ -150,7 +150,7 @@ public class PeerImpl implements Peer{
 		    //lookup
 		Socket sock = null;
 		List ports = (List)seenMessages.get(msgid);
-		System.out.printf("Sending queryhit to %d peers",ports.size());
+		//System.out.printf("Sending queryhit to %d peers",ports.size());
 		Iterator i = ports.iterator();
 		if(!isForward){
 			ttl = 7;
@@ -170,9 +170,9 @@ public class PeerImpl implements Peer{
 					    //ports.add(params[3]);//dont have to forward queryhit to myself
 					    this.seenQueryHitMessages.put(msgid,p);
 				    }
-				    else{
-					System.out.println("2. Not forwarding queryhit message");
-				    }
+				    //else{
+				    //	System.out.println("2. Not forwarding queryhit message");
+				    //}
 			    }
 			    catch(IOException e){
 				    e.printStackTrace();
@@ -187,12 +187,12 @@ public class PeerImpl implements Peer{
 		}
 
     @Override
-	    public void initConfig() {
+	    public void initialize() {
 
 	    }
 
     @Override
-	    public void initConfig(String hostName, int id, int port, int n[][]) {
+	    public void initialize(String hostName, int id, int port, int n[][]) {
 		    this.peerID = id;
 		    this.myport = port;
 		    this.msg_id = 0;
@@ -254,7 +254,12 @@ public class PeerImpl implements Peer{
 					    String message;
 
 					    if ((message = in.readLine()) != null) {
-						    processInput(message,new_socket);
+						    //processInput(message,new_socket);
+						    new Thread(new Runnable(){
+							public void run(){
+								processInput(message,new_socket);
+								}
+							}).start();
 						    //out.println(outputLine);
 
 					    }
@@ -279,7 +284,7 @@ public class PeerImpl implements Peer{
 			String fileName="";
 			try {
 				while(true){
-					System.out.println("\n1 : Lookup a file\n2 : Download file from a peer\n3 :Display seen query messages\n4 : Display seen queryhit messages\n5 : Exit\nEnter your choice number");
+					System.out.println("\n1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Exit\nEnter your choice number");
 					Scanner in = new Scanner(System.in);
 					int choice = in.nextInt();
 					switch(choice){
@@ -294,17 +299,19 @@ public class PeerImpl implements Peer{
 							String host = in.next();
 							System.out.println("Enter port number of of the download server : \n");
 							int hostPort = in.nextInt();
-							System.out.println("Enter file name  \n");
+							System.out.println("Enter file name : \n");
 							SendDownloadRequest(fileName,host,hostPort);
 							break;
 						case 3:
 							DisplaySeenMessages("query");
 							break;
-						case 4: DisplaySeenMessages("queryhit");
+						case 4: 
+							DisplaySeenMessages("queryhit");
 							break;
 						case 5:
 							System.exit(0);
-						default:System.exit(0);
+						default:
+							System.exit(0);
 					}
 				}
 			}
@@ -331,7 +338,7 @@ public class PeerImpl implements Peer{
 
 
     private void processInput(String input,Socket socket) {
-	    System.out.println(input);
+	    System.out.println("Received Message : " + input);
 	    //String fileContent = "";
 	    int senderPort = 0;
 	    String params[] = input.split(" ");
@@ -339,7 +346,7 @@ public class PeerImpl implements Peer{
 		    HandleDownloadRequest(params[1],socket);
 	    }
 	    else if(params[0].equals("query")){
-		    DisplaySeenMessages(params[0]);
+		    //DisplaySeenMessages(params[0]);
 		    int ttl = Integer.valueOf(params[4]);
                     ttl = ttl - 1;		
 
@@ -350,7 +357,7 @@ public class PeerImpl implements Peer{
 			    ports.add(params[3]);
 			    this.seenMessages.put(params[1],ports);
 	
-			    DisplaySeenMessages("query");
+			    //DisplaySeenMessages("query");
 
 			    ForwardSearchQuery(params[1],params[2],ttl);
 			    if(SearchInMyFileDB(params[2])){
@@ -363,16 +370,16 @@ public class PeerImpl implements Peer{
 			    if(!ports.contains(params[3])){
 				    ports.add(params[3]);
 			    }
-			    System.out.println("1. Not forwarding this query message");
+			    System.out.println("Not forwarding " + input);
 		    }
 	    }
 	else if(params[0].equals("queryhit")){
-		DisplaySeenMessages(params[0]);
+		//DisplaySeenMessages(params[0]);
 		int ttl = Integer.valueOf(params[4]);
                 ttl = ttl - 1;
 	
 		//Not forwarding already seen query hit messages
-		if(!seenQueryHitMessages.containsKey(params[1])){
+		if(!seenQueryHitMessages.containsKey(params[1]) && ttl > 0){
 			List ports = new ArrayList<Integer>();
                         ports.add(params[3]);
                         this.seenQueryHitMessages.put(params[1],ports);
@@ -392,7 +399,7 @@ public class PeerImpl implements Peer{
 			if(!ports.contains(params[3])){
 				ports.add(params[3]);
 			}
-			System.out.println("1. Not forwarding this queryhit message");
+			System.out.println("Not forwarding " + input);
 		}
 	}
     }

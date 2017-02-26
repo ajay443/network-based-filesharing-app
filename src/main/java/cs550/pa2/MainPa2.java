@@ -92,7 +92,7 @@ public class MainPa2 {
 		    neighbors[i][0] = n_iterator.next().intValue();
 		    neighbors[i][1] = p_iterator.next().intValue();	    
 	    }
-	    peer.initConfig("localhost",defaultId, port, neighbors);
+	    peer.initialize("localhost",defaultId, port, neighbors);
 	    peer.DisplayPeerInfo();
     }
 }

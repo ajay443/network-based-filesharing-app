@@ -10,8 +10,8 @@ public interface Peer {
     void ForwardSearchQuery(String message_id, String fileName, int ttl);
     void SendQueryHit(String msgid, String fileName, int port,int ttl,boolean forward);
     void ForwardQueryHit(String msg_id, String fileName, int port,int ttl);
-    void initConfig();
+    void initialize();
     void DisplayPeerInfo();
     boolean SearchInMyFileDB(String fileName);
-    void initConfig(String hostName, int id, int port, int[][] arr );
+    void initialize(String hostName, int id, int port, int[][] arr );
 }
