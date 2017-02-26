@@ -234,7 +234,7 @@ public class PeerImpl implements Peer {
 		    //not searching or forwarding already seen message
 		    if(!seenMessages.containsKey(params[1]) && ttl > 0){
                 List addresses = new ArrayList<String>();
-                addresses.add(params[1].split("_"));
+                addresses.add(params[1].split("_")[0]);
 			    this.seenMessages.put(params[1],addresses);
                 forwardQuery(params[1],params[2],ttl);
 			    if(Util.searchInMyFileDB(params[2]))
