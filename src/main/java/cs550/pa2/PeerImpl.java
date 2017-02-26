@@ -39,9 +39,9 @@ public class PeerImpl implements Peer{
 	HashMap seenQueryHitMessages;
      
         @Override
-		public void SendSearchQuery(String query_id, String fileName, int ttl, boolean forward){
+		public void SendSearchQuery(String query_id, String fileName, int ttl, boolean isForward){
 			Socket sock = null;
-			if(!forward){
+			if(!isForward){
 				query_id = Integer.toString(peerID) + ":" + Integer.toString(++msg_id);
 				ttl = 7;
 			}
@@ -64,7 +64,7 @@ public class PeerImpl implements Peer{
 						this.seenMessages.put(query_id,ports);
 					}
 					else{
-						System.out.println("2. Not forwarding this query message as already seen and forwarded");
+						System.out.println("2. Not forwarding query message");
 					}
 				}
 				catch(IOException e){
@@ -178,27 +178,28 @@ public class PeerImpl implements Peer{
 	}
 	*/
 	//String msg_attrs = params[1].split(":");
-	boolean found = false;
+	boolean isFound = false;
 	//List ports = new ArrayList<Integer>();
 	//ports.add(params[3]);
 	//this.seenMessages.put(params[1],ports);
-	DisplaySeenMessages("query");
+	//DisplaySeenMessages("query");
 	//ForwardSearchQuery(params);
 	File file = new File("sharedFolder/" + fileName);
 	if (file.exists()) {
                 //SendQueryHit(params[1],params[2],this.myport,7);
-		found = true;
+		isFound = true;
         }
-	return found;
+	return isFound;
     }
 
     @Override
-	    public void SendQueryHit(String msgid, String fileName, int port,int ttl,boolean forward) {
+	    public void SendQueryHit(String msgid, String fileName, int port,int ttl,boolean isForward) {
 		    //lookup
 		Socket sock = null;
 		List ports = (List)seenMessages.get(msgid);
+		System.out.printf("Sending queryhit to %d peers",ports.size());
 		Iterator i = ports.iterator();
-		if(!forward){
+		if(!isForward){
 			ttl = 7;
 		}
 		
@@ -217,7 +218,7 @@ public class PeerImpl implements Peer{
 					    this.seenQueryHitMessages.put(msgid,p);
 				    }
 				    else{
-					System.out.println("2. Not forwarding this message as already seen and forwarded");
+					System.out.println("2. Not forwarding queryhit message");
 				    }
 			    }
 			    catch(IOException e){
@@ -340,7 +341,7 @@ public class PeerImpl implements Peer{
 			String fileName="";
 			try {
 				while(true){
-					System.out.println("\n1 : Lookup a file\n2 : Download file from a peer\n3 : Exit\nEnter your choice number");
+					System.out.println("\n1 : Lookup a file\n2 : Download file from a peer\n3 :Display seen query messages\n4 : Display seen queryhit messages\n5 : Exit\nEnter your choice number");
 					Scanner in = new Scanner(System.in);
 					int choice = in.nextInt();
 					switch(choice){
@@ -359,6 +360,11 @@ public class PeerImpl implements Peer{
 							SendDownloadRequest(fileName,host,hostPort);
 							break;
 						case 3:
+							DisplaySeenMessages("query");
+							break;
+						case 4: DisplaySeenMessages("queryhit");
+							break;
+						case 5:
 							System.exit(0);
 						default:System.exit(0);
 					}
@@ -441,7 +447,7 @@ public class PeerImpl implements Peer{
 			    if(!ports.contains(params[3])){
 				    ports.add(params[3]);
 			    }
-			    System.out.println("1. Not forwarding this query message as already seen and forwarded");
+			    System.out.println("1. Not forwarding this query message");
 		    }
 	    }
 	else if(params[0].equals("queryhit")){
@@ -451,6 +457,10 @@ public class PeerImpl implements Peer{
 	
 		//Not forwarding already seen query hit messages
 		if(!seenQueryHitMessages.containsKey(params[1])){
+			List ports = new ArrayList<Integer>();
+                        ports.add(params[3]);
+                        this.seenQueryHitMessages.put(params[1],ports);
+		
 			String msg_params[] = params[1].split(":");
 			if (Integer.valueOf(msg_params[0]) == this.peerID){
 				//make sure we do not download from all peers
@@ -462,7 +472,11 @@ public class PeerImpl implements Peer{
 			}
 		}
 		else{
-			System.out.println("1. Not forwarding this queryhit message as already seen and forwarded");
+			List ports = (List)seenQueryHitMessages.get(params[1]);
+			if(!ports.contains(params[3])){
+				ports.add(params[3]);
+			}
+			System.out.println("1. Not forwarding this queryhit message");
 		}
 	}
     }
