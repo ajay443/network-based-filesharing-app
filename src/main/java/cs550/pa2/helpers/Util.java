@@ -188,8 +188,7 @@ public  class Util {
      */
     public static  void printFile(String filePath){
 
-        try(
-                BufferedReader br = new BufferedReader(new FileReader(filePath));
+        try(BufferedReader br = new BufferedReader(new FileReader(filePath));
         )
         {
             int lineCount = 0;

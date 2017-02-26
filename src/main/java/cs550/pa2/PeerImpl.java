@@ -40,7 +40,7 @@ public class PeerImpl implements Peer {
     public void search(String query_id, String fileName, int ttl, boolean isForward){
         Socket sock = null;
         if(!isForward){
-            query_id = Integer.toString(peerID) + ":" + Integer.toString(++msg_id);
+            query_id = hostaddress.replace(":","_") + "_" + Integer.toString(++msg_id);
             ttl = 7;
         }
 
@@ -56,7 +56,7 @@ public class PeerImpl implements Peer {
                     }
                     sock = new Socket(neighbour.split(":")[0], Integer.parseInt(neighbour.split(":")[1]));
                     PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
-                    out.println("query " + query_id + " " + fileName + " " + this.myport + " " + Integer.toString(ttl));
+                    out.println("query " + query_id + " " + fileName + " " + this.hostaddress + " " + Integer.toString(ttl));
                     out.close();
                 }
             }
@@ -148,11 +148,10 @@ public class PeerImpl implements Peer {
     @Override
     public void runPeerServer(){
         boolean listening = true;
-        int peerServerPort = Integer.getInteger(hostaddress.split(":")[1]);
+        int peerServerPort = Integer.parseInt(hostaddress.split(":")[1]);
         try {
             this.serverSocket = new ServerSocket(peerServerPort);
             while (listening) {
-                System.out.println("Server is listening to port:"+peerServerPort);
                 Socket new_socket = this.serverSocket.accept();
                 try ( BufferedReader in = new BufferedReader(new InputStreamReader(new_socket.getInputStream()));) {
                     String message;
@@ -217,14 +216,10 @@ public class PeerImpl implements Peer {
     
     @Override
     public void displayPeerInfo(){
-        System.out.printf("Peer Id : %d \n Port listening on : %d \nNeighbors : \nPEER ID : SERVER PORT ",peerID,myport);
-        Set set = this.neighbors.entrySet();
-	    Iterator it =  set.iterator();
-	    while(it.hasNext()) {
-			Map.Entry me = (Map.Entry)it.next();
-			System.out.println(me.getKey() + ": " + me.getValue());
-		}
-	    System.out.println();
+        System.out.printf("Peer address %s. \nMy Neighbours are \n",this.hostaddress);
+        for(String neighbour : neighbours){
+            System.out.println(neighbour);
+        }
     }
 
 
@@ -311,19 +306,20 @@ public class PeerImpl implements Peer {
     public void initConfig(String hostName, int port) {
 	    this.hostaddress = hostName+":"+port;
 	    neighbours = new ArrayList<String>();
-	    File file = new File("config.file");
+
+        // Read the list of config files
+        String line = null;
+	    File file = new File(Constants.CONFIG_FILE);
 	    try(BufferedReader br = new BufferedReader(new FileReader(file))){
-		    String line = null;
-            System.out.println("Neighbours :");
-			while((line = br.readLine()) != null){
-                System.out.println(line);
-            }
-	    }
+            while((line = br.readLine()) != null) neighbours.add(line);
+        }
 	    catch(IOException e){
 		    e.printStackTrace();
 	    }
+	    displayPeerInfo();
 
-	    Util.createFolder("sharedFolder");
+	    Util.createFolder("sharedFolder"+this.hostaddress);
+
 
         serverThread = new Thread () {
             public void run () {
@@ -333,7 +329,7 @@ public class PeerImpl implements Peer {
         };
         clientThread = new Thread () {
             public void run () {
-                System.out.println("\n\nPeer Client Started");
+                System.out.println("Peer Client Started");
                 try {
                     runPeerClient();
                 } catch (Exception e) {
@@ -345,7 +341,4 @@ public class PeerImpl implements Peer {
         clientThread.start();
 
     }
-
-
-
 }
