@@ -35,9 +35,5 @@ public class MainPa2 {
             int port = in.nextInt();
 			peer.initConfig(hostName,port);
         }
-		//peer.displayPeerInfo();
-
-
-
-    }
+	}
 }

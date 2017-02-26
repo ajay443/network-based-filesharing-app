@@ -1,11 +1,11 @@
-package cs550.pa2;
+package cs550.pa2.helpers;
 
 /**
  * Created by Ajay on 2/26/17.
  */
 public class Host {
-    String url;
-    int port;
+    private String url;
+    private int port;
 
     public Host(String url, int port) {
         this.url = url;

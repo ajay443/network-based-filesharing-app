@@ -2,9 +2,11 @@ package cs550.pa2;
 
 
 import cs550.pa2.helpers.Constants;
+import cs550.pa2.helpers.Host;
 import cs550.pa2.helpers.Util;
 
 import java.io.*;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -152,7 +154,14 @@ public class PeerImpl implements Peer {
                     e.printStackTrace();
                 }
             }
-        } catch (IOException e) {
+            System.out.println("Peer Server is running ");
+        }catch (BindException e){
+            System.err.println("*******************************************************");
+            System.err.println("Peer Server address already in use, try again !");
+            System.err.println("*******************************************************");
+            System.exit(-1);
+        }
+        catch (IOException e) {
             e.printStackTrace();
             System.err.println("Could not listen on port " + host.getUrl());
             System.exit(-1);
@@ -295,7 +304,7 @@ public class PeerImpl implements Peer {
 
         // Read the list of config files
         String line = null;
-	    File file = new File(Constants.CONFIG_FILE);
+	    File file = new File(port+Constants.CONFIG_FILE);
 	    try(BufferedReader br = new BufferedReader(new FileReader(file))){
             while((line = br.readLine()) != null) neighbours.add(line);
         }
@@ -309,13 +318,11 @@ public class PeerImpl implements Peer {
 
         serverThread = new Thread () {
             public void run () {
-                System.out.println("Peer Server Started");
                 runPeerServer();
             }
         };
         clientThread = new Thread () {
             public void run () {
-                System.out.println("Peer Client Started");
                 try {
                     runPeerClient();
                 } catch (Exception e) {
