@@ -37,12 +37,13 @@ public class PeerImpl implements Peer {
     public void search(String query_id, String fileName, int ttl, boolean isForward){
         Socket sock = null;
         if(!isForward){
-            query_id = host.address().replace(":","_") + "_" + Integer.toString(++messageID);
+            query_id = host.address() + "_" + Integer.toString(++messageID);
             ttl = 7;
         }
         try{
+
                 for (Host neighbour:neighbours) {
-                    if(host.address() != neighbour.address()){
+                    if(!query_id.contains(host.address())){
                         sock = new Socket(neighbour.getUrl(),neighbour.getPort());
                         PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
                         out.println("query " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
