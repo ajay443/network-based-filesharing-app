@@ -14,49 +14,38 @@ import java.util.*;
  * Created by Ajay on 2/24/17.
  */
 public class PeerImpl implements Peer {
-    int messageID=1;
-    String hostaddress;
-    int peerID;
-    HashMap neighbors;
-    int myport;
+    static int messageID=0;
+
     ServerSocket serverSocket;
-    int msg_id;
     Thread clientThread, serverThread;
+
     HashMap seenMessages;
     HashMap seenQueryHitMessages;
-    List<String> neighbours = new ArrayList<String>();
+    List<String> neighbours;
+
+    Host host;
 
     public PeerImpl() {
-        peerID = 1;
-        this.myport = 0;
-        this.msg_id = 0;
         this.seenMessages = new HashMap<String,List<Integer>>();
-        this.neighbors = new HashMap();
         this.seenQueryHitMessages = new HashMap<String,List<Integer>>();
-
+        neighbours = new ArrayList<String>();
     }
 
     @Override
     public void search(String query_id, String fileName, int ttl, boolean isForward){
         Socket sock = null;
         if(!isForward){
-            query_id = hostaddress.replace(":","_") + "_" + Integer.toString(++msg_id);
+            query_id = host.address().replace(":","_") + "_" + Integer.toString(++messageID);
             ttl = 7;
         }
 
          try{
                 // transmits the query to all neighbours
                 for (String neighbour:neighbours) {
-                    //pushing the msgid to seenMessages so that I dont have to forward again later when I get back the same
-                    if(!seenMessages.containsKey(query_id)){
-                        List ports = new ArrayList<Integer>();
-                        //Not adding myport to list of upstream peers, so that I dont have to send queryhit msg to myself
-                        //ports.add(this.myport);
-                        this.seenMessages.put(query_id,ports);
-                    }
+                    if(!seenMessages.containsKey(query_id)) this.seenMessages.put(query_id,neighbour);
                     sock = new Socket(neighbour.split(":")[0], Integer.parseInt(neighbour.split(":")[1]));
                     PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
-                    out.println("query " + query_id + " " + fileName + " " + this.hostaddress + " " + Integer.toString(ttl));
+                    out.println("query " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
                     out.close();
                 }
             }
@@ -65,7 +54,8 @@ public class PeerImpl implements Peer {
             }
 
     }
-	@Override
+
+    @Override
 	public void forwardQuery(String quer_id, String fileName, int ttl){
 		search(quer_id, fileName, ttl,true);
 	}
@@ -103,10 +93,9 @@ public class PeerImpl implements Peer {
 
     }
 
-
     @Override
     public void returnQueryHit(String msgid, String fileName, int port, int ttl, boolean isForward) {
-            //lookup
+        //lookup
         Socket sock = null;
         List ports = (List)seenMessages.get(msgid);
         //System.out.printf("Sending queryhit to %d peers",ports.size());
@@ -148,9 +137,8 @@ public class PeerImpl implements Peer {
     @Override
     public void runPeerServer(){
         boolean listening = true;
-        int peerServerPort = Integer.parseInt(hostaddress.split(":")[1]);
         try {
-            this.serverSocket = new ServerSocket(peerServerPort);
+            this.serverSocket = new ServerSocket(host.getPort());
             while (listening) {
                 Socket new_socket = this.serverSocket.accept();
                 try ( BufferedReader in = new BufferedReader(new InputStreamReader(new_socket.getInputStream()));) {
@@ -166,7 +154,7 @@ public class PeerImpl implements Peer {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Could not listen on port " + peerServerPort);
+            System.err.println("Could not listen on port " + host.getUrl());
             System.exit(-1);
         }
 
@@ -216,12 +204,11 @@ public class PeerImpl implements Peer {
     
     @Override
     public void displayPeerInfo(){
-        System.out.printf("Peer address %s. \nMy Neighbours are \n",this.hostaddress);
+        System.out.printf("Peer address %s. \nMy Neighbours are \n",host.address());
         for(String neighbour : neighbours){
             System.out.println(neighbour);
         }
     }
-
 
     private void processInput(String input,Socket socket) {
 	    System.out.println("Received Message : " + input);
@@ -243,12 +230,10 @@ public class PeerImpl implements Peer {
 			    List ports = new ArrayList<Integer>();
 			    ports.add(params[3]);
 			    this.seenMessages.put(params[1],ports);
-	
-			    forwardQuery(params[1],params[2],ttl);
+                forwardQuery(params[1],params[2],ttl);
 			    if(Util.searchInMyFileDB(params[2]))
-				    returnQueryHit(params[1],params[2],this.myport,7,false);
-
-		    }
+				    returnQueryHit(params[1],params[2],host.getPort(),7,false);
+            }
 		    else{
 			    List ports = (List)seenMessages.get(params[1]);
 			    if(!ports.contains(params[3])){
@@ -257,7 +242,7 @@ public class PeerImpl implements Peer {
 			    System.out.println("Not forwarding " + input);
 		    }
 	    }
-	else if(params[0].equals("queryhit")){
+	else if(params[0].equals(Constants.QUERYHIT)){
 		//DisplaySeenMessages(params[0]);
 		int ttl = Integer.valueOf(params[4]);
                 ttl = ttl - 1;
@@ -269,9 +254,7 @@ public class PeerImpl implements Peer {
                         this.seenQueryHitMessages.put(params[1],ports);
 		
 			String msg_params[] = params[1].split(":");
-			if (Integer.valueOf(msg_params[0]) == this.peerID){
-				//make sure we do not download from all peers
-				//download();
+			if (msg_params[0] == host.address()){
 				System.out.printf("File %s found at peer with port %d\n",params[2],Integer.valueOf(params[3]));
 			}
 			else{
@@ -287,7 +270,8 @@ public class PeerImpl implements Peer {
 		}
 	    }
     }
-	public void displaySeenMessages(String type){
+
+    public void displaySeenMessages(String type){
 		System.out.println("Displaying seen " + type + " messages");
 		Set set = null;
 		if(type.equals("query")){
@@ -302,9 +286,11 @@ public class PeerImpl implements Peer {
 			System.out.println(entry.getKey() + ":" + entry.getValue());
 		}
 	}
-    @Override
+
+	@Override
     public void initConfig(String hostName, int port) {
-	    this.hostaddress = hostName+":"+port;
+
+        host = new Host(hostName,port);
 	    neighbours = new ArrayList<String>();
 
         // Read the list of config files
@@ -318,7 +304,7 @@ public class PeerImpl implements Peer {
 	    }
 	    displayPeerInfo();
 
-	    Util.createFolder("sharedFolder"+this.hostaddress);
+	    Util.createFolder("sharedFolder"+host.address());
 
 
         serverThread = new Thread () {
