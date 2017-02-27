@@ -21,6 +21,8 @@ public class PeerImpl implements Peer {
     ServerSocket serverSocket;
     Thread clientThread, serverThread;
 
+    Socket new_socket;
+    
     HashMap seenMessages;
     HashMap seenQueryHitMessages;
     List<Host> neighbours;
@@ -98,7 +100,7 @@ public class PeerImpl implements Peer {
     }
 
     @Override
-    public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
+    public synchronized void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
         //lookup
         Socket sock = null;
         List addresses = (List)seenMessages.get(msgid);
@@ -143,20 +145,24 @@ public class PeerImpl implements Peer {
     @Override
     public void runPeerServer(){
         boolean listening = true;
+        //Socket new_socket = null;
         try {
             this.serverSocket = new ServerSocket(host.getPort());
             while (listening) {
-                Socket new_socket = this.serverSocket.accept();
-                try ( BufferedReader in = new BufferedReader(new InputStreamReader(new_socket.getInputStream()));) {
+                new_socket = this.serverSocket.accept();
+                //try {
+                	BufferedReader in = new BufferedReader(new InputStreamReader(new_socket.getInputStream()));
                     String message;
                     if ((message = in.readLine()) != null)
-                        new Thread(new Runnable(){public void run(){
+                        new Thread(new Runnable(){
+                        	public void run(){
                             processInput(message,new_socket);
-                            }}).start();
-                    new_socket.close();
-                } catch (IOException e) {
+                            }
+                        }).start();
+                    //new_socket.close();
+                /*} catch (IOException e) {
                     e.printStackTrace();
-                }
+                }*/
             }
             System.out.println("Peer Server is running ");
         }catch (BindException e){
