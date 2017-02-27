@@ -67,6 +67,5 @@ public class RunIndexMain {
 
     public static void main(String[] args) throws IOException {
         main();
-
     }
 }

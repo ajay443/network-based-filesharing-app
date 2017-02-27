@@ -282,7 +282,9 @@ public class PeerImpl implements Peer {
 		
 			String msg_params[] = params[1].split("_");
 			if (msg_params[0].equals(host.address())){
-				System.out.printf("File %s found at peer with port %s\n",params[2],params[3]);
+				System.out.printf("\n------------------------------------------------------------------ \n" +
+                        "File %s found at peer with port %s" +
+                        " \n------------------------------------------------------------------\n",params[2],params[3]);
 			}
 			else{
 				forwardQueryHit(params[1],params[2],params[3],ttl);
@@ -291,7 +293,9 @@ public class PeerImpl implements Peer {
 		else{
 				String msg_params[] = params[1].split("_");
 				if (msg_params[0].equals(host.address())){
-					System.out.printf("File %s found at peer with port %s\n",params[2],params[3]);
+					System.out.printf("\n------------------------------------------------------------------ \n " +
+                            "File %s found at peer with port %s" +
+                            "\n------------------------------------------------------------------\n",params[2],params[3]);
 				}
 				List ports = (List)seenQueryHitMessages.get(params[1]);
 				if(!ports.contains(params[3])){

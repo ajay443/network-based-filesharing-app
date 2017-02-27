@@ -17,8 +17,8 @@ public  class Constants {
     public static final String CONFIG_FILE="config.file";
     public static final String DEFAULT_SERVER_HOST ="localhost" ;
     public static final int    DEFAULT_SERVER_PORT =5555;
-    //public static final String INDEX_FILE_NAME="output/index.txt";
-    //public static final String TEMP_FILE_NAME="output/myTempFile.txt";
+    public static final String INDEX_FILE_NAME="output/index.txt";
+    public static final String TEMP_FILE_NAME="output/myTempFile.txt";
     public static final String QUERY = "query";
     public static final String QUERYHIT = "queryhit";
     public static final String DOWNLOAD = "download";
