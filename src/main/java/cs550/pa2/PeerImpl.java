@@ -20,12 +20,15 @@ public class PeerImpl implements Peer {
 
     ServerSocket serverSocket;
     Thread clientThread, serverThread;
+    Thread cleanUpThread;
 
     Socket new_socket;
     
     HashMap seenMessages;
     HashMap seenQueryHitMessages;
     List<Host> neighbours;
+    static List<String> thrash;
+   
 
     Host host;
 
@@ -100,7 +103,7 @@ public class PeerImpl implements Peer {
     }
 
     @Override
-    public synchronized void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
+    public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
         //lookup
         Socket sock = null;
         List addresses = (List)seenMessages.get(msgid);
@@ -126,6 +129,11 @@ public class PeerImpl implements Peer {
                     //ports.add(params[3]);//dont have to forward queryhit to myself
                     this.seenQueryHitMessages.put(msgid,p);
                 }
+                
+                if(!thrash.contains(msgid)){
+                	//System.out.println("pushing");
+                	thrash.add(msgid);
+                }
                 //else{
                 //	System.out.println("2. Not forwarding queryhit message");
                 //}
@@ -149,6 +157,7 @@ public class PeerImpl implements Peer {
         try {
             this.serverSocket = new ServerSocket(host.getPort());
             while (listening) {
+            	
                 new_socket = this.serverSocket.accept();
                 //try {
                 	BufferedReader in = new BufferedReader(new InputStreamReader(new_socket.getInputStream()));
@@ -157,6 +166,7 @@ public class PeerImpl implements Peer {
                         new Thread(new Runnable(){
                         	public void run(){
                             processInput(message,new_socket);
+                            System.out.println("Finished processing");
                             }
                         }).start();
                     //new_socket.close();
@@ -199,7 +209,6 @@ public class PeerImpl implements Peer {
                         String host = in.next();
                         System.out.println("Enter port number of of the download server : \n");
                         int hostPort = in.nextInt();
-                        System.out.println("Enter file name : \n");
                         download(fileName,host,hostPort);
                         break;
                     case 3: // TODO remove all other choices
@@ -310,6 +319,7 @@ public class PeerImpl implements Peer {
 
         host = new Host(hostName,port);
 	    neighbours = new ArrayList<Host>();
+	    thrash = new ArrayList<String>();
 
         // Read the list of config files
         String line = null;
@@ -342,8 +352,34 @@ public class PeerImpl implements Peer {
                 }
             }
         };
+        cleanUpThread = new Thread () {
+            public void run () {
+                try {
+                    cleanUpSeenMessages();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
         serverThread.start();
         clientThread.start();
+        cleanUpThread.start();
 
     }
+	public void cleanUpSeenMessages(){
+		while(true){
+				try{
+				Thread.sleep(5000);
+				for (String qid : thrash){
+					System.out.println("Removing " + qid);
+					seenMessages.remove(qid);
+					seenQueryHitMessages.remove(qid);
+				}
+				thrash.clear();
+				}
+			catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
 }
