@@ -169,8 +169,7 @@ public  class Util {
                 InputStream fip = new FileInputStream(f);
                 OutputStream out = socket.getOutputStream();
         )
-        {
-            //int content = 0;
+        {   //int content = 0;
             byte b[] = new byte[16 * 1024];
             int count;
             while ((count = fip.read(b)) > 0) {
