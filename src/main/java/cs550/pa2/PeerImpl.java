@@ -280,8 +280,8 @@ public class PeerImpl implements Peer {
             addr.add(params[3]);
             this.seenQueryHitMessages.put(params[1],addr);
 		
-			String msg_params[] = params[1].split(":");
-			if (msg_params[0] == host.address()){
+			String msg_params[] = params[1].split("_");
+			if (msg_params[0].equals(host.address())){
 				System.out.printf("File %s found at peer with port %s\n",params[2],params[3]);
 			}
 			else{
