@@ -166,7 +166,7 @@ public class PeerImpl implements Peer {
                         new Thread(new Runnable(){
                         	public void run(){
                             processInput(message,new_socket);
-                            System.out.println("Finished processing");
+                            //System.out.println("Finished processing");
                             }
                         }).start();
                     //new_socket.close();
@@ -289,11 +289,15 @@ public class PeerImpl implements Peer {
 			}
 		}
 		else{
-			List ports = (List)seenQueryHitMessages.get(params[1]);
-			if(!ports.contains(params[3])){
-				ports.add(params[3]);
-			}
-			System.out.println("Not forwarding " + input);
+				String msg_params[] = params[1].split("_");
+				if (msg_params[0].equals(host.address())){
+					System.out.printf("File %s found at peer with port %s\n",params[2],params[3]);
+				}
+				List ports = (List)seenQueryHitMessages.get(params[1]);
+				if(!ports.contains(params[3])){
+					ports.add(params[3]);
+				}
+				System.out.println("Not forwarding " + input);
 		}
 	    }
     }
