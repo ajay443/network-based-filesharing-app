@@ -163,8 +163,8 @@ public  class Util {
      * @param filename, file name to download
      * @param socket, socket to which the file contents has to be written
      */
-    public static void downloadFile(String filename,Socket socket){
-        File f = new File(filename);
+    public static void downloadFile(String filePath,Socket socket){
+        File f = new File(filePath);
         try(
                 InputStream fip = new FileInputStream(f);
                 OutputStream out = socket.getOutputStream();
@@ -206,9 +206,9 @@ public  class Util {
 
 
 
-    public static boolean searchInMyFileDB(String fileName) {
+    public static boolean searchInMyFileDB(String folderSuffix, String fileName) {
         boolean isFound = false;
-        File file = new File("sharedFolder/" + fileName);
+        File file = new File("sharedFolder" + folderSuffix + "/" + fileName);
         if (file.exists()) {
             isFound = true;
         }

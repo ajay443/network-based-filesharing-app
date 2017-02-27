@@ -28,8 +28,8 @@ public class PeerImpl implements Peer {
     Host host;
 
     public PeerImpl() {
-        this.seenMessages = new HashMap<String,List<Integer>>();
-        this.seenQueryHitMessages = new HashMap<String,List<Integer>>();
+        this.seenMessages = new HashMap<String,List<String>>();
+        this.seenQueryHitMessages = new HashMap<String,List<String>>();
         neighbours = new ArrayList<Host>();
     }
 
@@ -42,12 +42,15 @@ public class PeerImpl implements Peer {
         }
         try{
             for (Host neighbour:neighbours) {
-                    if(!query_id.contains(host.address())){
+                    //if(!query_id.contains(host.address())){
                         sock = new Socket(neighbour.getUrl(),neighbour.getPort());
                         PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
                         out.println(Constants.QUERY + " " + query_id + " " + fileName + " " + host.address() + " " + Integer.toString(ttl));
                         out.close();
-                    }
+                        if(!seenMessages.containsKey(query_id)){
+                        	List addr = new ArrayList<String>();
+                        	this.seenMessages.put(query_id,addr);
+                        }
                 }
             }
             catch(IOException e){
@@ -70,7 +73,7 @@ public class PeerImpl implements Peer {
               PrintWriter out = new PrintWriter( peerClientSocket.getOutputStream(), true );
               //BufferedReader in = new BufferedReader(new InputStreamReader(peerClientSocket.getInputStream()));
               InputStream in = peerClientSocket.getInputStream();
-              OutputStream fout = new FileOutputStream("sharedFolder/" + fileName);
+              OutputStream fout = new FileOutputStream("sharedFolder" + this.host.address() + "/" + fileName);
 
               out.println(Constants.DOWNLOAD + " " + fileName);
               String message = "";
@@ -95,22 +98,24 @@ public class PeerImpl implements Peer {
     }
 
     @Override
-    public void returnQueryHit(String msgid, String fileName, int port, int ttl, boolean isForward) {
+    public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
         //lookup
         Socket sock = null;
-        List ports = (List)seenMessages.get(msgid);
+        List addresses = (List)seenMessages.get(msgid);
         //System.out.printf("Sending queryhit to %d peers",ports.size());
-        Iterator i = ports.iterator();
+        Iterator i = addresses.iterator();
         if(!isForward){
             ttl = 7;
         }
 
         while(i.hasNext()){
             try{
-                sock = new Socket("localhost",Integer.valueOf((String)i.next()));
+            	String toSendAddr = (String)i.next();//got concurrent modification error
+            	String addr_attrs[] = toSendAddr.split(":");
+            	sock = new Socket(addr_attrs[0],Integer.valueOf(addr_attrs[1]));
                 PrintWriter out = new PrintWriter( sock.getOutputStream(), true );
 
-                out.println(Constants.QUERYIT + " " + msgid + " " + fileName + " " + port + " " + ttl);
+                out.println(Constants.QUERYHIT + " " + msgid + " " + fileName + " " + addr + " " + ttl);
                 out.close();
 
                 if(!seenQueryHitMessages.containsKey(msgid)){
@@ -131,8 +136,8 @@ public class PeerImpl implements Peer {
     }
 
 	@Override
-    public void forwardQueryHit(String queryHit_id, String fileName, int port, int ttl){
-                returnQueryHit(queryHit_id,fileName,port,ttl,true);
+    public void forwardQueryHit(String queryHit_id, String fileName, String addr, int ttl){
+                returnQueryHit(queryHit_id,fileName,addr,ttl,true);
     }
 
     @Override
@@ -224,7 +229,7 @@ public class PeerImpl implements Peer {
 	    int senderPort = 0;
 	    String params[] = input.split(" ");
 	    if (params[0].equals(Constants.DOWNLOAD)){
-            Util.downloadFile(params[1],socket);
+            Util.downloadFile("sharedFolder" + this.host.address() + "/" + params[1],socket);
 	    }
 	    else if(params[0].equals(Constants.QUERY)){
 		    //DisplaySeenMessages(params[0]);
@@ -234,12 +239,12 @@ public class PeerImpl implements Peer {
 		    //not searching or forwarding already seen message
 		    if(!seenMessages.containsKey(params[1]) && ttl > 0){
 
-			    List addresses = new ArrayList<Host>();
+			    List addresses = new ArrayList<String>();
                 	addresses.add(params[3]);
 			    this.seenMessages.put(params[1],addresses);
                 	forwardQuery(params[1],params[2],ttl);
-			    if(Util.searchInMyFileDB(params[2]))
-				    returnQueryHit(params[1],params[2],host.getPort(),7,false);
+			    if(Util.searchInMyFileDB(this.host.address(),params[2]))
+				    returnQueryHit(params[1],params[2],host.address(),7,false);
             }
 		    else{
 			    List ports = (List)seenMessages.get(params[1]);
@@ -256,16 +261,16 @@ public class PeerImpl implements Peer {
 	
 		//Not forwarding already seen query hit messages
 		if(!seenQueryHitMessages.containsKey(params[1]) && ttl > 0){
-			List ports = new ArrayList<Integer>();
-                        ports.add(params[3]);
-                        this.seenQueryHitMessages.put(params[1],ports);
+			List addr = new ArrayList<String>();
+            addr.add(params[3]);
+            this.seenQueryHitMessages.put(params[1],addr);
 		
 			String msg_params[] = params[1].split(":");
 			if (msg_params[0] == host.address()){
-				System.out.printf("File %s found at peer with port %d\n",params[2],Integer.valueOf(params[3]));
+				System.out.printf("File %s found at peer with port %s\n",params[2],params[3]);
 			}
 			else{
-				forwardQueryHit(params[1],params[2],Integer.valueOf(params[3]),ttl);
+				forwardQueryHit(params[1],params[2],params[3],ttl);
 			}
 		}
 		else{
