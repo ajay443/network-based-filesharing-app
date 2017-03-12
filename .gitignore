@@ -2,4 +2,4 @@
 FileSharingSystem.iml
 .idea/
 src/test/
-g
+/output/*
