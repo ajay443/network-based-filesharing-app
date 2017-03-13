@@ -3,8 +3,8 @@
 ## PA3 Logs
 
 
-!(high-level-0.1)[https://github.com/ajayramesh23/FileSharingSystem/blob/PA3-Final-A/pa3-HighLevel.png?raw=true]
-!(sequence-0.2) [https://github.com/ajayramesh23/FileSharingSystem/blob/PA3-Final-A/pa3-push-pull-squence.png?raw=true]
+![high-level-0.1](https://github.com/ajayramesh23/FileSharingSystem/blob/PA3-Final-A/pa3-HighLevel.png?raw=true)
+![sequence-0.2] (https://github.com/ajayramesh23/FileSharingSystem/blob/PA3-Final-A/pa3-push-pull-squence.png?raw=true)
 
 
 ### Todo list
