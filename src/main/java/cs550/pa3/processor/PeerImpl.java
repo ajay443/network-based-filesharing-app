@@ -1,4 +1,4 @@
-package cs550.pa2;
+package cs550.pa3.processor;
 
 
 import cs550.pa2.helpers.Constants;
@@ -63,6 +63,8 @@ public class PeerImpl implements Peer {
             }
 
     }
+
+
 
     @Override
 	public void forwardQuery(String quer_id, String fileName, int ttl){
@@ -392,14 +394,24 @@ public class PeerImpl implements Peer {
 	}
 
     /**
-     * This method starts a watcher Thread, which is running in background to check any
-     * change in Master Folder . If so it will trigger Even. Here the event is Push.
-     *
+     *  Handle Broad Cast Event here
+     *  1. Check if I have the latest file or not
+     *  2. If not Issue Download Request
      */
 
-    public void initWatchFolder(){
+    @Override
+    public void handleBroadCastEvents() {
 
-        // Todo Call Watch Thread
+    }
+
+    /**
+     * 1. Create a Pull->thread and let that run in background when peerserver starts.
+     * 2.
+     */
+
+    @Override
+    public void initPullThread() {
+
 
     }
 }
