@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 package cs550.pa1.servers.IndexServer;
 
 import cs550.pa1.helpers.Util;
@@ -9,12 +17,13 @@ import java.util.List;
  * Created by Ajay on 1/28/17.
  */
 public class FileProcessor{
-     int fileUnlocked = 0;
-     
+    int fileUnlocked = 0;
+
 
     public FileProcessor() {
 
     }
+
     public  synchronized  void registry(String peerID, String filename) throws InterruptedException {
         while(fileUnlocked == 1) wait(2000);
         lockIndexFile();
@@ -22,6 +31,7 @@ public class FileProcessor{
         unlockIndexFile();
 
     }
+
     public synchronized void lookup(String text, PrintWriter out) throws InterruptedException{
         while(fileUnlocked == 1) wait(2000);
         lockIndexFile();

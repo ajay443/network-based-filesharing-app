@@ -1,5 +1,12 @@
-package cs550.pa2;
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 1:07 PM
+ */
 
+package cs550.pa2;
 
 import cs550.pa2.helpers.Constants;
 import cs550.pa2.helpers.Host;
@@ -10,27 +17,24 @@ import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
-//import helpers.Constants;
-//import helpers.Util;
-/**
- * Created by Ajay on 2/24/17.
- */
-public class PeerImpl implements Peer {
-    static int messageID=0;
 
+public class PeerImpl implements Peer {
+
+    static int messageID=0;
     ServerSocket serverSocket;
     Thread clientThread, serverThread;
     Thread cleanUpThread;
-
     Socket new_socket;
-    
     HashMap seenMessages;
     HashMap seenQueryHitMessages;
     List<Host> neighbours;
     static List<String> thrash;
-   
-
     Host host;
+
+    /**
+     * PeerImpl() -
+     *  1. It Initialize all the data variables  default values
+     */
 
     public PeerImpl() {
         this.seenMessages = new HashMap<String,List<String>>();
@@ -238,91 +242,7 @@ public class PeerImpl implements Peer {
         }
     }
 
-    private void processInput(String input,Socket socket) {
-	    System.out.println("Received Message : " + input);
-	    //String fileContent = "";
-	    int senderPort = 0;
-	    String params[] = input.split(" ");
-	    if (params[0].equals(Constants.DOWNLOAD)){
-            Util.downloadFile("sharedFolder" + this.host.address() + "/" + params[1],socket);
-	    }
-	    else if(params[0].equals(Constants.QUERY)){
-		    //DisplaySeenMessages(params[0]);
-		    int ttl = Integer.valueOf(params[4]);
-                    ttl = ttl - 1;		
-
-		    //not searching or forwarding already seen message
-		    if(!seenMessages.containsKey(params[1]) && ttl > 0){
-
-			    List addresses = new ArrayList<String>();
-                	addresses.add(params[3]);
-			    this.seenMessages.put(params[1],addresses);
-                	forwardQuery(params[1],params[2],ttl);
-			    if(Util.searchInMyFileDB(this.host.address(),params[2]))
-				    returnQueryHit(params[1],params[2],host.address(),7,false);
-            }
-		    else{
-			    List ports = (List)seenMessages.get(params[1]);
-			    if(!ports.contains(params[3])){
-				    ports.add(params[3]);
-			    }
-			    System.out.println("Not forwarding " + input);
-		    }
-	    }
-	else if(params[0].equals(Constants.QUERYHIT)){
-		//DisplaySeenMessages(params[0]);
-		int ttl = Integer.valueOf(params[4]);
-                ttl = ttl - 1;
-	
-		//Not forwarding already seen query hit messages
-		if(!seenQueryHitMessages.containsKey(params[1]) && ttl > 0){
-			List addr = new ArrayList<String>();
-            addr.add(params[3]);
-            this.seenQueryHitMessages.put(params[1],addr);
-		
-			String msg_params[] = params[1].split("_");
-			if (msg_params[0].equals(host.address())){
-				System.out.printf("\n------------------------------------------------------------------ \n" +
-                        "File %s found at peer with port %s" +
-                        " \n------------------------------------------------------------------\n",params[2],params[3]);
-			}
-			else{
-				forwardQueryHit(params[1],params[2],params[3],ttl);
-			}
-		}
-		else{
-				String msg_params[] = params[1].split("_");
-				if (msg_params[0].equals(host.address())){
-					System.out.printf("\n------------------------------------------------------------------ \n " +
-                            "File %s found at peer with port %s" +
-                            "\n------------------------------------------------------------------\n",params[2],params[3]);
-				}
-				List ports = (List)seenQueryHitMessages.get(params[1]);
-				if(!ports.contains(params[3])){
-					ports.add(params[3]);
-				}
-				System.out.println("Not forwarding " + input);
-		}
-	    }
-    }
-
-    public void displaySeenMessages(String type){
-		System.out.println("Displaying seen " + type + " messages");
-		Set set = null;
-		if(type.equals(Constants.QUERY)){
-		set = seenMessages.entrySet();
-		}
-		else{
-			set = seenQueryHitMessages.entrySet();
-		}
-		Iterator i = set.iterator();
-		while(i.hasNext()){
-			Map.Entry entry = (Map.Entry)i.next();
-			System.out.println(entry.getKey() + ":" + entry.getValue());
-		}
-	}
-
-	@Override
+    @Override
     public void initConfig(String hostName, int port) {
 
         host = new Host(hostName,port);
@@ -360,8 +280,7 @@ public class PeerImpl implements Peer {
                 }
             }
         };
-        cleanUpThread = new Thread () {
-            public void run () {
+        cleanUpThread = new Thread () { public void run () {
                 try {
                     cleanUpSeenMessages();
                 } catch (Exception e) {
@@ -374,7 +293,92 @@ public class PeerImpl implements Peer {
         cleanUpThread.start();
 
     }
-	public void cleanUpSeenMessages(){
+
+    private void processInput(String input,Socket socket) {
+        System.out.println("Received Message : " + input);
+        //String fileContent = "";
+        int senderPort = 0;
+        String params[] = input.split(" ");
+        if (params[0].equals(Constants.DOWNLOAD)){
+            Util.downloadFile("sharedFolder" + this.host.address() + "/" + params[1],socket);
+        }
+        else if(params[0].equals(Constants.QUERY)){
+            //DisplaySeenMessages(params[0]);
+            int ttl = Integer.valueOf(params[4]);
+            ttl = ttl - 1;
+
+            //not searching or forwarding already seen message
+            if(!seenMessages.containsKey(params[1]) && ttl > 0){
+
+                List addresses = new ArrayList<String>();
+                addresses.add(params[3]);
+                this.seenMessages.put(params[1],addresses);
+                forwardQuery(params[1],params[2],ttl);
+                if(Util.searchInMyFileDB(this.host.address(),params[2]))
+                    returnQueryHit(params[1],params[2],host.address(),7,false);
+            }
+            else{
+                List ports = (List)seenMessages.get(params[1]);
+                if(!ports.contains(params[3])){
+                    ports.add(params[3]);
+                }
+                System.out.println("Not forwarding " + input);
+            }
+        }
+        else if(params[0].equals(Constants.QUERYHIT)){
+            //DisplaySeenMessages(params[0]);
+            int ttl = Integer.valueOf(params[4]);
+            ttl = ttl - 1;
+
+            //Not forwarding already seen query hit messages
+            if(!seenQueryHitMessages.containsKey(params[1]) && ttl > 0){
+                List addr = new ArrayList<String>();
+                addr.add(params[3]);
+                this.seenQueryHitMessages.put(params[1],addr);
+
+                String msg_params[] = params[1].split("_");
+                if (msg_params[0].equals(host.address())){
+                    System.out.printf("\n------------------------------------------------------------------ \n" +
+                            "File %s found at peer with port %s" +
+                            " \n------------------------------------------------------------------\n",params[2],params[3]);
+                }
+                else{
+                    forwardQueryHit(params[1],params[2],params[3],ttl);
+                }
+            }
+            else{
+                String msg_params[] = params[1].split("_");
+                if (msg_params[0].equals(host.address())){
+                    System.out.printf("\n------------------------------------------------------------------ \n " +
+                            "File %s found at peer with port %s" +
+                            "\n------------------------------------------------------------------\n",params[2],params[3]);
+                }
+                List ports = (List)seenQueryHitMessages.get(params[1]);
+                if(!ports.contains(params[3])){
+                    ports.add(params[3]);
+                }
+                System.out.println("Not forwarding " + input);
+            }
+        }
+    }
+
+    public void displaySeenMessages(String type){
+        System.out.println("Displaying seen " + type + " messages");
+        Set set = null;
+        if(type.equals(Constants.QUERY)){
+            set = seenMessages.entrySet();
+        }
+        else{
+            set = seenQueryHitMessages.entrySet();
+        }
+        Iterator i = set.iterator();
+        while(i.hasNext()){
+            Map.Entry entry = (Map.Entry)i.next();
+            System.out.println(entry.getKey() + ":" + entry.getValue());
+        }
+    }
+
+    public void cleanUpSeenMessages(){
 		while(true){
 				try{
 				Thread.sleep(5000);
@@ -390,12 +394,6 @@ public class PeerImpl implements Peer {
 			}
 		}
 	}
-
-    /**
-     * This method starts a watcher Thread, which is running in background to check any
-     * change in Master Folder . If so it will trigger Even. Here the event is Push.
-     *
-     */
 
     public void initWatchFolder(){
 

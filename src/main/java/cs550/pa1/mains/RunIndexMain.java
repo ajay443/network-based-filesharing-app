@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 /**
  * File Name : RunIndexMain.java
  * Description : implementaion of Index Server
@@ -21,10 +29,10 @@ import java.util.Scanner;
  * upon request from any of the peers ,creates a thread i.e IndexServerThread to process each request.
  */
 public class RunIndexMain {
-    
-/**
- * Created by Ajay on 1/25/17.
- */
+
+    /**
+     * Created by Ajay on 1/25/17.
+     */
     public static void main(){
 
         //taking use input
@@ -54,7 +62,7 @@ public class RunIndexMain {
             while (listening) {
                 //creating new thread for a request, so that Index server can handle multiple requests at a time.
                 //accepts the request and cretaes a new thread
-                 new IndexServerThread(serverSocket.accept(),fileProcessor).start();
+                new IndexServerThread(serverSocket.accept(),fileProcessor).start();
             }
         } catch (IOException e) {
             System.err.println("Could not listen on port " + indexServerPort);

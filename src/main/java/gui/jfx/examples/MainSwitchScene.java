@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 package gui.jfx.examples;
 
 import javafx.application.Application;
@@ -15,6 +23,10 @@ public class MainSwitchScene  extends Application{
     Stage window;
     Scene  scene1,scene2,scene3;
     Button indexServer, button1;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -40,14 +52,5 @@ public class MainSwitchScene  extends Application{
         indexServer.setOnAction(e -> window.setScene(scene1));*/
 
 
-
-
-
-
-
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

@@ -1,40 +1,40 @@
-package cs550.pa3;
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
 
-//import java.util.Scanner;
+package cs550.pa3;
 
 import cs550.pa2.PeerImpl;
 import cs550.pa2.helpers.Constants;
 
 import java.util.Scanner;
 
-/**
- * Created by Ajay on 2/24/17.
- */
 public class ApplicationRunner {
 
-    PeerImpl peer = new PeerImpl();
+  PeerImpl peer = new PeerImpl();
 
+  public ApplicationRunner() {
+    Scanner in = new Scanner(System.in);
+    System.out.print("Default config ? (yes/no) or (y/n): ");
+    String choice = in.next();
 
-    public static void main(String[] args) {
-        // This will run programming assignment 2
-        new ApplicationRunner();
+    if (choice.equalsIgnoreCase("yes") ||
+            choice.equalsIgnoreCase("y")) {
+      peer.initConfig(Constants.DEFAULT_SERVER_HOST, Constants.DEFAULT_SERVER_PORT);
+    } else {
+      System.out.println("Enter Host Name Example: 'localhost' or 127.0.0.1 ");
+      String hostName = in.next();
+      System.out.println("Port address  : ");
+      int port = in.nextInt();
+      peer.initConfig(hostName, port);
     }
+  }
 
-    public ApplicationRunner() {
-
-		Scanner in = new Scanner(System.in);
-        System.out.print("Default config ? (yes/no) or (y/n): ");
-        String choice = in.next();
-
-        if(choice.equalsIgnoreCase("yes") ||
-                choice.equalsIgnoreCase("y") ){
-            peer.initConfig(Constants.DEFAULT_SERVER_HOST,Constants.DEFAULT_SERVER_PORT);
-        }else{
-            System.out.println("Enter Host Name Example: 'localhost' or 127.0.0.1 ");
-            String hostName = in.next();
-            System.out.println("Port address  : ");
-            int port = in.nextInt();
-			peer.initConfig(hostName,port);
-        }
-	}
+  public static void main(String[] args) {
+    new ApplicationRunner();
+  }
 }

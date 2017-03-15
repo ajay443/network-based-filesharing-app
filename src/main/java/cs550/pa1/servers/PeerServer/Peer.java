@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 /**
  * File Name : Peer.java
  * Description : peer interface file

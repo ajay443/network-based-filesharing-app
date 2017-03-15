@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 /**
  * File Name : Util.java
  * Description : Implementation of all utility functions
@@ -168,16 +176,14 @@ public  class Util {
         try(
                 InputStream fip = new FileInputStream(f);
                 OutputStream out = socket.getOutputStream();
-        )
-        {
+        ) {
             //int content = 0;
             byte b[] = new byte[16 * 1024];
             int count;
             while ((count = fip.read(b)) > 0) {
                 out.write(b, 0, count);
             }
-        }
-        catch(Exception e){
+        } catch(Exception e){
             e.printStackTrace();
         }
     }
@@ -190,8 +196,7 @@ public  class Util {
 
         try(
                 BufferedReader br = new BufferedReader(new FileReader(filePath));
-        )
-        {
+        ) {
             int lineCount = 0;
             String line = null;
             while ((line = br.readLine()) != null) {
@@ -199,8 +204,7 @@ public  class Util {
                 ++lineCount;
                 if(lineCount > 10) return;
             }
-        }
-        catch(Exception e){
+        } catch(Exception e){
             e.printStackTrace();
         }
     }

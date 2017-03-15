@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 package gui.jfx.examples;
 
 import javafx.application.Application;
@@ -17,6 +25,11 @@ public class MainGuiHelloWorld  extends Application  implements EventHandler<Act
     Button lamdabtn;
     Scene scene1,scene2,scene3;
     Stage primaryStage;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         //primaryStage.setFullScreen(true);
@@ -65,9 +78,5 @@ public class MainGuiHelloWorld  extends Application  implements EventHandler<Act
             primaryStage.setScene(scene2);
             System.out.println("peerServerBtn clicked "+peerServerBtn);
         }
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

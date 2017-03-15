@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 package cs550.pa3.processor;
 
 import cs550.pa3.helpers.Util;
@@ -37,19 +45,18 @@ public class Pull  extends  PeerImpl implements Event {
     }
 
     public void expiryTTL(){
-       /**
-        *
-        * TODO Find better algorithm for TTR Expiration
-        *
-        *
-        if(now<TTR+now){
-            trigger()
-        }else{
-            // sleep(TTR)
-        }*/
+        /**
+         *
+         * TODO Find better algorithm for TTR Expiration
+         *
+         *
+         if(now<TTR+now){
+         trigger()
+         }else{
+         // sleep(TTR)
+         }*/
 
     }
-
 
 
     /**

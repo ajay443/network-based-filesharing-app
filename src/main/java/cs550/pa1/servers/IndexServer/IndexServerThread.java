@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 /**
  * File Name : IndexServerThread.java
  * Description : implementaion of a thread for each request to Index Server
@@ -20,8 +28,8 @@ import java.net.Socket;
  * IndexServerThread class : Processes the request
  */
 public class IndexServerThread extends  Thread{
-    private Socket socket = null;
     FileProcessor fileProcessor;
+    private Socket socket = null;
 
     /**
      * arguement constructor
@@ -29,7 +37,7 @@ public class IndexServerThread extends  Thread{
      * @param : fileProcessor - int, handle for the index.txt file containing all the list of files registered. This is used to ensure synchronozation between threads processing client requests
      * @return
      */
-    public IndexServerThread(Socket socket,FileProcessor fileProcessor) {
+    public IndexServerThread(Socket socket, FileProcessor fileProcessor) {
         super("IndexServerThread");//calling Thread constructor
         this.socket = socket;
         this.fileProcessor = fileProcessor;
@@ -74,7 +82,7 @@ public class IndexServerThread extends  Thread{
         if(params[0].equals("lookup")){
             //Creating a thread to handle file lookup request on index server
             try {
-               LookUp lkup =  new LookUp(fileProcessor, out, params[1]);
+                LookUp lkup =  new LookUp(fileProcessor, out, params[1]);
                 Thread lkup_thread = new Thread(lkup);
                 lkup_thread.start();
                 lkup_thread.join();
@@ -82,8 +90,7 @@ public class IndexServerThread extends  Thread{
 
                 socket.shutdownOutput();
                 return;
-            }
-            catch(Exception e){
+            } catch(Exception e){
                 e.printStackTrace();
             }
 
@@ -94,8 +101,7 @@ public class IndexServerThread extends  Thread{
                 Thread rgstr_thread = new Thread(rgstr);
                 rgstr_thread.start();
                 rgstr_thread.join();
-            }
-            catch(Exception e){
+            } catch(Exception e){
                 e.printStackTrace();
             }
 
@@ -106,8 +112,7 @@ public class IndexServerThread extends  Thread{
             }
             Util.DeleteSingleLineInFile(params[1], params[2]);
 
-        }
-        else{
+        } else{
             System.out.println("Invalid Input");
         }
 

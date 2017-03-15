@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 /**
  * File Name : PeerClientImpl.java
  * Description : Implementation of Peer Client
@@ -31,12 +39,13 @@ public class PeerClientImpl implements Peer {
         this.indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT;
         wt = new WatcherThread(this.hostName, this.indexServerPort, this.peerServerPort);
     }
+
     public PeerClientImpl() throws IOException {
         this.indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT;
         this.peerServerPort = Constants.PEER_SERVER_PORT_DEFAULT;
-	    this.hostName = "localhost";
-	
-	    wt = new WatcherThread(this.hostName, this.indexServerPort, this.peerServerPort);
+        this.hostName = "localhost";
+
+        wt = new WatcherThread(this.hostName, this.indexServerPort, this.peerServerPort);
     }
 
     //parameterized constructor
@@ -50,7 +59,7 @@ public class PeerClientImpl implements Peer {
 
     @Override
     public void init() {
-	    wt.start();
+        wt.start();
         peerClientInterface();
 
     }
@@ -99,8 +108,7 @@ public class PeerClientImpl implements Peer {
                     default:System.exit(0);
                 }
             }
-        }
-        catch(Exception e){
+        } catch(Exception e){
             System.out.print("Invalid input : "+e.getMessage());
             e.printStackTrace();
             System.exit(1);
@@ -109,7 +117,7 @@ public class PeerClientImpl implements Peer {
     }
 
     public void lookupFile(String fileName) {
-       Socket socketToIndexServer = null;
+        Socket socketToIndexServer = null;
         try {
             socketToIndexServer = new Socket( this.hostName, this.indexServerPort );
             PrintWriter out = new PrintWriter( socketToIndexServer.getOutputStream(), true );
@@ -128,13 +136,13 @@ public class PeerClientImpl implements Peer {
                     return;
                 }
 
-        }
-        System.out.println("***********************************************");
+            }
+            System.out.println("***********************************************");
 
-        socketToIndexServer.close();
+            socketToIndexServer.close();
         } catch ( IOException e ) {
             System.out.print("Exception : "+e.getMessage());
-           // e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 
@@ -166,17 +174,15 @@ public class PeerClientImpl implements Peer {
             Util.printFile(Constants.PEER_FOLDER_PREFIX + this.peerServerPort + "/" + fileName);
 
 
-        }
-        catch(Exception e){
+        } catch(Exception e){
             System.out.print("Invalid input from client "+e.getMessage());
-        }
-        finally{
+        } finally{
             peerClientSocket.close();
         }
     }
 
     public void registerFile(String fileLocation, String requestPeerAddress) throws IOException{
-       Socket sock = new Socket( this.hostName, this.indexServerPort );
+        Socket sock = new Socket( this.hostName, this.indexServerPort );
         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
         out.println("register " + fileLocation + " " + requestPeerAddress );
         sock.shutdownInput();

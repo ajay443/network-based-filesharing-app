@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 /**
  * File Name : PeerServerImpl.java
  * Description : Implementation of Peer Server
@@ -10,7 +18,9 @@ package cs550.pa1.servers.PeerServer;
 import cs550.pa1.helpers.Constants;
 import cs550.pa1.helpers.Util;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -56,7 +66,6 @@ public class PeerServerImpl implements Peer,Runnable{
         t.start();
         //t.join();
     }
-
 
 
     @Override

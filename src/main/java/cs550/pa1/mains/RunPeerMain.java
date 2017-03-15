@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 /**
  * File Name : RunPeerMain.java
  * Description : implementaion of a Peer
@@ -24,7 +32,28 @@ public class RunPeerMain {
     String hostName;//hostname of index server
     int indexServerPort;//port number the index server is listening on
     int peerServerPort;//port number this peer server is listening on
+    //creating new thread to act as a server
+    Thread peerServer = new Thread() {
+        public void run() {
+            System.out.print("Peer Server Started");
+            PeerServerImpl peerServerImpl = new PeerServerImpl(peerServerPort);
+            peerServerImpl.init();
+        }
+    };
+    //creating new thread to act as a client
+    Thread peerClient = new Thread() {
+        public void run() {
 
+            System.out.println("------------------------------------------");
+            System.out.println("Peer Client Started");
+            try {
+                PeerClientImpl peerClient = new PeerClientImpl(hostName, indexServerPort, peerServerPort);
+                peerClient.init();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     public RunPeerMain() {
         this.hostName = Constants.HOST_DEFAULT;
@@ -32,7 +61,6 @@ public class RunPeerMain {
         this.peerServerPort = Constants.PEER_SERVER_PORT_DEFAULT;
 
     }
-
 
     /**
      * arguement constructor
@@ -55,33 +83,8 @@ public class RunPeerMain {
         }
     }
 
-    //creating new thread to act as a server
-    Thread peerServer = new Thread () {
-        public void run () {
-            System.out.print("Peer Server Started");
-            PeerServerImpl peerServerImpl = new PeerServerImpl(peerServerPort);
-            peerServerImpl.init();
-        }
-    };
-
-    //creating new thread to act as a client
-    Thread peerClient = new Thread () {
-        public void run () {
-
-            System.out.println("------------------------------------------");
-            System.out.println("Peer Client Started");
-            try {
-                PeerClientImpl peerClient = new PeerClientImpl(hostName, indexServerPort, peerServerPort);
-                peerClient.init();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-
     public static void main(String[] args) {
-          main();
+        main();
     }
 
     static void main() {

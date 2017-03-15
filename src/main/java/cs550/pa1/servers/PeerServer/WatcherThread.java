@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 /**
  * File Name : WatcherThread.java
  * Description : implementation of WatcherThread to monitor a folder of the client for addition/deletion of file
@@ -17,21 +25,18 @@ import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * Created by Ajay on 1/28/17.
  */
 class WatcherThread extends Thread{
 
-    private WatchService watcher;
-    private Map<WatchKey, Path> keys;
-
     String hostName;
     int indexServerPort;
     int peerServerPort;
+    private WatchService watcher;
+    private Map<WatchKey, Path> keys;
 
     public WatcherThread(){
         try {
@@ -42,8 +47,7 @@ class WatcherThread extends Thread{
             this.peerServerPort = Constants.SERVER_PORT_DEFAULT;
             Path dir = Paths.get(Constants.PEER_FOLDER_PREFIX + this.peerServerPort);
             registerDirectory(dir);
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
         }
     }
@@ -57,15 +61,14 @@ class WatcherThread extends Thread{
             this.peerServerPort = peerServerPort;
             Path dir = Paths.get(Constants.PEER_FOLDER_PREFIX + this.peerServerPort);//this peer's directory
             registerDirectory(dir);//register watcher to monitor peer's directory
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
         }
     }
+
     //register watcher to monitor peer's directory
     //@param : Absolute path of the peer's directory
-    private void registerDirectory(Path dir) throws IOException
-    {
+    private void registerDirectory(Path dir) throws IOException {
 
         WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
         keys.put(key, dir);
@@ -105,8 +108,7 @@ class WatcherThread extends Thread{
                         sock = new Socket( hostName, indexServerPort );
                         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
                         out.println("delete " + name.toString() + " " + hostName + ":" + peerServerPort);//send delete notification to server
-                    }
-                    catch(Exception e){
+                    } catch(Exception e){
                         e.printStackTrace();
                     }
                 }else if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY){
@@ -114,8 +116,7 @@ class WatcherThread extends Thread{
                         sock = new Socket( hostName, indexServerPort );
                         PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
                         out.println("register " + name.toString() + " " + hostName + ":" + peerServerPort);//notify server of the new file added in the peer's directory
-                    }
-                    catch(Exception e){
+                    } catch(Exception e){
                         e.printStackTrace();
                     }
                 }

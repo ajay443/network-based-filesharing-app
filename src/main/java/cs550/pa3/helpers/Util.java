@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2017.  FileSharingSystem - https://github.com/ajayramesh23/FileSharingSystem
+ * Programming Assignment from Professor Z.Lan
+ * @author Ajay Ramesh
+ * @author Chandra Kumar Basavaraj
+ * Last Modified - 3/15/17 6:44 PM
+ */
+
 /**
  * File Name : Util.java
  * Description : Implementation of all utility functions
@@ -16,7 +24,6 @@ import java.util.Properties;
  * Created by Ajay on 1/25/17.
  */
 public  class Util {
-
 
 
     /**
@@ -44,20 +51,16 @@ public  class Util {
         try(
                 InputStream fip = new FileInputStream(f);
                 OutputStream out = socket.getOutputStream();
-        )
-        {   //int content = 0;
+        ) {   //int content = 0;
             byte b[] = new byte[16 * 1024];
             int count;
             while ((count = fip.read(b)) > 0) {
                 out.write(b, 0, count);
             }
-        }
-        catch(Exception e){
+        } catch(Exception e){
             e.printStackTrace();
         }
     }
-
-
 
 
     public static boolean searchInMyFileDB(String folderSuffix, String fileName) {
@@ -69,26 +72,26 @@ public  class Util {
         return isFound;
     }
 
-     public static String getValue(String key) {
+    public static String getValue(String key) {
 
-            Properties prop = new Properties();
-            String filePath = "";
+        Properties prop = new Properties();
+        String filePath = "";
 
-            try {
+        try {
 
-                InputStream inputStream =
-                        Util.class.getClassLoader().getResourceAsStream("config.properties");
+            InputStream inputStream =
+                    Util.class.getClassLoader().getResourceAsStream("config.properties");
 
-                prop.load(inputStream);
-                filePath = prop.getProperty(key);
+            prop.load(inputStream);
+            filePath = prop.getProperty(key);
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return filePath;
-
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        return filePath;
+
+    }
 
     public static void main(String[] args) {
         System.out.println(Util.getValue("master.foldername"));
