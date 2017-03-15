@@ -1,45 +1,34 @@
 package cs550.pa3.processor;
-
-
 import cs550.pa2.helpers.Constants;
 import cs550.pa2.helpers.Host;
 import cs550.pa2.helpers.Util;
-
 import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
-//import helpers.Constants;
-//import helpers.Util;
-/**
- * Created by Ajay on 2/24/17.
- */
+
 public class PeerImpl implements Peer {
-    static int messageID=0;
 
-    ServerSocket serverSocket;
-    Thread clientThread, serverThread;
-    Thread cleanUpThread;
+  static int messageID=0;
+  ServerSocket serverSocket;
+  Thread clientThread, serverThread;
+  Thread cleanUpThread;
+  Socket new_socket;
+  HashMap seenMessages;
+  HashMap seenQueryHitMessages;
+  List<Host> neighbours;
+  static List<String> thrash;
+  Host host;
 
-    Socket new_socket;
-    
-    HashMap seenMessages;
-    HashMap seenQueryHitMessages;
-    List<Host> neighbours;
-    static List<String> thrash;
-   
-
-    Host host;
-
-    public PeerImpl() {
+  public PeerImpl() {
         this.seenMessages = new HashMap<String,List<String>>();
         this.seenQueryHitMessages = new HashMap<String,List<String>>();
         neighbours = new ArrayList<Host>();
     }
 
-    @Override
-    public void search(String query_id, String fileName, int ttl, boolean isForward){
+  @Override
+  public void search(String query_id, String fileName, int ttl, boolean isForward){
         Socket sock = null;
         if(!isForward){
             query_id = host.address() + "_" + Integer.toString(++messageID);
@@ -64,15 +53,13 @@ public class PeerImpl implements Peer {
 
     }
 
-
-
-    @Override
+  @Override
 	public void forwardQuery(String quer_id, String fileName, int ttl){
 		search(quer_id, fileName, ttl,true);
 	}
 
-    @Override
-    public void download(String fileName, String host, int port)throws IOException {
+  @Override
+  public void download(String fileName, String host, int port)throws IOException {
           Socket peerClientSocket = null;
 
           try{
@@ -104,8 +91,8 @@ public class PeerImpl implements Peer {
 
     }
 
-    @Override
-    public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
+  @Override
+  public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
         //lookup
         Socket sock = null;
         List addresses = (List)seenMessages.get(msgid);
@@ -131,7 +118,7 @@ public class PeerImpl implements Peer {
                     //ports.add(params[3]);//dont have to forward queryhit to myself
                     this.seenQueryHitMessages.put(msgid,p);
                 }
-                
+
                 if(!thrash.contains(msgid)){
                 	//System.out.println("pushing");
                 	thrash.add(msgid);
@@ -148,18 +135,18 @@ public class PeerImpl implements Peer {
     }
 
 	@Override
-    public void forwardQueryHit(String queryHit_id, String fileName, String addr, int ttl){
+  public void forwardQueryHit(String queryHit_id, String fileName, String addr, int ttl){
                 returnQueryHit(queryHit_id,fileName,addr,ttl,true);
     }
 
-    @Override
-    public void runPeerServer(){
+  @Override
+  public void runPeerServer(){
         boolean listening = true;
         //Socket new_socket = null;
         try {
             this.serverSocket = new ServerSocket(host.getPort());
             while (listening) {
-            	
+
                 new_socket = this.serverSocket.accept();
                 //try {
                 	BufferedReader in = new BufferedReader(new InputStreamReader(new_socket.getInputStream()));
@@ -191,8 +178,8 @@ public class PeerImpl implements Peer {
 
     }
 
-    @Override
-    public void runPeerClient(){
+  @Override
+  public void runPeerClient(){
         String fileName="";
         try {
             while(true){
@@ -231,16 +218,16 @@ public class PeerImpl implements Peer {
             System.exit(1);
         }
     }
-    
-    @Override
-    public void displayPeerInfo(){
+
+  @Override
+  public void displayPeerInfo(){
         System.out.printf("Peer address %s. \nMy Neighbours are \n",host.address());
         for(Host neighbour : neighbours){
             System.out.println(neighbour.address());
         }
     }
 
-    private void processInput(String input,Socket socket) {
+  private void processInput(String input,Socket socket) {
 	    System.out.println("Received Message : " + input);
 	    //String fileContent = "";
 	    int senderPort = 0;
@@ -251,7 +238,7 @@ public class PeerImpl implements Peer {
 	    else if(params[0].equals(Constants.QUERY)){
 		    //DisplaySeenMessages(params[0]);
 		    int ttl = Integer.valueOf(params[4]);
-                    ttl = ttl - 1;		
+                    ttl = ttl - 1;
 
 		    //not searching or forwarding already seen message
 		    if(!seenMessages.containsKey(params[1]) && ttl > 0){
@@ -275,13 +262,13 @@ public class PeerImpl implements Peer {
 		//DisplaySeenMessages(params[0]);
 		int ttl = Integer.valueOf(params[4]);
                 ttl = ttl - 1;
-	
+
 		//Not forwarding already seen query hit messages
 		if(!seenQueryHitMessages.containsKey(params[1]) && ttl > 0){
 			List addr = new ArrayList<String>();
             addr.add(params[3]);
             this.seenQueryHitMessages.put(params[1],addr);
-		
+
 			String msg_params[] = params[1].split("_");
 			if (msg_params[0].equals(host.address())){
 				System.out.printf("\n------------------------------------------------------------------ \n" +
@@ -306,9 +293,9 @@ public class PeerImpl implements Peer {
 				System.out.println("Not forwarding " + input);
 		}
 	    }
-    }
+  }
 
-    public void displaySeenMessages(String type){
+  public void displaySeenMessages(String type){
 		System.out.println("Displaying seen " + type + " messages");
 		Set set = null;
 		if(type.equals(Constants.QUERY)){
@@ -322,24 +309,20 @@ public class PeerImpl implements Peer {
 			Map.Entry entry = (Map.Entry)i.next();
 			System.out.println(entry.getKey() + ":" + entry.getValue());
 		}
-	}
+}
 
 	@Override
-    public void initConfig(String hostName, int port) {
-
-        host = new Host(hostName,port);
-	    neighbours = new ArrayList<Host>();
-	    thrash = new ArrayList<String>();
-
-        // Read the list of config files
-        String line = null;
-	    File file = new File(port+Constants.CONFIG_FILE);
-	    try(BufferedReader br = new BufferedReader(new FileReader(file))){
-
-            while((line = br.readLine()) != null) neighbours.add(
-                    new Host(line.split(":")[0],
-                              Integer.parseInt(line.split(":")[1])));
-        }
+  public void initConfig(String hostName, int port) {
+    host = new Host(hostName,port);
+    neighbours = new ArrayList<Host>();
+    thrash = new ArrayList<String>();
+    String line = null;
+	  File file = new File(port+Constants.CONFIG_FILE);
+	  try(BufferedReader br = new BufferedReader(new FileReader(file))){
+      while((line = br.readLine()) != null) neighbours.add(
+        new Host(line.split(":")[0],
+            Integer.parseInt(line.split(":")[1])));
+      }
 	    catch(IOException e){
 		    e.printStackTrace();
 	    }
@@ -347,8 +330,7 @@ public class PeerImpl implements Peer {
 
 	    Util.createFolder("sharedFolder"+host.address());
 
-
-        serverThread = new Thread () {
+      serverThread = new Thread () {
             public void run () {
                 runPeerServer();
             }
@@ -376,11 +358,12 @@ public class PeerImpl implements Peer {
         cleanUpThread.start();
 
     }
-	public void cleanUpSeenMessages(){
+
+  public void cleanUpSeenMessages(){
 		while(true){
 				try{
 				Thread.sleep(5000);
-				for (String qid : thrash){
+    		for (String qid : thrash){
 					System.out.println("Removing " + qid);
 					seenMessages.remove(qid);
 					seenQueryHitMessages.remove(qid);
@@ -393,25 +376,25 @@ public class PeerImpl implements Peer {
 		}
 	}
 
-    /**
-     *  Handle Broad Cast Event here
-     *  1. Check if I have the latest file or not
-     *  2. If not Issue Download Request
-     */
+  /**
+   *  Handle Broad Cast Event here
+   *  1. Check if I have the latest file or not
+   *  2. If not Issue Download Request
+   */
 
-    @Override
-    public void handleBroadCastEvents() {
+  @Override
+  public void handleBroadCastEvents() {
 
-    }
+  }
 
-    /**
-     * 1. Create a Pull->thread and let that run in background when peerserver starts.
-     * 2.
-     */
+  /**
+   * 1. Create a Pull->thread and let that run in background when peerserver starts.
+   * 2.
+   */
 
-    @Override
-    public void initPullThread() {
+  @Override
+  public void initPullThread() {
 
 
-    }
+  }
 }

@@ -10,17 +10,17 @@ import java.util.Scanner;
 /**
  * Created by Ajay on 2/24/17.
  */
-public class Runner {
+public class ApplicationRunner {
 
     PeerImpl peer = new PeerImpl();
 
 
     public static void main(String[] args) {
         // This will run programming assignment 2
-        new Runner();
+        new ApplicationRunner();
     }
 
-    public Runner() {
+    public ApplicationRunner() {
 
 		Scanner in = new Scanner(System.in);
         System.out.print("Default config ? (yes/no) or (y/n): ");
