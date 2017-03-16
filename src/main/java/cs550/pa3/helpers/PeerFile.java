@@ -10,9 +10,6 @@ package cs550.pa3.helpers;
 
 import java.time.LocalDateTime;
 
-/**
- * Created by Ajay on 3/13/17.
- */
 public class PeerFile {
     int version;
     boolean original;
@@ -57,10 +54,10 @@ public class PeerFile {
     public LocalDateTime getLastUpdated() {
         return lastUpdated;
     }
-    // TODO write unit test
+
     public boolean fileExpired(){
         if(!original){
-            return LocalDateTime.now().isBefore(lastUpdated.plusSeconds(TTR));
+            return LocalDateTime.now().isAfter(lastUpdated.plusSeconds(TTR));
         }else{
             return false;
         }
