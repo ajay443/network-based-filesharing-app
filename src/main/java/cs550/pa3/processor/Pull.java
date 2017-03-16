@@ -8,54 +8,27 @@
 
 package cs550.pa3.processor;
 
+import cs550.pa3.helpers.Host;
+import cs550.pa3.helpers.PeerFile;
 import cs550.pa3.helpers.Util;
-
-import java.util.Date;
 
 /**
  * Created by Ajay on 3/13/17.
  */
 public class Pull  extends  PeerImpl implements Event {
-
+    PeerFile dummyFile1 = new PeerFile(true,"foo.txt");
+    PeerFile dummyFile2 = new PeerFile(false,"cached.txt",5, new Host("localhost",5555));
     int TTR;
-    Date now;
 
     public Pull() {
-        if(Util.getValue("pull.switch").equals("on")){
-            TTR = Integer.parseInt(Util.getValue("TTR"));
-            while(true){
-                handlePollRequests();
-                expiryTTL();
-            }
-        }else{
-            //stop the thread
-            System.out.print("Pull switch is off");
-        }
-    }
-
-    /**
-     * 1.PeerServer Recieves Poll request [the origin server ID for the file, TTR, and last-modified-time]
-     *         return      [the origin server ID for the file, TTR, and last-modified-time] for a file
-     *
-     * 2.It Checks request
-     */
-
-    private void handlePollRequests() {
 
     }
+
+
 
     public void expiryTTL(){
-        /**
-         *
-         * TODO Find better algorithm for TTR Expiration
-         *
-         *
-         if(now<TTR+now){
-         trigger()
-         }else{
-         // sleep(TTR)
-         }*/
-
+        Util.print("expiryTTL");
+        // read the cache folder file names
     }
 
 
@@ -66,6 +39,7 @@ public class Pull  extends  PeerImpl implements Event {
 
     @Override
     public void trigger() {
+        Util.print("Triggered");
         pull();
 
     }
@@ -78,7 +52,31 @@ public class Pull  extends  PeerImpl implements Event {
          * }
          *
          */
+        if(Util.getValue("pull.switch").equals("on")){
+            TTR = Integer.parseInt(Util.getValue("pull.TTR"));
+            for(PeerFile f : peerFiles){
+                if(f.fileExpired()){
+                    Util.print(f.getName()+"file "+f.getName()+" is Expired");
+                    Util.print("Fetching latest file from origin server ");
+
+                }else{
+                    Util.print(f.getName()+" file is not expired , Last Updated "+f.getLastUpdated().toString());
+                }
+            }
+        }else{
+            //stop the thread
+            System.out.print("Pull switch is off");
+        }
     }
 
+
+    public void init() {
+        // todo
+        Util.print("Pull process now initializing...");
+        peerFiles.add(dummyFile1);
+        peerFiles.add(dummyFile2);
+        pull();
+
+    }
 
 }

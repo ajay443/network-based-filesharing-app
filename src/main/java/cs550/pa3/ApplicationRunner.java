@@ -8,8 +8,9 @@
 
 package cs550.pa3;
 
-import cs550.pa2.PeerImpl;
-import cs550.pa2.helpers.Constants;
+
+import cs550.pa3.helpers.Constants;
+import cs550.pa3.processor.PeerImpl;
 
 import java.util.Scanner;
 

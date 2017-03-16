@@ -17,6 +17,7 @@ package cs550.pa3.helpers;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Date;
 import java.util.Properties;
 
 
@@ -93,12 +94,27 @@ public  class Util {
 
     }
 
+    public static void print(String input){
+        if(Util.getValue("debug").equals("on"))
+            System.out.println(new Date().toString()+" >>>> PA3 - Debug Information ::  "+ input);
+    }
+
+    public  static void sleep(int seconds){
+        try{
+            Thread.sleep(seconds*1000);
+        }catch(InterruptedException e){
+            Util.print(e.getMessage());
+        }
+    }
+
     public static void main(String[] args) {
+        Util.print("Hello World");
         System.out.println(Util.getValue("master.foldername"));
         System.out.println(Util.getValue("push.switch"));
         System.out.println(Util.getValue("pull.switch"));
         System.out.println(Util.getValue("pull.TTR"));
         System.out.println(Util.getValue("cached.foldername "));
+        System.out.println(Util.getValue("debug"));
     }
 
 

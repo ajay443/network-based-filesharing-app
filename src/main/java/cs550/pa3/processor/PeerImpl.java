@@ -10,6 +10,7 @@ package cs550.pa3.processor;
 
 import cs550.pa3.helpers.Constants;
 import cs550.pa3.helpers.Host;
+import cs550.pa3.helpers.PeerFile;
 import cs550.pa3.helpers.Util;
 
 import java.io.*;
@@ -19,17 +20,20 @@ import java.net.Socket;
 import java.util.*;
 
 public class PeerImpl implements Peer {
-
+        List<PeerFile> peerFiles = new ArrayList<PeerFile>();
         private static int messageID = 0;
         private static List<String> thrash;
         private ServerSocket serverSocket;
-        private Thread clientThread, serverThread;
+        private Thread clientThread;
+        private Thread  serverThread;
         private Thread cleanUpThread;
+        private Thread pullThread;
         private Socket new_socket;
         private HashMap seenMessages;
         private HashMap seenQueryHitMessages;
         private List<Host> neighbours;
         private Host host;
+
 
         public PeerImpl() {
                 this.seenMessages = new HashMap<String, List<String>>();
@@ -150,13 +154,10 @@ public class PeerImpl implements Peer {
         @Override
         public void runPeerServer() {
                 boolean listening = true;
-                //Socket new_socket = null;
                 try {
                         this.serverSocket = new ServerSocket(host.getPort());
                         while (listening) {
-
                                 new_socket = this.serverSocket.accept();
-                                //try {
                                 BufferedReader in = new BufferedReader(new InputStreamReader(new_socket.getInputStream()));
                                 String message;
                                 if ((message = in.readLine()) != null)
@@ -166,10 +167,6 @@ public class PeerImpl implements Peer {
                                                         //System.out.println("Finished processing");
                                                 }
                                         }).start();
-                                //new_socket.close();
-                                /*} catch (IOException e) {
-                                    e.printStackTrace();
-                                   }*/
                         }
                         System.out.println("Peer Server is running ");
                 } catch (BindException e) {
@@ -255,9 +252,15 @@ public class PeerImpl implements Peer {
                                 cleanUpSeenMessages();
                         }
                 };
+                pullThread = new Thread() {
+                        public void run() {
+                                runPullProcess();
+                        }
+                };
                 serverThread.start();
                 clientThread.start();
                 cleanUpThread.start();
+                pullThread.start();
 
         }
 
@@ -292,9 +295,14 @@ public class PeerImpl implements Peer {
          * 2.
          */
         @Override
-        public void initPullThread() {
+        public void runPullProcess() {
+                Util.print("Pull Thread Started Running.");
+                Pull pullEvent = new Pull();
+                while(true){
+                        pullEvent.init();
+                        Util.sleep(3);
 
-
+                }
         }
 
         private void processInput(String input, Socket socket) {

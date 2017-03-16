@@ -8,41 +8,62 @@
 
 package cs550.pa3.helpers;
 
+import java.time.LocalDateTime;
+
 /**
  * Created by Ajay on 3/13/17.
  */
 public class PeerFile {
+    int version;
     boolean original;
     String name;
     int TTR;
+    Host fromAddress;
+    LocalDateTime lastUpdated;
 
-    public PeerFile(boolean original, String name, int TTR) {
+    public PeerFile(boolean original, String name) {
+        this.original = original;
+        this.name = name;
+        this.TTR = -1;
+        this.fromAddress = null; // TODO change to make peer server address .
+        this.lastUpdated = LocalDateTime.now();
+
+    }
+
+    public PeerFile(boolean original, String name, int TTR, Host address) {
         this.original = original;
         this.name = name;
         this.TTR = TTR;
+        this.fromAddress = address;
+        this.lastUpdated = LocalDateTime.now();
     }
 
     public boolean isOriginal() {
         return original;
     }
 
-    public void setOriginal(boolean original) {
-        this.original = original;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public int getTTR() {
         return TTR;
     }
 
-    public void setTTR(int TTR) {
-        this.TTR = TTR;
+    public Host getFromAddress() {
+        return fromAddress;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+    // TODO write unit test
+    public boolean fileExpired(){
+        if(!original){
+            return LocalDateTime.now().isBefore(lastUpdated.plusSeconds(TTR));
+        }else{
+            return false;
+        }
+
     }
 }

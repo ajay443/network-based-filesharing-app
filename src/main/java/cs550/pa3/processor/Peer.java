@@ -27,7 +27,7 @@ public interface Peer {
 
     void handleBroadCastEvents();
 
-    void initPullThread();
+    void runPullProcess();
 
     void runPeerServer();
 
