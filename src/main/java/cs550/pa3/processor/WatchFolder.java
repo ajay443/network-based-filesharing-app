@@ -12,19 +12,20 @@ package cs550.pa3.processor;
  * Created by Ajay on 3/13/17.
  */
 public class WatchFolder {
-    /**
+     /**
      * WatchFolder()
      * Now we need watch the folder
-     * If master folder contents --> Trigger Update Event
+     * If master folder contents change--> Trigger Update Event
      * TODO - Chandra
      */
 
-    Push observer;
+    PeerImpl observer;
+    String folderName;
 
-    public WatchFolder(Push push) {
-        observer = push;
-
-        new WatcherThread().run();
+    public WatchFolder(PeerImpl watchingPeer,String folder) {
+        observer = watchingPeer;
+        folderName = folder;
+        new WatcherThread(observer,folderName).run();
     }
 
     public void checkUpdate(){

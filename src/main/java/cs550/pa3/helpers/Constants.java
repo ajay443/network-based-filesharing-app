@@ -22,7 +22,7 @@ package cs550.pa3.helpers;
  * Created by Ajay on 1/25/17.
  */
 public  class Constants {
-    public static final String CONFIG_FILE="config.file";
+    public static final String CONFIG_FILE="StarTopologyTest/config.file";
     public static final String DEFAULT_SERVER_HOST ="localhost" ;
     public static final int    DEFAULT_SERVER_PORT =5555;
     public static final String INDEX_FILE_NAME="output/index.txt";

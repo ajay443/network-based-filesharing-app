@@ -32,34 +32,32 @@ import static java.nio.file.StandardWatchEventKinds.*;
  */
 class WatcherThread extends Thread{
 
-    String hostName;
-    int indexServerPort;
-    int peerServerPort;
+    PeerImpl observer;
+    String folderName;
     private WatchService watcher;
     private Map<WatchKey, Path> keys;
 
+    /*
     public WatcherThread(){
         try {
+            this.observer = null;
+            this.folderName = null;
             this.watcher = FileSystems.getDefault().newWatchService();
             this.keys = new HashMap<WatchKey, Path>();
-            this.hostName = Constants.INDEX_SERVER_HOST;
-            this.indexServerPort = Constants.INDEX_SERVER_PORT_DEFAULT;
-            this.peerServerPort = Constants.SERVER_PORT_DEFAULT;
             Path dir = Paths.get(Constants.PEER_FOLDER_PREFIX + this.peerServerPort);
             registerDirectory(dir);
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
-
-    public WatcherThread(String hostName, int indexServerPort, int peerServerPort ){
+    */
+    public WatcherThread(PeerImpl observer, String folderName ){
         try {
+            this.observer = observer;
+            this.folderName = folderName;
             this.watcher = FileSystems.getDefault().newWatchService();
             this.keys = new HashMap<WatchKey, Path>();
-            this.hostName = hostName;
-            this.indexServerPort = indexServerPort;
-            this.peerServerPort = peerServerPort;
-            Path dir = Paths.get(Constants.PEER_FOLDER_PREFIX + this.peerServerPort);//this peer's directory
+            Path dir = Paths.get(this.folderName);//this peer's directory
             registerDirectory(dir);//register watcher to monitor peer's directory
         } catch(Exception e) {
             e.printStackTrace();
@@ -104,23 +102,12 @@ class WatcherThread extends Thread{
                 Socket sock = null;
                 // if directory is created, and watching recursively, then register it and its sub-directories
                 if (kind == ENTRY_DELETE )  {
-                    try{
-                        sock = new Socket( hostName, indexServerPort );
-                        PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
-                        out.println("delete " + name.toString() + " " + hostName + ":" + peerServerPort);//send delete notification to server
-                    } catch(Exception e){
-                        e.printStackTrace();
-                    }
+                    observer.handleBroadCastEvents(name.toString());
                 }else if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY){
-                    try{
-                        sock = new Socket( hostName, indexServerPort );
-                        PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
-                        out.println("register " + name.toString() + " " + hostName + ":" + peerServerPort);//notify server of the new file added in the peer's directory
-                    } catch(Exception e){
-                        e.printStackTrace();
+                    observer.handleBroadCastEvents(name.toString());
                     }
                 }
-            }
+
             // reset key and remove from set if directory no longer accessible
             boolean valid = key.reset();
             if (!valid) {

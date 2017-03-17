@@ -66,7 +66,7 @@ public  class Util {
 
     public static boolean searchInMyFileDB(String folderSuffix, String fileName) {
         boolean isFound = false;
-        File file = new File("sharedFolder" + folderSuffix + "/" + fileName);
+        File file = new File(Util.getValue("master.foldername","peer.properties") + "/" + fileName);
         if (file.exists()) {
             isFound = true;
         }
@@ -93,6 +93,28 @@ public  class Util {
         return filePath;
 
     }
+
+    public static String getValue(String key, String fromFile) {
+
+        Properties prop = new Properties();
+        String filePath = "";
+
+        try {
+
+            InputStream inputStream =
+                    Util.class.getClassLoader().getResourceAsStream(fromFile);
+
+            prop.load(inputStream);
+            filePath = prop.getProperty(key);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return filePath;
+
+    }
+
 
     public static void print(String input){
         if(Util.getValue("debug").equals("on"))

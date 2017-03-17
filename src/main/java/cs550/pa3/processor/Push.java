@@ -11,7 +11,8 @@ package cs550.pa3.processor;
 /**
  * Created by Ajay on 3/13/17.
  */
-public class Push extends  PeerImpl implements Event {
+public class Push implements Event {
+
 
 
     @Override

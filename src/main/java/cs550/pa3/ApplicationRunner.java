@@ -10,6 +10,7 @@ package cs550.pa3;
 
 
 import cs550.pa3.helpers.Constants;
+import cs550.pa3.helpers.Util;
 import cs550.pa3.processor.PeerImpl;
 
 import java.util.Scanner;
@@ -25,7 +26,7 @@ public class ApplicationRunner {
 
     if (choice.equalsIgnoreCase("yes") ||
             choice.equalsIgnoreCase("y")) {
-      peer.initConfig(Constants.DEFAULT_SERVER_HOST, Constants.DEFAULT_SERVER_PORT);
+      peer.initConfig(Util.getValue("peer.host","peer.properties"), Integer.parseInt(Util.getValue("peer.port","peer.properties")));
     } else {
       System.out.println("Enter Host Name Example: 'localhost' or 127.0.0.1 ");
       String hostName = in.next();
