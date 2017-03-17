@@ -12,5 +12,3 @@ g
 /output/
 *.file
 sharedFolder*
-PeerServerFilesRoot/cache/test*
-PeerServerFilesRoot/master/test*
