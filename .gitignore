@@ -12,3 +12,11 @@ g
 /output/
 *.file
 sharedFolder*
+!/PeerDownloads/Master/
+!/PeerDownloads/Master/files.metadata.json
+!/PeerDownloads/
+!/PeerDownloads/Master/mountain.jpg
+!/PeerDownloads/Cache/stars.jpg
+!/PeerDownloads/Cache/
+!/PeerDownloads/Cache/files.metadata.json
+PeerDownloads/
