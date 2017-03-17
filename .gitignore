@@ -10,3 +10,7 @@ g
 /peer_8100/
 /peer*
 /output/
+*.file
+sharedFolder*
+PeerServerFilesRoot/cache/test*
+PeerServerFilesRoot/master/test*
