@@ -30,5 +30,6 @@ public  class Constants {
     public static final String QUERY = "query";
     public static final String QUERYHIT = "queryhit";
     public static final String DOWNLOAD = "download";
+    public static final String DISPLAY_MENU = "\n1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Exit\nEnter your choice number";
 
 }

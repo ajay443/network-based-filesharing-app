@@ -3,7 +3,7 @@
  * Programming Assignment from Professor Z.Lan
  * @author Ajay Ramesh
  * @author Chandra Kumar Basavaraj
- * Last Modified - 3/16/17 2:22 PM
+ * Last Modified - 3/16/17 2:37 PM
  */
 
 package cs550.pa3.test;
@@ -12,7 +12,8 @@ import cs550.pa3.ApplicationRunner;
 import org.junit.After;
 import org.junit.Test;
 
-import java.util.Scanner;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 public class ApplicationRunnerTest {
     ApplicationRunner runner;
@@ -23,11 +24,11 @@ public class ApplicationRunnerTest {
 
     @Test
     public void main() throws Exception {
-        Scanner scanner = new Scanner("y");
-/*
-        assertEquals(0, programContinueSelect(scanner));
-        runner = new ApplicationRunner(scanner);
-*/
+
+        String input = "n\n 121.2.2.2 \n 3333";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
+        new ApplicationRunner();
 
 
     }

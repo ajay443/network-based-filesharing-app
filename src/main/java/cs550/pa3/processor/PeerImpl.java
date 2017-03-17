@@ -133,11 +133,11 @@ public class PeerImpl implements Peer {
                                 }
 
                                 if (!thrash.contains(msgid)) {
-                                        //System.out.println("pushing");
+                                        //Util.print();("pushing");
                                         thrash.add(msgid);
                                 }
                                 //else{
-                                //	System.out.println("2. Not forwarding queryhit message");
+                                //	Util.print();("2. Not forwarding queryhit message");
                                 //}
                         } catch (IOException e) {
                                 e.printStackTrace();
@@ -164,11 +164,10 @@ public class PeerImpl implements Peer {
                                         new Thread(new Runnable() {
                                                 public void run() {
                                                         processInput(message, new_socket);
-                                                        //System.out.println("Finished processing");
                                                 }
                                         }).start();
                         }
-                        System.out.println("Peer Server is running ");
+                        Util.print("Peer Server is running ");
                 } catch (BindException e) {
                         System.err.println("*******************************************************");
                         System.err.println("Peer Server address already in use, try again !");
@@ -187,21 +186,21 @@ public class PeerImpl implements Peer {
                 String fileName = "";
                 try {
                         while (true) {
-                                System.out.println("\n1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Exit\nEnter your choice number");
+                                Util.println(Constants.DISPLAY_MENU);
                                 Scanner in = new Scanner(System.in);
                                 int choice = in.nextInt();
                                 switch (choice) {
                                         case 1:
-                                                System.out.println("Enter filename : \n");
+                                                Util.println("Enter filename : \n");
                                                 fileName = in.next();
                                                 search(null, fileName, 0, false);
                                                 break;
                                         case 2:
-                                                System.out.println("Enter filename : \n");
+                                                Util.println("Enter filename : \n");
                                                 fileName = in.next();
-                                                System.out.println("Enter Host name of the download server : \n");
+                                                Util.println("Enter Host name of the download server : \n");
                                                 String host = in.next();
-                                                System.out.println("Enter port number of of the download server : \n");
+                                                Util.println("Enter port number of of the download server : \n");
                                                 int hostPort = in.nextInt();
                                                 download(fileName, host, hostPort);
                                                 break;
@@ -227,7 +226,7 @@ public class PeerImpl implements Peer {
         public void displayPeerInfo() {
                 System.out.printf("Peer address %s. \nMy Neighbours are \n", host.address());
                 for (Host neighbour : neighbours) {
-                        System.out.println(neighbour.address());
+                        Util.print(neighbour.address());
                 }
         }
 
@@ -269,7 +268,7 @@ public class PeerImpl implements Peer {
                         try {
                                 Thread.sleep(5000);
                                 for (String qid : thrash) {
-                                        System.out.println("Removing " + qid);
+                                        Util.print("Removing " + qid);
                                         seenMessages.remove(qid);
                                         seenQueryHitMessages.remove(qid);
                                 }
@@ -306,7 +305,7 @@ public class PeerImpl implements Peer {
         }
 
         private void processInput(String input, Socket socket) {
-                System.out.println("Received Message : " + input);
+                Util.print("Received Message : " + input);
                 //String fileContent = "";
                 int senderPort = 0;
                 String params[] = input.split(" ");
@@ -331,7 +330,7 @@ public class PeerImpl implements Peer {
                                 if (!ports.contains(params[3])) {
                                         ports.add(params[3]);
                                 }
-                                System.out.println("Not forwarding " + input);
+                                Util.print("Not forwarding " + input);
                         }
                 } else if (params[0].equals(Constants.QUERYHIT)) {
                         //DisplaySeenMessages(params[0]);
@@ -363,13 +362,13 @@ public class PeerImpl implements Peer {
                                 if (!ports.contains(params[3])) {
                                         ports.add(params[3]);
                                 }
-                                System.out.println("Not forwarding " + input);
+                                Util.print("Not forwarding " + input);
                         }
                 }
         }
 
         public void displaySeenMessages(String type) {
-                System.out.println("Displaying seen " + type + " messages");
+                Util.print("Displaying seen " + type + " messages");
                 Set set = null;
                 if (type.equals(Constants.QUERY)) {
                         set = seenMessages.entrySet();
@@ -379,7 +378,7 @@ public class PeerImpl implements Peer {
                 Iterator i = set.iterator();
                 while (i.hasNext()) {
                         Map.Entry entry = (Map.Entry) i.next();
-                        System.out.println(entry.getKey() + ":" + entry.getValue());
+                        Util.print(entry.getKey() + ":" + entry.getValue());
                 }
         }
 

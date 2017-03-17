@@ -99,6 +99,10 @@ public  class Util {
             System.out.println(new Date().toString()+" >>>> PA3 - Debug Information ::  "+ input);
     }
 
+    public static void println(String input){
+         System.out.println(new Date().toString()+" >>>> PA3 -  Information ::  "+ input);
+    }
+
     public  static void sleep(int seconds){
         try{
             Thread.sleep(seconds*1000);
