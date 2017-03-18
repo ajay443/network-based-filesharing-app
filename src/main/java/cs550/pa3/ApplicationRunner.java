@@ -16,10 +16,9 @@ import cs550.pa3.processor.PeerImpl;
 import java.util.Scanner;
 
 public class ApplicationRunner {
+    PeerImpl peer = new PeerImpl();
+    public ApplicationRunner() {
 
-  PeerImpl peer = new PeerImpl();
-
-  public ApplicationRunner() {
     Scanner in = new Scanner(System.in);
     System.out.print("Default config ? (yes/no) or (y/n): ");
     String choice = in.next();
@@ -37,6 +36,23 @@ public class ApplicationRunner {
   }
 
   public static void main(String[] args) {
-    new ApplicationRunner();
+        /*
+    PeerImpl peer = new PeerImpl();
+    Scanner in = new Scanner(System.in);
+    System.out.print("Default config ? (yes/no) or (y/n): ");
+    String choice = in.next();
+
+    if (choice.equalsIgnoreCase("yes") ||
+            choice.equalsIgnoreCase("y")) {
+      peer.initConfig(Util.getValue("peer.host", "peer.properties"), Integer.parseInt(Util.getValue("peer.port", "peer.properties")));
+    } else {
+      System.out.println("Enter Host Name Example: 'localhost' or 127.0.0.1 ");
+      String hostName = in.next();
+      System.out.println("Port address  : ");
+      int port = in.nextInt();
+      peer.initConfig(hostName, port);
+      */
+      new ApplicationRunner();
+    }
   }
-}
+
