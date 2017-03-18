@@ -243,7 +243,7 @@ public class PeerImpl implements Peer {
                 displayPeerInfo();
                 Util.createFolder(Util.getValue(Constants.MASTER_FOLDER,Constants.PEER_PROPERTIES_FILE));
                 Util.createFolder(Util.getValue(Constants.CACHED_FOLDER,Constants.PEER_PROPERTIES_FILE));
-                System.out.println("After Create Folder");
+                //System.out.println("After Create Folder");
                 serverThread = new Thread() {
                         public void run() {
                                 runPeerServer();

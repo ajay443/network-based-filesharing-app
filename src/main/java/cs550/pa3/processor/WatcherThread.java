@@ -98,16 +98,19 @@ class WatcherThread extends Thread{
                 // Context for directory entry event is the file name of entry
                 @SuppressWarnings("unchecked")
                 Path name = ((WatchEvent<Path>)event).context();
-                Path child = dir.resolve(name);
+                //Path child = dir.resolve(name);
 
-                Socket sock = null;
+                //Socket sock = null;
+                String changedFileName = name.toString();
                 // if directory is created, and watching recursively, then register it and its sub-directories
                 if (kind == ENTRY_DELETE )  {
-                    System.out.println("Forwarding delete event");
-                    observer.handleBroadCastEvents(null, name.toString(),2,0,false);
+                    //System.out.println("Forwarding delete event");
+                    if(!changedFileName.contains("_jb_"))
+                        observer.handleBroadCastEvents(null, name.toString(),2,0,false);
                 }else if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY){
-                    System.out.println("Forwarding create/modify event");
-                    observer.handleBroadCastEvents(null,name.toString(),2,0,false);
+                    //System.out.println("Forwarding create/modify event");
+                    if(!changedFileName.contains("_jb_"))
+                        observer.handleBroadCastEvents(null,name.toString(),2,0,false);
                     }
                 }
 
