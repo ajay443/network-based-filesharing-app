@@ -15,12 +15,12 @@ import cs550.pa3.helpers.Util;
 
 import java.io.*;
 import java.net.BindException;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
 public class PeerImpl implements Peer {
-        List<PeerFile> peerFiles = new ArrayList<PeerFile>();
         private static int messageID = 0;
         private static List<String> thrash;
         private ServerSocket serverSocket;
@@ -34,14 +34,14 @@ public class PeerImpl implements Peer {
         private HashMap seenQueryHitMessages;
         private List<Host> neighbours;
         private Host host;
-
+        public  ArrayList<PeerFile> peerFiles;
 
         public PeerImpl() {
                 this.seenMessages = new HashMap<String, List<String>>();
                 this.seenQueryHitMessages = new HashMap<String, List<String>>();
                 neighbours = new ArrayList<Host>();
                 thrash = new ArrayList<String>();
-
+                peerFiles = new ArrayList<PeerFile>();
         }
 
         @Override
@@ -63,7 +63,10 @@ public class PeerImpl implements Peer {
                                         this.seenMessages.put(query_id, addr);
                                 }
                         }
-                } catch (IOException e) {
+                } catch (ConnectException e){
+                    Util.error("Peer Server is not running ....");
+                }
+                catch (IOException e) {
                         e.printStackTrace();
                 }
 
@@ -154,6 +157,7 @@ public class PeerImpl implements Peer {
 
         @Override
         public void runPeerServer() {
+                Util.print("Peer Server running ... ");
                 boolean listening = true;
                 try {
                         this.serverSocket = new ServerSocket(host.getPort());
@@ -170,10 +174,7 @@ public class PeerImpl implements Peer {
                         }
                         Util.print("Peer Server is running ");
                 } catch (BindException e) {
-                        System.err.println("*******************************************************");
-                        System.err.println("Peer Server address already in use, try again !");
-                        System.err.println("*******************************************************");
-                        System.exit(-1);
+                        Util.print("Peer Server address already in use, try again !");
                 } catch (IOException e) {
                         e.printStackTrace();
                         System.err.println("Could not listen on port " + host.getUrl());
@@ -184,7 +185,8 @@ public class PeerImpl implements Peer {
 
         @Override
         public void runPeerClient() {
-                String fileName = "";
+            Util.print("Peer Client running ... ");
+            String fileName = "";
                 try {
                         while (true) {
                                 Util.println(Constants.DISPLAY_MENU);
@@ -236,8 +238,8 @@ public class PeerImpl implements Peer {
                 host = new Host(hostName, port);
                 readFromFile(port + "peer.properties");
                 displayPeerInfo();
-                Util.createFolder(Util.getValue("master.foldername"));
-                Util.createFolder(Util.getValue("cache.foldername"));
+                Util.createFolder(Util.getValue("master.folderName"));
+                Util.createFolder(Util.getValue("cache.folderName"));
                 serverThread = new Thread() {
                         public void run() {
                                 runPeerServer();
@@ -258,12 +260,11 @@ public class PeerImpl implements Peer {
                                 runPullProcess();
                         }
                 };
-                watchThread = new WatchFolder(this,Util.getValue("master.foldername"));
                 serverThread.start();
                 clientThread.start();
                 cleanUpThread.start();
                 pullThread.start();
-
+                //watchThread = new WatchFolder(this,Util.getValue("master.folderName"));
         }
 
         public void cleanUpSeenMessages() {
@@ -317,21 +318,20 @@ public class PeerImpl implements Peer {
         @Override
         public void runPullProcess() {
                 Util.print("Pull Thread Started Running.");
-                Pull pullEvent = new Pull();
+                Pull pullEvent = new Pull(this);
                 while(true){
-                        pullEvent.init();
-                        Util.sleep(3);
+                        pullEvent.trigger();
+                        Util.sleep(Integer.parseInt(Util.getValue("pull.TTR")));
 
                 }
         }
 
         private void processInput(String input, Socket socket) {
                 Util.print("Received Message : " + input);
-                //String fileContent = "";
-                int senderPort = 0;
                 String params[] = input.split(" ");
+                // TODO - Make it simple to read by using Switch Case and Enum datatype
                 if (params[0].equals(Constants.DOWNLOAD)) {
-                        Util.downloadFile(Util.getValue("master.foldername","peer.properties") + "/" + params[1], socket);
+                        Util.downloadFile(Util.getValue("master.folderName","peer.properties") + "/" + params[1], socket);
                 } else if (params[0].equals(Constants.QUERY)) {
                         //DisplaySeenMessages(params[0]);
                         int ttl = Integer.valueOf(params[4]);
@@ -414,4 +414,32 @@ public class PeerImpl implements Peer {
                 }
         }
 
+        public void pullFile(PeerFile f) {
+            Socket peerClientSocket = null;
+            try {
+                Host from = f.getFromAddress();
+                peerClientSocket = new Socket(from.getUrl(), from.getPort());
+                PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
+                InputStream in = peerClientSocket.getInputStream();
+                String filePath = Util.getValue("cache.folderName") +"/"+ f.getName();
+                OutputStream fileOutputStream = new FileOutputStream(filePath);
+                out.println(Constants.DOWNLOAD + " " + f.getName());
+                PrintWriter p = new PrintWriter(filePath, "UTF-8");
+                byte[] bytes = new byte[16 * 1024];
+                int count;
+                while ((count = in.read(bytes)) > 0) {
+                    fileOutputStream.write(bytes, 0, count);
+                }
+                p.close();
+            }catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    peerClientSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
 }
