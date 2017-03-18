@@ -15,6 +15,9 @@ public class Host {
     private String url;
     private int port;
 
+    public Host() {
+    }
+
     public Host(String url, int port) {
         this.url = url;
         this.port = port;
@@ -39,4 +42,5 @@ public class Host {
     public String address() {
         return url+":"+port;
     }
+
 }

@@ -64,5 +64,34 @@ public class PeerFile {
 
     }
 
+    public int getVersion() {
+        return version;
+    }
 
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public void setOriginal(boolean original) {
+        this.original = original;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setTTR(int TTR) {
+        this.TTR = TTR;
+    }
+
+    public void setFromAddress(Host fromAddress) {
+        this.fromAddress = fromAddress;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public PeerFile() {
+    }
 }
