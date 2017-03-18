@@ -8,16 +8,10 @@
 
 package cs550.pa3.processor;
 
-import cs550.pa3.helpers.Constants;
-import cs550.pa3.helpers.Host;
-import cs550.pa3.helpers.PeerFile;
-import cs550.pa3.helpers.Util;
+import cs550.pa3.helpers.*;
 
 import java.io.*;
-import java.net.BindException;
-import java.net.ConnectException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.*;
 
 public class PeerImpl implements Peer {
@@ -36,6 +30,8 @@ public class PeerImpl implements Peer {
         private List<Host> neighbours;
         private Host host;
         public  ArrayList<PeerFile> peerFiles;
+        public  PeerFiles files;
+
 
         public PeerImpl() {
                 this.seenMessages = new HashMap<String, List<String>>();
@@ -45,6 +41,8 @@ public class PeerImpl implements Peer {
 
                 thrash = new ArrayList<String>();
                 peerFiles = new ArrayList<PeerFile>();
+                files.setFilesMetaData(peerFiles);
+
         }
 
         @Override
@@ -83,14 +81,13 @@ public class PeerImpl implements Peer {
         @Override
         public void download(String fileName, String host, int port) throws IOException {
                 Socket peerClientSocket = null;
-
                 try {
                         peerClientSocket = new Socket(host, port);
                         PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
                         //BufferedReader in = new BufferedReader(new InputStreamReader(peerClientSocket.getInputStream()));
                         InputStream in = peerClientSocket.getInputStream();
                         OutputStream fout = new FileOutputStream(Util.getValue(Constants.CACHED_FOLDER,Constants.PEER_PROPERTIES_FILE) + "/" + fileName);
-
+                        registry(fileName);
                         out.println(Constants.DOWNLOAD + " " + fileName);
                         String message = "";
                         PrintWriter p = new PrintWriter(fileName, "UTF-8");
@@ -111,7 +108,14 @@ public class PeerImpl implements Peer {
 
         }
 
-        @Override
+    private void registry(String fileName) {
+        // TODO when you download some thing from the remote peer, register it
+        // example
+        files.getFilesMetaData().add(new PeerFile(false, fileName));
+    }
+
+
+    @Override
         public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
                 //lookup
                 Socket sock = null;
@@ -294,7 +298,7 @@ public class PeerImpl implements Peer {
          * 2. If not Issue Download Request
          */
         @Override
-        public void handleBroadCastEvents(String messageId, String changedFileName, int fileVersion, int ttl, boolean isForward) {
+        public void  handleBroadCastEvents(String messageId, String changedFileName, int fileVersion, int ttl, boolean isForward) {
             Socket sock = null;
             if(!isForward){
                 messageId = host.address() + "_" + Integer.toString(++messageID);
