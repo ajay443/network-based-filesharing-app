@@ -98,18 +98,19 @@ class WatcherThread extends Thread{
                 // Context for directory entry event is the file name of entry
                 @SuppressWarnings("unchecked")
                 Path name = ((WatchEvent<Path>)event).context();
-                Path child = dir.resolve(name);
+                //Path child = dir.resolve(name);
 
-                Socket sock = null;
+                //Socket sock = null;
+                String changedFileName = name.toString();
                 // if directory is created, and watching recursively, then register it and its sub-directories
-                if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE ){
+                if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE ) {
                     String fileName = name.toString();
-                    if(!fileName.contains("_jb_")) {
+                    if (!fileName.contains("_jb_")) {
                         System.out.println("Forwarding create/modify/delete event");
                         observer.handleWatcherThreadEvents(kind.toString(), fileName);
                     }
-                    }
                 }
+            }
 
             // reset key and remove from set if directory no longer accessible
             boolean valid = key.reset();
