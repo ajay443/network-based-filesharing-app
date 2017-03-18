@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import cs550.pa3.helpers.Host;
 import cs550.pa3.helpers.PeerFile;
+import cs550.pa3.helpers.PeerFiles;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -28,11 +29,16 @@ public class JsonPeerFileProcessorTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String json = mapper.writeValueAsString(files);
-        System.out.println(json);
+        //System.out.println(json);
         String content = new String(Files.readAllBytes(Paths.get("PeerDownloads/Cache/files.metadata.json")));
         // Util.error(content);
         PeerFile newFile = mapper.readValue(content, PeerFile.class);
-         System.out.println(newFile.getLastUpdated().toString());
+        System.out.println(newFile.getLastUpdated().toString());
+        PeerFiles p = new PeerFiles(files);
+        json = mapper.writeValueAsString(p);
+        System.out.println(json);
+        content = new String(Files.readAllBytes(Paths.get("PeerDownloads/Master/files.metadata.json")));
+        PeerFiles fs = mapper.readValue(content, PeerFiles.class);
 
     }
 }
