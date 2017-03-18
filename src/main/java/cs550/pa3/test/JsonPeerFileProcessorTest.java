@@ -32,7 +32,7 @@ public class JsonPeerFileProcessorTest {
         String content = new String(Files.readAllBytes(Paths.get("PeerDownloads/Cache/files.metadata.json")));
         // Util.error(content);
         PeerFile newFile = mapper.readValue(content, PeerFile.class);
-         System.out.println(newFile.getName());
+         System.out.println(newFile.getLastUpdated().toString());
 
     }
 }
