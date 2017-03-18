@@ -9,7 +9,6 @@
 package cs550.pa3;
 
 
-import cs550.pa3.helpers.Constants;
 import cs550.pa3.helpers.Util;
 import cs550.pa3.processor.PeerImpl;
 
@@ -38,5 +37,12 @@ public class ApplicationRunner {
 
   public static void main(String[] args) {
     new ApplicationRunner();
+    // TODO - write the data to file metadata-json
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
+        System.out.println("Running Shutdown Hook");
+      }
+    });
+
   }
 }
