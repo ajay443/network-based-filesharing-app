@@ -52,6 +52,7 @@ class WatcherThread extends Thread{
     }
     */
     public WatcherThread(PeerImpl observer, String folderName ){
+        System.out.println("Inside constructor " + folderName);
         try {
             this.observer = observer;
             this.folderName = folderName;
@@ -102,9 +103,11 @@ class WatcherThread extends Thread{
                 Socket sock = null;
                 // if directory is created, and watching recursively, then register it and its sub-directories
                 if (kind == ENTRY_DELETE )  {
-                    observer.handleBroadCastEvents(name.toString());
+                    System.out.println("Forwarding delete event");
+                    observer.handleBroadCastEvents(null, name.toString(),2,0,false);
                 }else if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY){
-                    observer.handleBroadCastEvents(name.toString());
+                    System.out.println("Forwarding create/modify event");
+                    observer.handleBroadCastEvents(null,name.toString(),2,0,false);
                     }
                 }
 

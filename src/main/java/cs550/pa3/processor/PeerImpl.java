@@ -28,10 +28,11 @@ public class PeerImpl implements Peer {
         private Thread  serverThread;
         private Thread cleanUpThread;
         private Thread pullThread;
-        private WatchFolder watchThread;
+        private WatcherThread watchThread;
         private Socket new_socket;
         private HashMap seenMessages;
         private HashMap seenQueryHitMessages;
+        private Set seenInvalidationHitMessages;
         private List<Host> neighbours;
         private Host host;
         public  ArrayList<PeerFile> peerFiles;
@@ -39,7 +40,9 @@ public class PeerImpl implements Peer {
         public PeerImpl() {
                 this.seenMessages = new HashMap<String, List<String>>();
                 this.seenQueryHitMessages = new HashMap<String, List<String>>();
-                neighbours = new ArrayList<Host>();
+                this.neighbours = new ArrayList<Host>();
+                this.seenInvalidationHitMessages = new HashSet();
+
                 thrash = new ArrayList<String>();
                 peerFiles = new ArrayList<PeerFile>();
         }
@@ -86,7 +89,7 @@ public class PeerImpl implements Peer {
                         PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
                         //BufferedReader in = new BufferedReader(new InputStreamReader(peerClientSocket.getInputStream()));
                         InputStream in = peerClientSocket.getInputStream();
-                        OutputStream fout = new FileOutputStream("sharedFolder" + this.host.address() + "/" + fileName);
+                        OutputStream fout = new FileOutputStream(Util.getValue(Constants.CACHED_FOLDER,Constants.PEER_PROPERTIES_FILE) + "/" + fileName);
 
                         out.println(Constants.DOWNLOAD + " " + fileName);
                         String message = "";
@@ -236,17 +239,18 @@ public class PeerImpl implements Peer {
         @Override
         public void initConfig(String hostName, int port) {
                 host = new Host(hostName, port);
-                readFromFile(port + "peer.properties");
+                readFromFile(Constants.PEER_PROPERTIES_FILE);
                 displayPeerInfo();
-                Util.createFolder(Util.getValue("master.folderName"));
-                Util.createFolder(Util.getValue("cache.folderName"));
+                Util.createFolder(Util.getValue(Constants.MASTER_FOLDER,Constants.PEER_PROPERTIES_FILE));
+                Util.createFolder(Util.getValue(Constants.CACHED_FOLDER,Constants.PEER_PROPERTIES_FILE));
+                System.out.println("After Create Folder");
                 serverThread = new Thread() {
                         public void run() {
                                 runPeerServer();
                         }
                 };
                 clientThread = new Thread() {
-                        public void run() {
+                        public void run(){
                                 runPeerClient();
                         }
                 };
@@ -260,11 +264,12 @@ public class PeerImpl implements Peer {
                                 runPullProcess();
                         }
                 };
+                watchThread = new WatcherThread(this,Util.getValue(Constants.MASTER_FOLDER,Constants.PEER_PROPERTIES_FILE));
                 serverThread.start();
                 clientThread.start();
                 cleanUpThread.start();
-                pullThread.start();
-                //watchThread = new WatchFolder(this,Util.getValue("master.folderName"));
+                //pullThread.start();
+                 watchThread.start();
         }
 
         public void cleanUpSeenMessages() {
@@ -289,14 +294,21 @@ public class PeerImpl implements Peer {
          * 2. If not Issue Download Request
          */
         @Override
-        public void handleBroadCastEvents(String changedFileName) {
+        public void handleBroadCastEvents(String messageId, String changedFileName, int fileVersion, int ttl, boolean isForward) {
             Socket sock = null;
+            if(!isForward){
+                messageId = host.address() + "_" + Integer.toString(++messageID);
+                ttl = 7;
+            }
             for(Host h : neighbours){
                 try {
                     sock = new Socket(h.getUrl(), h.getPort());
                     PrintWriter out = new PrintWriter(sock.getOutputStream(),true);
-                    out.println("INVALIDATION " + host.address() + " " + Integer.toString(++messageID) + changedFileName);
+                    out.println(Constants.INVALIDATION + " " + messageId  + " " + changedFileName + " " + Integer.toString(fileVersion) + " " + Integer.toString(ttl));
                     sock.close();
+                    if (!seenInvalidationHitMessages.contains(messageId)) {
+                        this.seenInvalidationHitMessages.add(messageId);
+                    }
                 }
                 catch(Exception e){
                     e.printStackTrace();
@@ -310,6 +322,10 @@ public class PeerImpl implements Peer {
             }
 
         }
+
+    public void handleForwardBroadCastEvents(String messageId, String changedFileName, int fileVersion, int ttl){
+        handleBroadCastEvents(messageId, changedFileName, fileVersion, ttl, true);
+    }
 
         /**
          * 1. Create a Pull->thread and let that run in background when peerserver starts.
@@ -331,7 +347,7 @@ public class PeerImpl implements Peer {
                 String params[] = input.split(" ");
                 // TODO - Make it simple to read by using Switch Case and Enum datatype
                 if (params[0].equals(Constants.DOWNLOAD)) {
-                        Util.downloadFile(Util.getValue("master.folderName","peer.properties") + "/" + params[1], socket);
+                        Util.downloadFile(Util.getValue(Constants.MASTER_FOLDER,Constants.PEER_PROPERTIES_FILE) + "/" + params[1], socket);
                 } else if (params[0].equals(Constants.QUERY)) {
                         //DisplaySeenMessages(params[0]);
                         int ttl = Integer.valueOf(params[4]);
@@ -344,7 +360,7 @@ public class PeerImpl implements Peer {
                                 addresses.add(params[3]);
                                 this.seenMessages.put(params[1], addresses);
                                 forwardQuery(params[1], params[2], ttl);
-                                if (Util.searchInMyFileDB(this.host.address(), params[2]))
+                                if (Util.searchInMaster(params[2]) || Util.searchInCached(params[2],0,null,false))
                                         returnQueryHit(params[1], params[2], host.address(), 7, false);
                         } else {
                                 List ports = (List) seenMessages.get(params[1]);
@@ -386,8 +402,18 @@ public class PeerImpl implements Peer {
                                 Util.print("Not forwarding " + input);
                         }
                 }
-                else if (params[0].equals("INVALIDATION")) {
-                    //
+                else if (params[0].equals(Constants.INVALIDATION)) {
+                    int ttl = Integer.valueOf(params[4]);
+                    ttl = ttl - 1;
+
+                    //not forwarding already seen message
+                    if (!seenInvalidationHitMessages.contains(params[1]) && ttl > 0) {
+
+                        handleForwardBroadCastEvents(params[1], params[2],Integer.parseInt(params[3]), ttl);
+                        Util.searchInCached(params[2],Integer.parseInt(params[3]),params[1].split("_")[0],true);
+                    } else {
+                        Util.print("Not forwarding " + input);
+                    }
                 }
         }
 
@@ -407,7 +433,7 @@ public class PeerImpl implements Peer {
         }
 
         void readFromFile(String path) {
-                String neighbors[] = Util.getValue("peer.neighbors","peer.properties").split(",");
+                String neighbors[] = Util.getValue(Constants.PEER_NEIGHBORS, Constants.PEER_PROPERTIES_FILE).split(",");
                 for (String neighbour: neighbors) {
                         String params[] = neighbour.split(":");
                         neighbours.add(new Host(params[0],Integer.parseInt(params[1])));

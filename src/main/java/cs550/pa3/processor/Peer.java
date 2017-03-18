@@ -25,7 +25,7 @@ public interface Peer {
 
     void initConfig(String hostName, int port);
 
-    void handleBroadCastEvents(String changedFileName);
+    void handleBroadCastEvents(String msgid, String changedFileName, int newFileVersion, int ttl, boolean isForward);
 
     void runPullProcess();
 

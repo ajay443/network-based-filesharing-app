@@ -69,15 +69,117 @@ public  class Util {
     }
 
 
-    public static boolean searchInMyFileDB(String folderSuffix, String fileName) {
+    public static boolean searchInMaster( String fileName) {
         boolean isFound = false;
-        File file = new File(Util.getValue("master.foldername","peer.properties") + "/" + fileName);
+        File file = new File(Util.getValue(Constants.MASTER_FOLDER,Constants.PEER_PROPERTIES_FILE) + "/" + fileName);
         if (file.exists()) {
             isFound = true;
         }
         return isFound;
     }
 
+    public static boolean searchInCached(String fileName, int version, String originServer, boolean validateVersion){
+
+        //BufferedReader br = null;
+        RandomAccessFile raf = null;
+
+        try {
+            //createFolder(Constants.INDEX_FILE_NAME.split("/")[0]);
+
+            //File file = new File("downloadlist.txt");
+            raf = new RandomAccessFile(Util.getValue(Constants.DOWNLOADED_LIST,Constants.PEER_PROPERTIES_FILE), "rw");
+
+            // if file doesnt exists, then create it
+            if (raf == null) {
+                //file.createNewFile();
+                return false;
+            }
+
+            //br = new BufferedReader(new FileReader(file));
+            String txt = null;
+
+            while ((txt = raf.readLine()) != null) {
+                System.out.println("file content : " + txt);
+                if(txt.contains(fileName)){
+                    String fileAttrs[] = txt.split(" ");
+                    if(!validateVersion && fileAttrs[3].equals("valid")){
+                        return true;
+                    }
+                    //System.out.println(txt+"\n");
+                    if(validateVersion) {
+                        if ((fileAttrs[2].equals(originServer)) && (version > Integer.parseInt(fileAttrs[1])) && (fileAttrs[3].equals("valid"))) {
+                            //markFileInvalid(fileName, originServer);
+                            //FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+                            //BufferedWriter bw = new BufferedWriter(fw);
+                            txt = txt.replace("valid", "invalid");
+                            System.out.println("Changed content : " + txt);
+                            synchronized (Util.class){
+                                raf.writeChars(txt);
+                            }
+                            return false;
+                        } else if (fileAttrs[3] == "valid" && originServer.equals(fileAttrs[2])) {
+                            return true;
+                        }
+                    }
+
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                raf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    /*
+    private static void markFileInvalid(String fileName, String originServer) {
+        BufferedWriter bw = null;
+        FileWriter fw = null;
+
+        try {
+
+            File file = new File("downloadlist.txt");
+            //createFolder(Constants.INDEX_FILE_NAME.split("/")[0]);
+
+            // if file doesnt exists, then create itportRequested
+            /*
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            // true = append file
+            fw = new FileWriter(file.getAbsoluteFile(), true);
+            bw = new BufferedWriter(fw);
+
+            bw.write(data);
+            return true;
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            return false;
+
+        } finally {
+            try {
+                if (bw != null)
+                    bw.close();
+
+                if (fw != null)
+                    fw.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+        }
+    }
+     */
     public static String getValue(String key) {
 
         Properties prop = new Properties();
@@ -169,11 +271,11 @@ public  class Util {
 
     public static void main(String[] args) {
         Util.print("Hello World");
-        System.out.println(Util.getValue("master.folderName"));
+        System.out.println(Util.getValue(Constants.MASTER_FOLDER));
         System.out.println(Util.getValue("push.switch"));
         System.out.println(Util.getValue("pull.switch"));
         System.out.println(Util.getValue("pull.TTR"));
-        System.out.println(Util.getValue("cache.folderName "));
+        System.out.println(Util.getValue(Constants.CACHED_FOLDER));
         System.out.println(Util.getValue("debug"));
     }
 

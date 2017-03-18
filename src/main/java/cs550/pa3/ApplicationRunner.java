@@ -15,10 +15,9 @@ import cs550.pa3.processor.PeerImpl;
 import java.util.Scanner;
 
 public class ApplicationRunner {
+    PeerImpl peer = new PeerImpl();
+    public ApplicationRunner() {
 
-  PeerImpl peer = new PeerImpl();
-
-  public ApplicationRunner() {
     Scanner in = new Scanner(System.in);
     System.out.print("Default config ? (yes/no) or (y/n): ");
     String choice = in.next();
@@ -36,13 +35,15 @@ public class ApplicationRunner {
   }
 
   public static void main(String[] args) {
-    new ApplicationRunner();
-    // TODO - write the data to file metadata-json
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      public void run() {
-        System.out.println("Running Shutdown Hook");
-      }
-    });
+
+      new ApplicationRunner();
+      // TODO - write the data to file metadata-json
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+          public void run() {
+              System.out.println("Running Shutdown Hook");
+          }
+      });
 
   }
-}
+  }
+
