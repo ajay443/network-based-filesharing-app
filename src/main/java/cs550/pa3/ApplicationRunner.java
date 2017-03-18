@@ -9,7 +9,6 @@
 package cs550.pa3;
 
 
-import cs550.pa3.helpers.Constants;
 import cs550.pa3.helpers.Util;
 import cs550.pa3.processor.PeerImpl;
 
@@ -36,23 +35,15 @@ public class ApplicationRunner {
   }
 
   public static void main(String[] args) {
-        /*
-    PeerImpl peer = new PeerImpl();
-    Scanner in = new Scanner(System.in);
-    System.out.print("Default config ? (yes/no) or (y/n): ");
-    String choice = in.next();
 
-    if (choice.equalsIgnoreCase("yes") ||
-            choice.equalsIgnoreCase("y")) {
-      peer.initConfig(Util.getValue("peer.host", "peer.properties"), Integer.parseInt(Util.getValue("peer.port", "peer.properties")));
-    } else {
-      System.out.println("Enter Host Name Example: 'localhost' or 127.0.0.1 ");
-      String hostName = in.next();
-      System.out.println("Port address  : ");
-      int port = in.nextInt();
-      peer.initConfig(hostName, port);
-      */
       new ApplicationRunner();
-    }
+      // TODO - write the data to file metadata-json
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+          public void run() {
+              System.out.println("Running Shutdown Hook");
+          }
+      });
+
+  }
   }
 

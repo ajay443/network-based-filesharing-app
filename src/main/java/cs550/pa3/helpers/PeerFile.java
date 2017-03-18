@@ -8,6 +8,11 @@
 
 package cs550.pa3.helpers;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+
 import java.time.LocalDateTime;
 
 public class PeerFile {
@@ -16,6 +21,9 @@ public class PeerFile {
     String name;
     int TTR;
     Host fromAddress;
+
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     LocalDateTime lastUpdated;
 
     public PeerFile(boolean original, String name) {

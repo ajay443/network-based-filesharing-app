@@ -15,6 +15,10 @@
  */
 package cs550.pa3.helpers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Date;
@@ -241,6 +245,28 @@ public  class Util {
         System.err.println(errorMessage);
         System.err.println("*******************************************************");
         System.exit(-1);
+    }
+
+    public static String getJson(Object obj){
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        try {
+            return  mapper.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static Object toObjectFromJson(String json, Class classObject){
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        try {
+            return mapper.readValue(json,classObject);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void main(String[] args) {
