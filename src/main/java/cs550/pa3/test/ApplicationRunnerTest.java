@@ -25,7 +25,7 @@ public class ApplicationRunnerTest {
     @Test
     public void main() throws Exception {
 
-        String input = "n\n 121.2.2.2 \n 3333";
+        String input = "n\nlocalhost\n52001\n1";
         InputStream in = new ByteArrayInputStream(input.getBytes());
         System.setIn(in);
         new ApplicationRunner();
