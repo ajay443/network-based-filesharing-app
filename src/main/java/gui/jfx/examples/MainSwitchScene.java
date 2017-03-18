@@ -48,7 +48,7 @@ public class MainSwitchScene  extends Application{
         VBox layout2 = new VBox(20);
         layout2.getChildren().addAll(button1);
         scene2 = new Scene(layout2,200,300);
-        window.setTitle("Test");
+        window.setTitle("JsonPeerFileProcessorTest");
         indexServer.setOnAction(e -> window.setScene(scene1));*/
 
 

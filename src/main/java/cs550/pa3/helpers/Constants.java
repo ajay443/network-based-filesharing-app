@@ -31,9 +31,9 @@ public  class Constants {
     public static final String QUERYHIT = "queryhit";
     public static final String DOWNLOAD = "download";
     public static final String INVALIDATION = "INVALIDATION";
-    public static final String PEER_PROPERTIES_FILE = "peer3.properties";
+    public static final String PEER_PROPERTIES_FILE = "peer.properties";
     public static final String MASTER_FOLDER = "master.foldername";
-    public static final String CACHED_FOLDER = "cached.foldername";
+    public static final String CACHED_FOLDER = "cache.foldername";
     public static final String PEER_NEIGHBORS = "peer.neighbors";
     public static final String DOWNLOADED_LIST = "downloaded.folderlist";
 

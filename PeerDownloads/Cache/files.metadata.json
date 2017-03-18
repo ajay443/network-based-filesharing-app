@@ -1,0 +1,9 @@
+{
+  "original" : false,
+  "name" : "Ajay Rocks mountain2.jpg",
+  "fromAddress" : {
+    "url" : "localhost",
+    "port" : 9999
+  },
+  "ttr" : 1
+}

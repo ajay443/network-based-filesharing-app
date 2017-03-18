@@ -32,6 +32,7 @@ public  class Util {
      * @param rootDirName, path of the directory
      */
     public static void createFolder(String rootDirName){
+        Util.print("Creating folder "+rootDirName);
         try {
             File file = new File(rootDirName);
             if (!file.exists()) {
@@ -233,6 +234,13 @@ public  class Util {
         }catch(InterruptedException e){
             Util.print(e.getMessage());
         }
+    }
+
+    public static void error(String errorMessage){
+        System.err.println("*******************************************************");
+        System.err.println(errorMessage);
+        System.err.println("*******************************************************");
+        System.exit(-1);
     }
 
     public static void main(String[] args) {
