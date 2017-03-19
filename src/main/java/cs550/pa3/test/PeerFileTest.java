@@ -8,14 +8,14 @@
 
 package cs550.pa3.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import cs550.pa3.helpers.Host;
 import cs550.pa3.helpers.PeerFile;
 import cs550.pa3.helpers.Util;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public  class PeerFileTest {
 
