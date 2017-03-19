@@ -9,3 +9,5 @@ fi
 mkdir -p pa3_test/test1
 mvn clean
 mvn package
+cp target/File*.jar pa3_test/test1
+java -jar pa3_test/test1/FileSharingSystem-jar-with-dependencies.jar

@@ -8,15 +8,9 @@
 
 package cs550.pa3.helpers;
 
-/**
- * Created by Ajay on 2/26/17.
- */
 public class Host {
     private String url;
     private int port;
-
-    public Host() {
-    }
 
     public Host(String url, int port) {
         this.url = url;
@@ -43,4 +37,9 @@ public class Host {
         return url+":"+port;
     }
 
+    public String getHashCode(){
+        long hash = (url+""+port).hashCode();
+        if(hash<0) return "N"+Math.abs(hash);
+        else return "P"+Math.abs(hash);
+    }
 }
