@@ -20,3 +20,4 @@ sharedFolder*
 !/PeerDownloads/Cache/
 !/PeerDownloads/Cache/files.metadata.json
 PeerDownloads/
+/FileSharingSystem.iml
