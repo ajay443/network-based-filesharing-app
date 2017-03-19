@@ -127,7 +127,8 @@ public class PeerImpl implements Peer {
 
         private void registry(String fileName, Host host, int ttr, int version) {
             // TODO when you download some thing from the remote peer, register it
-            downloadedFiles.add(new PeerFile(false, fileName,ttr, host, version));
+            if(!downloadedFiles.fileExists(fileName))
+                downloadedFiles.add(new PeerFile(false, fileName,ttr, host, version));
          }
 
 
@@ -237,6 +238,15 @@ public class PeerImpl implements Peer {
                                                 displaySeenMessages(Constants.QUERYHIT);
                                                 break;
                                         case 5:
+                                                displayDownloadedFilesInfo();
+                                                break;
+                                        case 6:
+                                                Util.println("Enter filename : \n");
+                                                fileName = in.next();
+                                                Host h = downloadedFiles.getFileMetadata(fileName).getFromAddress();
+                                                download(fileName,h.getUrl(),h.getPort());
+                                                break;
+                                        case 7:
                                                 System.exit(0);
                                         default:
                                                 System.exit(0);
@@ -587,7 +597,17 @@ public class PeerImpl implements Peer {
         public PeerFiles getMyfiles(){
             return myfiles;
         }
+
         public PeerFiles getDownloadedFiles(){
             return downloadedFiles;
         }
+
+        public void displayDownloadedFilesInfo(){
+            HashMap<String,PeerFile> hm = downloadedFiles.getFilesMetaData();
+            Util.println("Name | version | last update time | ");
+            for (PeerFile file : hm.values()){
+                Util.println(file.getName() + " " + file.getVersion() + " " + file.getLastUpdated().toString() + " " + file.getFromAddress().address() + " " + file.checkIsStale());
+            }
+        }
+
 }
