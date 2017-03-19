@@ -9,7 +9,10 @@
 package cs550.pa3.processor;
 
 import cs550.pa3.helpers.PeerFile;
+import cs550.pa3.helpers.PeerFiles;
 import cs550.pa3.helpers.Util;
+
+import java.util.HashMap;
 
 public class Pull  implements Event {
 
@@ -26,10 +29,17 @@ public class Pull  implements Event {
 
     public void pull() {
         if (Util.getValue("pull.switch").equals("on")) {
-            if (peerImpl == null || peerImpl.peerFiles == null) return;
-            for (PeerFile f : peerImpl.peerFiles) {
-                if (f.fileExpired()) {
-                    peerImpl.pullFile(f);
+            //if (peerImpl == null || peerImpl.peerFiles == null) return;
+            //changed here
+            if(peerImpl == null)return;
+            else {
+                PeerFiles files = peerImpl.getDownloadedFiles();
+                if(files == null)return;
+                HashMap<String, PeerFile> peerFiles = files.getFilesMetaData();
+                for (PeerFile f : peerFiles.values()) {
+                    if (f.fileExpired()) {
+                        peerImpl.pullFile(f);
+                    }
                 }
             }
         }

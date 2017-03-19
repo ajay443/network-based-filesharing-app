@@ -21,10 +21,14 @@ public class PeerFile {
     String name;
     int TTR;
     Host fromAddress;
+    boolean isStale;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     LocalDateTime lastUpdated;
+
+    public PeerFile() {
+    }
 
     public PeerFile(boolean original, String name) {
         this.original = original;
@@ -35,12 +39,14 @@ public class PeerFile {
 
     }
 
-    public PeerFile(boolean original, String name, int TTR, Host address) {
+    public PeerFile(boolean original, String name, int TTR, Host address, int version) {
         this.original = original;
         this.name = name;
         this.TTR = TTR;
         this.fromAddress = address;
         this.lastUpdated = LocalDateTime.now();
+        this.version = version;
+        this.isStale = false;
     }
 
     public boolean isOriginal() {
@@ -100,6 +106,13 @@ public class PeerFile {
         this.lastUpdated = lastUpdated;
     }
 
-    public PeerFile() {
+    public boolean checkIsStale(){
+        return isStale;
     }
+    public void setIsStale(boolean isStale){
+        this.isStale = isStale;
+    }
+
+
+
 }

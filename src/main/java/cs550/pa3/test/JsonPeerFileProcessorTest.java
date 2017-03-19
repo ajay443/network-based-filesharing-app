@@ -18,15 +18,16 @@ import cs550.pa3.helpers.Util;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class JsonPeerFileProcessorTest {
     public static void main(String[] args) throws Exception {
-        List<PeerFile> files = new ArrayList<PeerFile>();
-        PeerFile file = new PeerFile(false,"mountain.jpg",1,new Host("localhost",9999));
-        files.add(file);
-        file = new PeerFile(false,"mountain2.jpg",1, new Host("localhost",9999));
-        files.add(file);
+        HashMap<String, PeerFile> files = new HashMap<String, PeerFile>();//changed here
+        PeerFile file = new PeerFile(false,"mountain.jpg",1,new Host("localhost",9999),0);
+        files.put("mountain.jpg",file);//changed here
+        file = new PeerFile(false,"mountain2.jpg",1, new Host("localhost",9999),0);
+        files.put("mountain2.jpg",file);//changed here
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String json = mapper.writeValueAsString(files);
@@ -51,7 +52,7 @@ public class JsonPeerFileProcessorTest {
          */
         PeerFiles fileList = (PeerFiles) Util.toObjectFromJson(content,PeerFiles.class);
 
-        for(PeerFile f : fileList.getFilesMetaData()){
+        for(PeerFile f : fileList.getFilesMetaData().values()){//changed here
             Util.print("f"+f.getName());
         }
     }

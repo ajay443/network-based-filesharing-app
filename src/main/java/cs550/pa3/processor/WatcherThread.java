@@ -102,12 +102,12 @@ class WatcherThread extends Thread{
 
                 Socket sock = null;
                 // if directory is created, and watching recursively, then register it and its sub-directories
-                if (kind == ENTRY_DELETE )  {
-                    System.out.println("Forwarding delete event");
-                    observer.handleBroadCastEvents(null, name.toString(),2,0,false);
-                }else if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY){
-                    System.out.println("Forwarding create/modify event");
-                    observer.handleBroadCastEvents(null,name.toString(),2,0,false);
+                if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE ){
+                    String fileName = name.toString();
+                    if(!fileName.contains("_jb_")) {
+                        System.out.println("Forwarding create/modify/delete event");
+                        observer.handleWatcherThreadEvents(kind.toString(), fileName);
+                    }
                     }
                 }
 

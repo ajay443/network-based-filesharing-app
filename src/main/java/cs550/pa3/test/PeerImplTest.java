@@ -37,7 +37,8 @@ public class PeerImplTest {
     @Test
     public void pullFile() throws Exception {
         PeerImpl peer = new PeerImpl();
-        peer.peerFiles.add(new PeerFile(false,"stars.jpg",3,new Host("localhost",9999)));
+        //changed here
+        peer.getDownloadedFiles().add(new PeerFile(false,"stars.jpg",3,new Host("localhost",9999),0));
         peer.runPullProcess();
 
     }

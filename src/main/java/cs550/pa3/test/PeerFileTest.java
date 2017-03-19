@@ -27,7 +27,7 @@ public  class PeerFileTest {
     @Before
     public void setUp() throws Exception {
         dummyMasterFile = new PeerFile(true,"foo-original.txt");
-        dummyCachedFile = new PeerFile(false,"foo-cache.txt", 10, new Host("localhost",5555));
+        dummyCachedFile = new PeerFile(false,"foo-cache.txt", 10, new Host("localhost",5555),0);
     }
 
     @After

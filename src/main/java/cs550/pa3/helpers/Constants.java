@@ -31,11 +31,12 @@ public  class Constants {
     public static final String QUERYHIT = "queryhit";
     public static final String DOWNLOAD = "download";
     public static final String INVALIDATION = "INVALIDATION";
-    public static final String PEER_PROPERTIES_FILE = "peer.properties";
+    public static final String PEER_PROPERTIES_FILE = "peer3.properties";
     public static final String MASTER_FOLDER = "master.foldername";
     public static final String CACHED_FOLDER = "cache.foldername";
     public static final String PEER_NEIGHBORS = "peer.neighbors";
     public static final String DOWNLOADED_LIST = "downloaded.folderlist";
+    public static final String PULL_TTR = "pull.TTR";
 
 
     public static final String DISPLAY_MENU = "\n1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Exit\nEnter your choice number";

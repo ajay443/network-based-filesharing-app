@@ -30,7 +30,6 @@ import java.util.Properties;
  */
 public  class Util {
 
-
     /**
      * Creates a folder is not already existing
      * @param rootDirName, path of the directory
@@ -51,7 +50,6 @@ public  class Util {
 
     }
 
-
     public static void downloadFile(String filePath,Socket socket){
         File f = new File(filePath);
         try(
@@ -63,11 +61,12 @@ public  class Util {
             while ((count = fip.read(b)) > 0) {
                 out.write(b, 0, count);
             }
+            //fetch the file details from peerFiles object
+            //out.write("fileVersion");//send file attributes : version, origin server, TTR and last modified time
         } catch(Exception e){
             e.printStackTrace();
         }
     }
-
 
     public static boolean searchInMaster( String fileName) {
         boolean isFound = false;
@@ -138,48 +137,6 @@ public  class Util {
         return false;
     }
 
-    /*
-    private static void markFileInvalid(String fileName, String originServer) {
-        BufferedWriter bw = null;
-        FileWriter fw = null;
-
-        try {
-
-            File file = new File("downloadlist.txt");
-            //createFolder(Constants.INDEX_FILE_NAME.split("/")[0]);
-
-            // if file doesnt exists, then create itportRequested
-            /*
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            // true = append file
-            fw = new FileWriter(file.getAbsoluteFile(), true);
-            bw = new BufferedWriter(fw);
-
-            bw.write(data);
-            return true;
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-            return false;
-
-        } finally {
-            try {
-                if (bw != null)
-                    bw.close();
-
-                if (fw != null)
-                    fw.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-
-        }
-    }
-     */
     public static String getValue(String key) {
 
         Properties prop = new Properties();
@@ -221,7 +178,6 @@ public  class Util {
         return filePath;
 
     }
-
 
     public static void print(String input){
         if(Util.getValue("debug").equals("on"))
@@ -278,6 +234,4 @@ public  class Util {
         System.out.println(Util.getValue(Constants.CACHED_FOLDER));
         System.out.println(Util.getValue("debug"));
     }
-
-
 }
