@@ -21,3 +21,4 @@ sharedFolder*
 !/PeerDownloads/Cache/files.metadata.json
 PeerDownloads/
 /FileSharingSystem.iml
+/pa3_test/*
