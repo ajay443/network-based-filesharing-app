@@ -22,3 +22,6 @@ sharedFolder*
 PeerDownloads/
 /FileSharingSystem.iml
 /pa3_test/*
+config-*
+pa3_test/
+test/

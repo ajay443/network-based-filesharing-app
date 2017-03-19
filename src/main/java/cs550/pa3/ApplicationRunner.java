@@ -15,16 +15,19 @@ import cs550.pa3.processor.PeerImpl;
 import java.util.Scanner;
 
 public class ApplicationRunner {
-    PeerImpl peer = new PeerImpl();
-    public ApplicationRunner() {
+
+  PeerImpl peer = new PeerImpl();
+
+  public ApplicationRunner() {
 
     Scanner in = new Scanner(System.in);
     System.out.print("Default config ? (yes/no) or (y/n): ");
     String choice = in.next();
 
     if (choice.equalsIgnoreCase("yes") ||
-            choice.equalsIgnoreCase("y")) {
-      peer.initConfig(Util.getValue("peer.host","peer.properties"), Integer.parseInt(Util.getValue("peer.port","peer.properties")));
+        choice.equalsIgnoreCase("y")) {
+      peer.initConfig(Util.getValue("peer.host", "peer.properties"),
+          Integer.parseInt(Util.getValue("peer.port", "peer.properties")));
     } else {
       System.out.println("Enter Host Name Example: 'localhost' or 127.0.0.1 ");
       String hostName = in.next();
@@ -34,16 +37,24 @@ public class ApplicationRunner {
     }
   }
 
+
+  public ApplicationRunner(String [] args) {
+        peer.initConfig(args[0], Integer.parseInt(args[1]));
+    }
+
   public static void main(String[] args) {
-
+    if (args.length > 0) {
+      new ApplicationRunner(args);
+    } else {
       new ApplicationRunner();
-      // TODO - write the data to file metadata-json
-      Runtime.getRuntime().addShutdownHook(new Thread() {
-          public void run() {
-              System.out.println("Running Shutdown Hook");
-          }
-      });
+    }
+    // TODO - write the data to file metadata-json
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
+        System.out.println("Running Shutdown Hook");
+      }
+    });
 
   }
-  }
+}
 

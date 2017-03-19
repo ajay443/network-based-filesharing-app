@@ -16,16 +16,20 @@
  */
 package cs550.pa3.processor;
 
-import cs550.pa1.helpers.Constants;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
+import cs550.pa3.helpers.Util;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * Created by Ajay on 1/28/17.
@@ -52,7 +56,7 @@ class WatcherThread extends Thread{
     }
     */
     public WatcherThread(PeerImpl observer, String folderName ){
-        System.out.println("Inside constructor " + folderName);
+        Util.print("Watching this folder "+folderName);
         try {
             this.observer = observer;
             this.folderName = folderName;

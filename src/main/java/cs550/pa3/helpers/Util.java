@@ -39,7 +39,7 @@ public  class Util {
         try {
             File file = new File(rootDirName);
             if (!file.exists()) {
-                if (file.mkdir()) {
+                if (file.mkdirs()) {
                 } else {
                     System.out.println("Failed to create directory!");
                 }
@@ -179,6 +179,26 @@ public  class Util {
 
     }
 
+    public static String getValue(String key, FileInputStream fromFile) {
+
+        Properties prop = new Properties();
+        String filePath = "";
+
+        try {
+
+            InputStream inputStream = fromFile;
+
+            prop.load(inputStream);
+            filePath = prop.getProperty(key);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return filePath;
+
+    }
+
     public static void print(String input){
         if(Util.getValue("debug").equals("on"))
             System.out.println(new Date().toString()+" >>>> PA3 - Debug Information ::  "+ input);
@@ -227,11 +247,17 @@ public  class Util {
 
     public static void main(String[] args) {
         Util.print("Hello World");
+        Util.createFolder("test/test");
         System.out.println(Util.getValue(Constants.MASTER_FOLDER));
         System.out.println(Util.getValue("push.switch"));
         System.out.println(Util.getValue("pull.switch"));
         System.out.println(Util.getValue("pull.TTR"));
         System.out.println(Util.getValue(Constants.CACHED_FOLDER));
         System.out.println(Util.getValue("debug"));
+        try {
+            System.out.print("Value of TTR "+Util.getValue("pull.TTR",new FileInputStream("peer.properties")));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }
