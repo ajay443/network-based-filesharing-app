@@ -43,6 +43,7 @@ public  class Constants {
     public static final int MINUS_ONE = -1;
     public static final String TEMP_FILE="__temp.json";
     public static final String PULL="pull";
+    public static final String POLL="poll";
     public static final String SPACE=" ";
 
 

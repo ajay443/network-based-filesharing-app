@@ -423,15 +423,57 @@ public class PeerImpl implements Peer {
 
     }
   }
-  // todo synchronized check p
+
+  private void sendPullRequest(String fileName,String address){
+    PeerFile file =  peerFiles.getFileMetadata(fileName);
+    file.setIsStale(true);
+    file.setOriginal(false);
+
+    Socket peerClientSocket = null;
+    try {
+      peerClientSocket = new Socket(address.split(":")[0], Integer.parseInt(address.split(":")[1]));
+      PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
+      out.println(Constants.PULL + " " + file.getName()+" "+Util.getJson(file));
+      out.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        peerClientSocket.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+  }
+
+  private void parsePullRequest(String input,String fileName) {
+    try{
+      PeerFile file = (PeerFile) Util.toObjectFromJson(input.split(Constants.SPACE,3)[2],PeerFile.class);
+      synchronized (peerFiles){
+        peerFiles.getFilesMetaData().remove(fileName);
+        peerFiles.getFilesMetaData().put(fileName,file);
+      }
+      Util.print("File Meta Data updated from Pull request, press 5 to see the latest meta data");
+    }catch (Exception e){
+      Util.println(e.getMessage()+"\nException Occurred while parsing the poll request\n"+input);
+    }
+
+  }
+
+  // todo synchronized ch5eck p
   private void processInput(String input, Socket socket) {
     Util.print("Received Message : " + input);
     String params[] = input.split(" ");
-    if(params[0].equals(Constants.PULL)){
+    if(params[0].equals(Constants.POLL)){
       Util.print("Pull Event Happened");
-      Util.printHeader();
-      Util.print(input.split(Constants.SPACE,3)[2]);
-      Util.printFooter();
+      sendPullRequest(params[1],params[2]);
+      return;
+    }
+    if(params[0].equals(Constants.PULL)){
+      Util.print("POLL Event Happened");
+      parsePullRequest(input,params[1]);
+      return;
     }
     // TODO - Make it simple to read by using Switch Case and Enum datatype
     if (params[0].equals(Constants.DOWNLOAD) || params[0].equals(Constants.DOWNLOAD_METADATA) ) {
@@ -522,6 +564,8 @@ public class PeerImpl implements Peer {
     }
   }
 
+
+
   public void displaySeenMessages(String type) {
     Util.print("Displaying seen " + type + " messages");
     Set set = null;
@@ -555,13 +599,13 @@ public class PeerImpl implements Peer {
     }
   }
 
-  public void pullFile(PeerFile f) {
+  public void pollRequest(PeerFile f) {
     Socket peerClientSocket = null;
     try {
       Host from = f.getFromAddress();
       peerClientSocket = new Socket(from.getUrl(), from.getPort());
       PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
-      out.println(Constants.PULL + " " + f.getName()+" "+Util.getJson(f));
+      out.println(Constants.POLL + " " + f.getName()+" "+this.host.address());
       out.close();
     } catch (Exception e) {
       e.printStackTrace();
@@ -577,7 +621,7 @@ public class PeerImpl implements Peer {
   public void handleWatcherThreadEvents(String eventType, String fileName) {
     Util.print("Event = " + eventType + " file = " + fileName);
     if (eventType.equals("ENTRY_CREATE")) {
-      peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 10, host,false,LocalDateTime.now()));
+      peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 90, host,false,LocalDateTime.now()));
       Util.print(Util.getJson(peerFiles));
     } else if (eventType.equals("ENTRY_MODIFY")) {
       PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
