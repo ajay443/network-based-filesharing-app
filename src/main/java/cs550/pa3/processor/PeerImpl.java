@@ -453,7 +453,7 @@ public class PeerImpl implements Peer {
 
   private void parsePullRequest(String input,String fileName) {
     try{
-      PeerFile file = (PeerFile) Util.toObjectFromJson(input.split(Constants.SPACE,3)[2],PeerFile.class);
+      PeerFile file = (PeerFile) Util.toObjectFromJson(input.split(" ",3)[2],PeerFile.class);
       synchronized (peerFiles){
         peerFiles.getFilesMetaData().remove(fileName);
         peerFiles.getFilesMetaData().put(fileName,file);
