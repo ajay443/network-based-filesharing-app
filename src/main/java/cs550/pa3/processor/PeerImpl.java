@@ -63,6 +63,8 @@ public class PeerImpl implements Peer {
   //private PeerFiles downloadedFiles;
   public PeerFiles peerFiles;
 
+  int pullOrPush;//1 : Pull, 2 : Push
+
   //todo - iniital file contents are not indexed by watch thread
 
   public PeerImpl() {
@@ -77,6 +79,8 @@ public class PeerImpl implements Peer {
     //myfiles = new PeerFiles();
     //downloadedFiles = new PeerFiles();
     peerFiles = new PeerFiles();
+
+    pullOrPush = 2;
 
   }
 
@@ -365,8 +369,10 @@ public class PeerImpl implements Peer {
     serverThread.start();
     clientThread.start();
     cleanUpThread.start();
-    pullThread.start();
-    watchThread.start();
+    if(pullOrPush == 1)
+      pullThread.start();
+    else
+     watchThread.start();
   }
 
   @Override
@@ -512,7 +518,8 @@ public class PeerImpl implements Peer {
         this.seenInvalidationHitMessages.add(params[1]);
         handleForwardBroadCastEvents(params[5], params[2], Integer.parseInt(params[3]), ttl,params[1].split("_")[0]);
         //Util.searchInCached(params[2],Integer.parseInt(params[3]),params[1].split("_")[0],true);
-        if (peerFiles.fileExistsAndValid(params[2], params[1].split("_")[0])) {//filename, origin server
+        if (peerFiles.fileExistsAndValid(params[2], params[5])){//filename, origin server
+          Util.println("Updating as Stale");
           peerFiles.updateFileMetadata(params[2], Integer.parseInt(params[3]));
         }
       } else {
@@ -576,20 +583,43 @@ public class PeerImpl implements Peer {
   public void handleWatcherThreadEvents(String eventType, String fileName) {
     Util.print("Event = " + eventType + " file = " + fileName);
     if (eventType.equals("ENTRY_CREATE")) {
-      peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 10, host,false,LocalDateTime.now()));
+      if(peerFiles.fileExists(fileName)){//file is modified
+        PeerFile modifiedFile = peerFiles.getFileMetadata(fileName);
+        modifiedFile.setVersion(modifiedFile.getVersion() + 1);
+        modifiedFile.setLastUpdated(LocalDateTime.now());
+        modifiedFile.setIsStale(false);
+        peerFiles.add(modifiedFile);
+        //peerFiles.incrementVersion(fileName);
+        //peerFiles.updateLastUpdatedTime(fileName);
+        //PeerFile fileModified = peerFiles.getFileMetadata(fileName);
+        Util.print(Util.getJson(modifiedFile));
+        handleBroadCastEvents(null, fileName, modifiedFile.getVersion(), Constants.ZERO, false, null);
+      }//file is created
+      else
+        peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 10, host,false,LocalDateTime.now()));
       Util.print(Util.getJson(peerFiles));
     } else if (eventType.equals("ENTRY_MODIFY")) {
-      PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
-      fileModified.setVersion(fileModified.getVersion()+1);
-      fileModified.setLastUpdated(LocalDateTime.now());
-      peerFiles.getFilesMetaData().remove(fileName);
+      //PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
+      //fileModified.setVersion(fileModified.getVersion()+1);
+      //fileModified.setLastUpdated(LocalDateTime.now());
+      //peerFiles.getFilesMetaData().remove(fileName);
       // TODO Optimization - Change it up as per your below comment
       //we can directly change the attributes rather than removing and adding again //
-      peerFiles.getFilesMetaData().put(fileName,fileModified);
+      //peerFiles.getFilesMetaData().put(fileName,fileModified);
+      /*
+      peerFiles.incrementVersion(fileName);
+      peerFiles.updateLastUpdatedTime(fileName);
+      PeerFile fileModified = peerFiles.getFileMetadata(fileName);
       Util.print(Util.getJson(fileModified));
       handleBroadCastEvents(null, fileName, fileModified.getVersion(), Constants.ZERO, false, null);
+      */
     } else if (eventType.equals("ENTRY_DELETE")) {
-      peerFiles.getFilesMetaData().remove(fileName);
+      //peerFiles.getFilesMetaData().remove(fileName);
+      if(peerFiles.fileExists(fileName)) {
+        PeerFile deletedFile = peerFiles.getFileMetadata(fileName);
+        deletedFile.setIsStale(true);
+        peerFiles.add(deletedFile);
+      }
     }
   }
 

@@ -31,12 +31,17 @@ public class PeerFiles {
         this.filesMetaData = filesMetaData;
     }
 
-    public void setVersion(String fileName, int version){
-        this.filesMetaData.get(fileName).setVersion(version);
+    public void incrementVersion(String fileName){
+
+        PeerFile modifiedFile = this.filesMetaData.get(fileName);
+        modifiedFile.setVersion(modifiedFile.getVersion() + 1);
+        this.filesMetaData.put(fileName, modifiedFile);
     }
 
-    public void setLastUpdatedTime(String fileName, LocalDateTime time){
-        this.filesMetaData.get(fileName).setLastUpdated(time);
+    public void updateLastUpdatedTime(String fileName){
+        PeerFile modifiedFile = this.filesMetaData.get(fileName);
+        modifiedFile.setLastUpdated(LocalDateTime.now());
+        this.filesMetaData.put(fileName,modifiedFile);
     }
 
     public void add(PeerFile newFile){
@@ -77,16 +82,23 @@ public class PeerFiles {
     public boolean fileExistsAndValid(String fileName, String originServer){//checks if fileName is cached from originServer
         PeerFile file = getFileMetadata(fileName);
         if(file == null) {
+            Util.println("null");
             return false;
         }
         else {
             Host host = file.getFromAddress();
-            String ip_port[] = originServer.split(":");
-            if(ip_port[0].equals(host.getUrl()) && ip_port[1].equals(host.getPort())) {
-                if (file.isStale())
+            //String ip_port[] = originServer.split(":");
+            if(originServer.equals(host.address())) {
+                if (file.isStale()) {
+                    Util.println("one");
                     return false;
-                else
+
+                }
+                else {
+                    Util.println("two");
                     return true;
+
+                }
             }
             else
                 return false;
@@ -96,7 +108,13 @@ public class PeerFiles {
     public void updateFileMetadata(String fileName,int newVersion){
         PeerFile file = getFileMetadata(fileName);
         int oldVersion = file.getVersion();
-        if(newVersion > oldVersion) file.setIsStale(true);
+        if(newVersion > oldVersion) {
+            file.setIsStale(true);
+            file.setVersion(newVersion);
+            filesMetaData.put(fileName,file);
+        }
+
+
     }
 }
 
