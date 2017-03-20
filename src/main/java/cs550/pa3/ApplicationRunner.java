@@ -16,7 +16,7 @@ import java.util.Scanner;
 
 public class ApplicationRunner {
 
-  PeerImpl peer = new PeerImpl();
+  public PeerImpl peer = new PeerImpl();
 
   public ApplicationRunner() {
 
@@ -51,7 +51,7 @@ public class ApplicationRunner {
     // TODO - write the data to file metadata-json
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
-        System.out.println("Running Shutdown Hook");
+
       }
     });
 

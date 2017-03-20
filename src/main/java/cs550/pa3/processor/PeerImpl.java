@@ -175,6 +175,20 @@ public class PeerImpl implements Peer {
     deleteMetaDataFile(metaDataFileName);
  }
 
+
+  public void refresh(String fileName, String host, int port) throws IOException {
+    String metaDataFileName  = getCacheFolderName(this.host)+ "/" + fileName+""+Constants.TEMP_FILE;
+    downloadFile(Constants.DOWNLOAD_METADATA,metaDataFileName,host,port,fileName);
+    downloadFile(Constants.DOWNLOAD,getCacheFolderName(this.host)+ "/" + fileName,host,port,fileName);
+    synchronized (peerFiles){
+      PeerFile cacheFile = (PeerFile) Util.toObjectJsonFromJson(metaDataFileName,PeerFile.class);
+      cacheFile.setOriginal(false);
+      cacheFile.setIsStale(false);
+      peerFiles.add(cacheFile);
+      deleteMetaDataFile(metaDataFileName);
+    }
+  }
+
   /**
    * TODO check synchronized p1
    * @param msgid
@@ -308,7 +322,7 @@ public class PeerImpl implements Peer {
             System.out.print("Enter filename : \n");
             fileName = in.next();
             Host h = peerFiles.getFileMetadata(fileName).getFromAddress();
-            download(fileName, h.getUrl(), h.getPort());
+            refresh(fileName, h.getUrl(), h.getPort());
             break;
           case 7:
             System.exit(Constants.ZERO);
@@ -430,7 +444,7 @@ public class PeerImpl implements Peer {
 
   private void sendPullRequest(String fileName,String address){
     PeerFile file =  peerFiles.getFileMetadata(fileName);
-    file.setIsStale(true);
+    file.setIsStale(false);
     file.setOriginal(false);
 
     Socket peerClientSocket = null;
@@ -632,32 +646,13 @@ public class PeerImpl implements Peer {
         modifiedFile.setLastUpdated(LocalDateTime.now());
         modifiedFile.setIsStale(false);
         peerFiles.add(modifiedFile);
-        //peerFiles.incrementVersion(fileName);
-        //peerFiles.updateLastUpdatedTime(fileName);
-        //PeerFile fileModified = peerFiles.getFileMetadata(fileName);
         Util.print(Util.getJson(modifiedFile));
         handleBroadCastEvents(null, fileName, modifiedFile.getVersion(), Constants.ZERO, false, null);
       }//file is created
       else
         peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, Integer.parseInt(Util.getValue("TTR")), host,false,LocalDateTime.now()));
         Util.print(Util.getJson(peerFiles));
-    } else if (eventType.equals("ENTRY_MODIFY")) {
-      //PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
-      //fileModified.setVersion(fileModified.getVersion()+1);
-      //fileModified.setLastUpdated(LocalDateTime.now());
-      //peerFiles.getFilesMetaData().remove(fileName);
-      // TODO Optimization - Change it up as per your below comment
-      //we can directly change the attributes rather than removing and adding again //
-      //peerFiles.getFilesMetaData().put(fileName,fileModified);
-      /*
-      peerFiles.incrementVersion(fileName);
-      peerFiles.updateLastUpdatedTime(fileName);
-      PeerFile fileModified = peerFiles.getFileMetadata(fileName);
-      Util.print(Util.getJson(fileModified));
-      handleBroadCastEvents(null, fileName, fileModified.getVersion(), Constants.ZERO, false, null);
-      */
     } else if (eventType.equals("ENTRY_DELETE")) {
-      //peerFiles.getFilesMetaData().remove(fileName);
       if(peerFiles.fileExists(fileName)) {
         PeerFile deletedFile = peerFiles.getFileMetadata(fileName);
         deletedFile.setIsStale(true);
@@ -674,11 +669,8 @@ public class PeerImpl implements Peer {
      *  3.a Send File MetaData
      *  3.b Send FIle content
      */
-    Util.print(fileName);
     if (isPeerFileOutdated(fileName)) {
-       Util.print("File is outdated");
-      // todo send invalid message
-      return;
+       Util.println("File is outdated, try after some time "+fileName);
     }
     switch (taskType){
       case Constants.DOWNLOAD:
@@ -703,7 +695,7 @@ public class PeerImpl implements Peer {
       }
       out.flush();
     } catch (FileNotFoundException e) {
-      Util.error("File is not present below locations: \n" + getCacheFolderName(this.host) + "\n"
+      Util.error("File is not present in any below locations: \n" + getCacheFolderName(this.host) + "\n"
           + getMasterFolderName(this.host));
       return;
     } catch (Exception e) {
@@ -731,8 +723,8 @@ public class PeerImpl implements Peer {
 
   private boolean isPeerFileOutdated(String fileName) {
     try{
-      if(peerFiles.getFilesMetaData().get(fileName).isOriginal() == true) return false;
-      if(peerFiles.getFilesMetaData().get(fileName).isStale() == true) return true;
+      if(peerFiles.getFilesMetaData().get(fileName).isOriginal()) return false;
+      if(peerFiles.getFilesMetaData().get(fileName).isStale()) return true;
       return false;
     }catch (NullPointerException e) {
       Util.error("Peer Data is corrupted please restart again.");
