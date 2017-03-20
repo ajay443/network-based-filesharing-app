@@ -148,14 +148,6 @@ public class PeerImpl implements Peer {
 
   }
 
-  private void registry(String fileName, Host host, int ttr, int version) {
-    // TODO when you download some thing from the remote peer, register it
-    if (!downloadedFiles.fileExists(fileName)) {
-      downloadedFiles.add(new PeerFile(false, fileName, ttr, host, version));
-    }
-  }
-
-
   @Override
   public void returnQueryHit(String msgid, String fileName, String addr, int ttl,
       boolean isForward) {
@@ -175,9 +167,11 @@ public class PeerImpl implements Peer {
         sock = new Socket(addr_attrs[0], Integer.valueOf(addr_attrs[1]));
         PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
 
-        Util.print("File Information to send \n"+ Util.getJson(peerFiles.getFilesMetaData().get(fileName)));
+        Util.print("File Information to send with QueyHit\n"+ Util.getJson(peerFiles.getFilesMetaData().get(fileName)));
+        Util.print(queryHitMessage(msgid,fileName,addr,ttl));
+        out.println(queryHitMessage(msgid,fileName,addr,ttl));
 
-        out.println(Constants.QUERYHIT + " " + msgid + " " + fileName + " " + addr + " " + ttl);
+        // out.println(Constants.QUERYHIT + " " + msgid + " " + fileName + " " + addr + " " + ttl);
         out.close();
 
         if (!seenQueryHitMessages.containsKey(msgid)) {
@@ -561,6 +555,7 @@ public class PeerImpl implements Peer {
     Util.print("Event = " + eventType + " file = " + fileName);
     if (eventType.equals("ENTRY_CREATE")) {
       peerFiles.getFilesMetaData().put(fileName,new PeerFile(true, fileName, 0, host, 1));
+      Util.print(Util.getJson(peerFiles));
     } else if (eventType.equals("ENTRY_MODIFY")) {
       PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
       fileModified.setVersion(fileModified.getVersion()+1);
@@ -652,6 +647,16 @@ public class PeerImpl implements Peer {
           file.getName() + " " + file.getVersion() + " " + file.getLastUpdated().toString() + " "
               + file.getFromAddress().address() + " " + file.checkIsStale());
     }
+  }
+
+  public  String queryHitMessage(String messageID, String fileName, String address, int ttl) {
+    return
+        Constants.QUERYHIT + " "
+            + messageID + " " +
+            fileName + " " +
+            address + " " +
+            ttl + " " +
+            Util.getJson(peerFiles.getFilesMetaData().get(fileName));
   }
 
 }
