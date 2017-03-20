@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 
 public class PeerFile {
     int version;
-    boolean original;
+    boolean original=true;
     String name;
     int TTR;
     Host fromAddress;

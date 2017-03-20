@@ -8,8 +8,6 @@
 
 package cs550.pa3.test;
 
-import cs550.pa3.helpers.Host;
-import cs550.pa3.helpers.PeerFile;
 import cs550.pa3.processor.PeerImpl;
 import org.junit.After;
 import org.junit.Before;
@@ -38,7 +36,7 @@ public class PeerImplTest {
     public void pullFile() throws Exception {
         PeerImpl peer = new PeerImpl();
         //changed here
-        peer.getDownloadedFiles().add(new PeerFile(false,"stars.jpg",3,new Host("localhost",9999),0));
+        //peer.getDownloadedFiles().add(new PeerFile(false,"stars.jpg",3,new Host("localhost",9999),0));
         peer.runPullProcess();
 
     }
