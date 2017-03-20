@@ -110,7 +110,7 @@ class WatcherThread extends Thread{
                 if( kind == ENTRY_CREATE || kind == ENTRY_MODIFY || kind == ENTRY_DELETE ) {
                     String fileName = name.toString();
                     if (!fileName.contains("_jb_")) {
-                        System.out.println("Forwarding create/modify/delete event");
+                        Util.print("Forwarding create/modify/delete event");
                         observer.handleWatcherThreadEvents(kind.toString(), fileName);
                     }
                 }

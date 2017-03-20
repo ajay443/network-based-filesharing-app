@@ -10,7 +10,6 @@ package cs550.pa3.helpers;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 
 public class PeerFiles {
 
@@ -70,7 +69,7 @@ public class PeerFiles {
             return false;
         }
         else {
-            if(file.checkIsStale()) return false;
+            if(file.isStale()) return false;
             else return true;
         }
     }
@@ -84,7 +83,7 @@ public class PeerFiles {
             Host host = file.getFromAddress();
             String ip_port[] = originServer.split(":");
             if(ip_port[0].equals(host.getUrl()) && ip_port[1].equals(host.getPort())) {
-                if (file.checkIsStale())
+                if (file.isStale())
                     return false;
                 else
                     return true;

@@ -117,7 +117,7 @@ public class PeerFile {
         this.lastUpdated = lastUpdated;
     }
 
-    public boolean checkIsStale(){
+    public boolean isStale(){
         return isStale;
     }
     public void setIsStale(boolean isStale){

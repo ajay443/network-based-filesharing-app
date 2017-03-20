@@ -13,8 +13,6 @@ import cs550.pa3.helpers.Host;
 import cs550.pa3.helpers.PeerFile;
 import cs550.pa3.helpers.PeerFiles;
 import cs550.pa3.helpers.Util;
-import org.omg.CORBA.CODESET_INCOMPATIBLE;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -113,9 +111,10 @@ public class PeerImpl implements Peer {
 
   @Override
   public void download(String fileName, String host, int port) throws IOException {
-    downloadFile(Constants.DOWNLOAD_METADATA,getCacheFolderName(this.host)+ "/" + fileName+""+Constants.TEMP_FILE,host,port,fileName);
+    String metaDataFileName  = getCacheFolderName(this.host)+ "/" + fileName+""+Constants.TEMP_FILE;
+    downloadFile(Constants.DOWNLOAD_METADATA,metaDataFileName,host,port,fileName);
     downloadFile(Constants.DOWNLOAD,getCacheFolderName(this.host)+ "/" + fileName,host,port,fileName);
-    //todo update the  PeerFiles database from the
+    peerFiles.add((PeerFile) Util.toObjectJsonFromJson(metaDataFileName,PeerFile.class));
   }
 
   @Override
@@ -189,7 +188,7 @@ public class PeerImpl implements Peer {
       }
       Util.print("Peer Server is running ");
     } catch (BindException e) {
-      Util.print("Peer Server address already in use, try again !");
+      Util.error("Peer Server address already in use, try again !");
     } catch (IOException e) {
       e.printStackTrace();
       System.err.println("Could not listen on port " + host.getUrl());
@@ -500,7 +499,9 @@ public class PeerImpl implements Peer {
       PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
       fileModified.setVersion(fileModified.getVersion()+1);
       fileModified.setLastUpdated(LocalDateTime.now());
-      peerFiles.getFilesMetaData().remove(fileName);//we can directly change the attributes rather than removing and adding again
+      peerFiles.getFilesMetaData().remove(fileName);
+      // TODO Optimization - Change it up as per your below comment
+      //we can directly change the attributes rather than removing and adding again //
       peerFiles.getFilesMetaData().put(fileName,fileModified);
       Util.print(Util.getJson(fileModified));
       handleBroadCastEvents(null, fileName, fileModified.getVersion(), Constants.ZERO, false, null);
@@ -573,7 +574,7 @@ public class PeerImpl implements Peer {
   }
 
   private boolean isPeerFileOutdated(String fileName) {
-    return peerFiles.getFilesMetaData().get(fileName).checkIsStale();
+    return peerFiles.getFilesMetaData().get(fileName).isStale();
   }
 
   private String getFilePath(String fileName) {
@@ -588,11 +589,11 @@ public class PeerImpl implements Peer {
     for (PeerFile file : hm.values()) {
       Util.println(
           file.getName() + " " + file.getVersion() + " " + file.getLastUpdated().toString() + " "
-              + file.getFromAddress().address() + " " + file.checkIsStale());
+              + file.getFromAddress().address() + " " + file.isStale());
     }
   }
 
-  public  String queryHitMessage(String messageID, String fileName, String address, int ttl) {
+  public String queryHitMessage(String messageID, String fileName, String address, int ttl) {
     return
         Constants.QUERYHIT + " "
             + messageID + " " +
@@ -653,7 +654,9 @@ public class PeerImpl implements Peer {
       }
       p.close();
 
-    } catch (Exception e) {
+    }catch (ConnectException e){
+      Util.error(e.getMessage());
+    }catch (Exception e) {
       e.printStackTrace();
     } finally {
       try {

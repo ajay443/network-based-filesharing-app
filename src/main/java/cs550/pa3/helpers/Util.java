@@ -18,9 +18,13 @@ package cs550.pa3.helpers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
-import java.io.*;
-import java.net.Socket;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Properties;
 
@@ -243,6 +247,16 @@ public  class Util {
             return mapper.readValue(json,classObject);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Object toObjectJsonFromJson(String filePath,Class classObject){
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(filePath)));
+            return  Util.toObjectFromJson(content,classObject);
+        } catch (IOException e) {
+            Util.error("Error is reading the file - "+e.getMessage());
         }
         return null;
     }
