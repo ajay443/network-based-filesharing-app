@@ -542,9 +542,10 @@ public class PeerImpl implements Peer {
   private void sendFileMetadata(String fileName, Socket socket) {
     Util.print("Sending Meta Data.");
     try (
-       OutputStream out = socket.getOutputStream();
+        OutputStream out = socket.getOutputStream();
     ) {
-      InputStream fip = new ByteArrayInputStream(Util.getJson(peerFiles.getFileMetadata(fileName)).getBytes(StandardCharsets.UTF_8));
+      //InputStream fip = new ByteArrayInputStream(Util.getJson(peerFiles.getFileMetadata(fileName)).getBytes(StandardCharsets.UTF_8));
+      InputStream fip = new ByteArrayInputStream(("{\"name\":\"ajayramesh-testing\"}").getBytes(StandardCharsets.UTF_8));
       byte b[] = new byte[16 * 1024];
       int count;
       while ((count = fip.read(b)) > 0) {
