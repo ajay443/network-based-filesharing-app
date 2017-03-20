@@ -489,7 +489,7 @@ public class PeerImpl implements Peer {
         addToSeenMessages(params[1], params[3]);
         forwardQuery(params[1], params[2], ttl);
 
-        if (peerFiles.fileExists(params[2])) {//for cached files need to check if it is valid?
+        if (( peerFiles.fileExists(params[2]) && (peerFiles.getFileMetadata(params[2]).isOriginal() || (!peerFiles.getFileMetadata(params[2]).isStale())))) {//for cached files need to check if it is valid?
           returnQueryHit(params[1], params[2], host.address(), Constants.TTL, false);
         }
       } else {
@@ -498,7 +498,7 @@ public class PeerImpl implements Peer {
           //ports.add(params[3]);
         //}
           addToSeenMessages(params[1], params[3]);
-        Util.print("Not forwarding " + input);
+          Util.print("Not forwarding " + input);
       }
     } else if (params[0].equals(Constants.QUERYHIT)) {
       //DisplaySeenMessages(params[0]);
@@ -628,10 +628,13 @@ public class PeerImpl implements Peer {
         //peerFiles.updateLastUpdatedTime(fileName);
         //PeerFile fileModified = peerFiles.getFileMetadata(fileName);
         Util.print(Util.getJson(modifiedFile));
-        handleBroadCastEvents(null, fileName, modifiedFile.getVersion(), Constants.ZERO, false, null);
+        //no need to notify neighbors when using pull mechanism
+        if(pullOrPush == 2)
+         handleBroadCastEvents(null, fileName, modifiedFile.getVersion(), Constants.ZERO, false, null);
       }//file is created
       else
-        peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 10, host,false,LocalDateTime.now()));
+        //not need to notify the neighbirs when new file is created.
+        //peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 10, host,false,LocalDateTime.now()));
       Util.print(Util.getJson(peerFiles));
     } else if (eventType.equals("ENTRY_MODIFY")) {
       //PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
