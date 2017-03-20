@@ -75,6 +75,54 @@ public class PeerImpl implements Peer {
 
   }
 
+  private synchronized void addToSeenMessages(String fileName, String address){
+    if(seenMessages.containsKey(fileName)){
+      List list_addr = (List) seenMessages.get(fileName);
+      if (!list_addr.contains(address)) {
+        list_addr.add(address);
+        seenMessages.remove(fileName);
+        seenMessages.put(fileName,list_addr);
+      }
+    }
+    else{
+      List addr_list = new ArrayList<String>();
+      addr_list.add(address);
+      this.seenMessages.put(fileName, addr_list);
+    }
+
+  }
+
+  private synchronized void removeFromSeenMessages(String fileName){
+    if(seenMessages.containsKey(fileName)){
+      seenMessages.remove(fileName);
+    }
+  }
+
+  private synchronized void addToSeenQueryHitMessages(String fileName, String address){
+
+    if(seenQueryHitMessages.containsKey(fileName)){
+      List list_addr = (List) seenMessages.get(fileName);
+      if (!list_addr.contains(address)) {
+        list_addr.add(address);
+        seenMessages.remove(fileName);
+        seenMessages.put(fileName,list_addr);
+      }
+    }
+    else{
+      List addr_list = new ArrayList<String>();
+      addr_list.add(address);
+      this.seenQueryHitMessages.put(fileName, addr_list);
+    }
+
+  }
+
+  private synchronized void removeFromSeenQueryHitMessages(String fileName){
+    if(seenQueryHitMessages.containsKey(fileName)){
+      seenQueryHitMessages.remove(fileName);
+    }
+  }
+
+
   @Override
   public void search(String query_id, String fileName, int ttl, boolean isForward) {
     Socket sock = null;
@@ -317,7 +365,7 @@ public class PeerImpl implements Peer {
         sock = new Socket(h.getUrl(), h.getPort());
         PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
         out.println(Constants.INVALIDATION + " " + messageId + " " + changedFileName + " " + Integer
-            .toString(fileVersion) + " " + Integer.toString(ttl) + originServer);
+            .toString(fileVersion) + " " + Integer.toString(ttl) + " " + originServer);
         sock.close();
         } catch (Exception e) {
         e.printStackTrace();
@@ -387,6 +435,8 @@ public class PeerImpl implements Peer {
       int ttl = Integer.valueOf(params[4]);
       ttl = ttl - 1;
 
+
+
       //Not forwarding already seen query hit messages
       if (!seenQueryHitMessages.containsKey(params[1]) && ttl > Constants.ZERO) {
         List addr = new ArrayList<String>();
@@ -412,11 +462,16 @@ public class PeerImpl implements Peer {
                       "\n------------------------------------------------------------------\n",
                   params[2], params[3]);
         }
-        List ports = (List) seenQueryHitMessages.get(params[1]);
-        if (!ports.contains(params[3])) {
-          ports.add(params[3]);
+        else{
+          List ports = (List) seenQueryHitMessages.get(params[1]);
+          if (!ports.contains(params[3])) {
+            forwardQueryHit(params[1], params[2], params[3], ttl);
+            ports.add(params[3]);
+          }
+          else {
+            Util.print("Not forwarding " + input);
+          }
         }
-        Util.print("Not forwarding " + input);
       }
     } else if (params[0].equals(Constants.INVALIDATION)) {
       int ttl = Integer.valueOf(params[4]);
@@ -595,9 +650,11 @@ public class PeerImpl implements Peer {
     HashMap<String, PeerFile> hm = peerFiles.getFilesMetaData();
     Util.println("Name | version | last update time | ");
     for (PeerFile file : hm.values()) {
-      Util.println(
-          file.getName() + " " + file.getVersion() + " " + file.getLastUpdated().toString() + " "
-              + file.getFromAddress().address() + " " + file.isStale());
+      if(!file.isOriginal()) {
+        Util.println(
+                file.getName() + " " + file.getVersion() + " " + file.getLastUpdated().toString() + " "
+                        + file.getFromAddress().address() + " " + file.isStale());
+      }
     }
   }
 
