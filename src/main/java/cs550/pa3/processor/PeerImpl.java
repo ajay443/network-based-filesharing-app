@@ -80,27 +80,31 @@ public class PeerImpl implements Peer {
 
   }
 
-  private synchronized void addToSeenMessages(String fileName, String address){
-    if(seenMessages.containsKey(fileName)){
-      List list_addr = (List) seenMessages.get(fileName);
+  private synchronized void addToSeenMessages(String messageId, String address){
+    if(seenMessages.containsKey(messageId)){
+      List list_addr = (List) seenMessages.get(messageId);
       if (!list_addr.contains(address)) {
         list_addr.add(address);
-        seenMessages.remove(fileName);
-        seenMessages.put(fileName,list_addr);
+        seenMessages.remove(messageId);
+        seenMessages.put(messageId,list_addr);
       }
     }
     else{
       List addr_list = new ArrayList<String>();
       addr_list.add(address);
-      this.seenMessages.put(fileName, addr_list);
+      this.seenMessages.put(messageId, addr_list);
     }
 
   }
 
-  private synchronized void removeFromSeenMessages(String fileName){
-    if(seenMessages.containsKey(fileName)){
-      seenMessages.remove(fileName);
+  private synchronized void removeFromSeenMessages(String messageId){
+    if(seenMessages.containsKey(messageId)){
+      seenMessages.remove(messageId);
     }
+  }
+
+  private synchronized List<String> getSeenMessages(String messageId){
+    return (List)seenMessages.get(messageId);
   }
 
   private synchronized void addToSeenQueryHitMessages(String fileName, String address){
@@ -127,6 +131,9 @@ public class PeerImpl implements Peer {
     }
   }
 
+  private synchronized List<String> getSeenQueryHitMessages(String messageId){
+    return (List)seenQueryHitMessages.get(messageId);
+  }
 
   @Override
   public void search(String query_id, String fileName, int ttl, boolean isForward) {
@@ -144,10 +151,7 @@ public class PeerImpl implements Peer {
             Constants.QUERY + " " + query_id + " " + fileName + " " + host.address() + " " + Integer
                 .toString(ttl));
         out.close();
-        if (!seenMessages.containsKey(query_id)) {
-          List addr = new ArrayList<String>();
-          this.seenMessages.put(query_id, addr);
-        }
+        addToSeenMessages(query_id,null);
       }
     } catch (ConnectException e) {
       Util.error("Peer Server is not running ....");
@@ -182,10 +186,10 @@ public class PeerImpl implements Peer {
    * @param isForward
    */
   @Override
-  public synchronized void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
+  public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
     //lookup
     Socket sock = null;
-    List addresses = (List) seenMessages.get(msgid);
+    List addresses = getSeenMessages(msgid);
     //System.out.printf("Sending queryhit to %d peers",ports.size());
     Iterator i = addresses.iterator();
     if (!isForward) {
@@ -206,12 +210,9 @@ public class PeerImpl implements Peer {
         // out.println(Constants.QUERYHIT + " " + msgid + " " + fileName + " " + addr + " " + ttl);
         out.close();
 
-        if (!seenQueryHitMessages.containsKey(msgid)) {
-          //I saw the message I am sending
-          List p = new ArrayList<Integer>();
-          //ports.add(params[3]);//dont have to forward queryhit to myself
-          this.seenQueryHitMessages.put(msgid, p);
-        }
+        //I saw the message I am sending
+        //ports.add(params[3]);//dont have to forward queryhit to myself
+        addToSeenQueryHitMessages(msgid, null);
 
         if (!thrash.contains(msgid)) {
           //Util.print();("pushing");
@@ -419,7 +420,7 @@ public class PeerImpl implements Peer {
     }
   }
   // todo synchronized check p
-  private synchronized  void processInput(String input, Socket socket) {
+  private void processInput(String input, Socket socket) {
     Util.print("Received Message : " + input);
     String params[] = input.split(" ");
     if(params[0].equals(Constants.PULL)){
@@ -437,19 +438,20 @@ public class PeerImpl implements Peer {
       //not searching or forwarding already seen message
       if (!seenMessages.containsKey(params[1]) && ttl > Constants.ZERO) {
 
-        List addresses = new ArrayList<String>();
-        addresses.add(params[3]);
-        this.seenMessages.put(params[1], addresses);
+        //List addresses = new ArrayList<String>();
+        //addresses.add(params[3]);
+        addToSeenMessages(params[1], params[3]);
         forwardQuery(params[1], params[2], ttl);
 
         if (peerFiles.fileExists(params[2])) {//for cached files need to check if it is valid?
           returnQueryHit(params[1], params[2], host.address(), Constants.TTL, false);
         }
       } else {
-        List ports = (List) seenMessages.get(params[1]);
-        if (!ports.contains(params[3])) {
-          ports.add(params[3]);
-        }
+        //List ports = (List) seenMessages.get(params[1]);
+        //if (!ports.contains(params[3])) {
+          //ports.add(params[3]);
+        //}
+          addToSeenMessages(params[1], params[3]);
         Util.print("Not forwarding " + input);
       }
     } else if (params[0].equals(Constants.QUERYHIT)) {
@@ -461,9 +463,10 @@ public class PeerImpl implements Peer {
 
       //Not forwarding already seen query hit messages
       if (!seenQueryHitMessages.containsKey(params[1]) && ttl > Constants.ZERO) {
-        List addr = new ArrayList<String>();
-        addr.add(params[3]);
-        this.seenQueryHitMessages.put(params[1], addr);
+        //List addr = new ArrayList<String>();
+        //addr.add(params[3]);
+        //this.seenQueryHitMessages.put(params[1], addr);
+        addToSeenQueryHitMessages(params[1],params[3]);
 
         String msg_params[] = params[1].split("_");
         if (msg_params[0].equals(host.address())) {
@@ -485,10 +488,10 @@ public class PeerImpl implements Peer {
                   params[2], params[3]);
         }
         else{
-          List ports = (List) seenQueryHitMessages.get(params[1]);
-          if (!ports.contains(params[3])) {
+          List addresses = getSeenQueryHitMessages(params[1]);
+          if (!addresses.contains(params[3])) {
             forwardQueryHit(params[1], params[2], params[3], ttl);
-            ports.add(params[3]);
+            addToSeenQueryHitMessages(params[1],params[3]);
           }
           else {
             Util.print("Not forwarding " + input);
@@ -694,8 +697,10 @@ public class PeerImpl implements Peer {
         Thread.sleep(5000);
         for (String qid : thrash) {
           Util.print("Removing " + qid);
-          seenMessages.remove(qid);
-          seenQueryHitMessages.remove(qid);
+          //seenMessages.remove(qid);
+          //seenQueryHitMessages.remove(qid);
+          removeFromSeenMessages(qid);
+          removeFromSeenQueryHitMessages(qid);
         }
         thrash.clear();
       } catch (Exception e) {
