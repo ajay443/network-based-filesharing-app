@@ -464,9 +464,9 @@ public class PeerImpl implements Peer {
   // todo synchronized ch5eck p
   private void processInput(String input, Socket socket) {
     Util.print("Received Message : " + input);
-    String params[] = input.split(" ");
+    String params[] = input.split(Constants.SPACE);
     if(params[0].equals(Constants.POLL)){
-      Util.print("Pull Event Happened");
+      Util.print("Poll Event request client received");
       sendPullRequest(params[1],params[2]);
       return;
     }
