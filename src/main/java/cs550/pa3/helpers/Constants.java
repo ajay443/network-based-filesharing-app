@@ -39,7 +39,7 @@ public  class Constants {
     public static final String DOWNLOADED_LIST = "downloaded.folderlist";
     public static final String PULL_TTR = "pull.TTR";
     public static final String CONFIG_FILE_PREFIX = "config-";
-    public static final String TEMP_FILE="temp.json";
+    public static final String TEMP_FILE="__temp.json";
 
     public static final String DISPLAY_MENU = "\n1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Display downloaded files info\n6 : Refresh a stale file\n7 : Exit\nEnter your choice number";
 

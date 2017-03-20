@@ -108,7 +108,7 @@ public class PeerImpl implements Peer {
   @Override
   public void download(String fileName, String host, int port) throws IOException {
     downloadFile(Constants.DOWNLOAD_METADATA,getCacheFolderName(this.host)+ "/" + fileName+""+Constants.TEMP_FILE,host,port,fileName);
-    downloadFile(Constants.DOWNLOAD_METADATA,getCacheFolderName(this.host)+ "/" + fileName,host,port,fileName);
+    downloadFile(Constants.DOWNLOAD,getCacheFolderName(this.host)+ "/" + fileName,host,port,fileName);
     //todo update the  PeerFiles database from the
   }
 
