@@ -268,27 +268,30 @@ public class PeerImpl implements Peer {
     String fileName = "";
     try {
       while (true) {
-        Util.println("********************************************************");
-        Util.println("Peer Display Menu **************************************");
+        Util.println("******************************************************************");
+        Util.println("Peer Display Menu ************************************************");
         Util.println(Constants.DISPLAY_MENU);
-        Util.println("********************************************************");
+        Util.println("******************************************************************");
+
 
         Scanner in = new Scanner(System.in);
+        System.out.print("Your Choice : ");
         int choice = in.nextInt();
         switch (choice) {
           case 1:
-            Util.println("Enter filename : ");
+            System.out.print("Enter filename : ");
             fileName = in.next();
             search(null, fileName, Constants.ZERO, false);
             break;
           case 2:
-            Util.println("Enter filename : ");
+            System.out.print("Enter filename : ");
             fileName = in.next();
-            Util.println("Enter Host name of the download server : ");
+            System.out.print("Enter Host name of the download server : ");
             String host = in.next();
-            Util.println("Enter port number of of the download server : ");
+            System.out.print("Enter port number of of the download server : ");
             int hostPort = in.nextInt();
             download(fileName, host, hostPort);
+            Util.println("Message to User: \nFile is downloaded to "+getCacheFolderName(this.host)+" Folder");
             break;
           case 3: // TODO remove all other choices
             displaySeenMessages(Constants.QUERY);
