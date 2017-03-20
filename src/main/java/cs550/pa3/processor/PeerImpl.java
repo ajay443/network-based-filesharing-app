@@ -107,9 +107,9 @@ public class PeerImpl implements Peer {
 
   @Override
   public void download(String fileName, String host, int port) throws IOException {
-    downloadFile(Constants.DOWNLOAD_METADATA,getCacheFolderName(this.host)+ "/" + fileName+""+Constants.TEMP_FILE,host,port);
-    downloadFile(Constants.DOWNLOAD,getCacheFolderName(this.host)+ "/" + fileName,host,port);
-    //updatePeerFilesList();
+    downloadFile(Constants.DOWNLOAD_METADATA,getCacheFolderName(this.host)+ "/" + fileName+""+Constants.TEMP_FILE,host,port,fileName);
+    downloadFile(Constants.DOWNLOAD_METADATA,getCacheFolderName(this.host)+ "/" + fileName,host,port,fileName);
+    //todo update the  PeerFiles database from the
   }
 
   @Override
@@ -338,9 +338,9 @@ public class PeerImpl implements Peer {
     String params[] = input.split(" ");
     // TODO - Make it simple to read by using Switch Case and Enum datatype
     if (params[0].equals(Constants.DOWNLOAD) || params[0].equals(Constants.DOWNLOAD_METADATA) ) {
-      serveDownloadRequest(params[0],params[1], socket);
+      Util.print("Serving request of the type = "+params[0]);
+      serveDownloadRequest(params[0], params[1], socket);
     } else if (params[0].equals(Constants.QUERY)) {
-      //DisplaySeenMessages(params[0]);
       int ttl = Integer.valueOf(params[4]);
       ttl = ttl - 1;
 
@@ -480,7 +480,7 @@ public class PeerImpl implements Peer {
   public void handleWatcherThreadEvents(String eventType, String fileName) {
     Util.print("Event = " + eventType + " file = " + fileName);
     if (eventType.equals("ENTRY_CREATE")) {
-      peerFiles.getFilesMetaData().put(fileName,new PeerFile(true, fileName, 0, host, 1));
+      peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 3600, host,false,LocalDateTime.now()));
       Util.print(Util.getJson(peerFiles));
     } else if (eventType.equals("ENTRY_MODIFY")) {
       PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
@@ -503,11 +503,12 @@ public class PeerImpl implements Peer {
      *  3.a Send File MetaData
      *  3.b Send FIle content
      */
-
-    /*if (isPeerFileOutdated(fileName)) {
+    Util.print(fileName);
+    if (isPeerFileOutdated(fileName)) {
+       Util.print("File is outdated");
       // todo send invalid message
       return;
-    }*/
+    }
     switch (taskType){
       case Constants.DOWNLOAD:
         sendFileData(fileName,socket);
@@ -544,8 +545,8 @@ public class PeerImpl implements Peer {
     try (
         OutputStream out = socket.getOutputStream();
     ) {
-      //InputStream fip = new ByteArrayInputStream(Util.getJson(peerFiles.getFileMetadata(fileName)).getBytes(StandardCharsets.UTF_8));
-      InputStream fip = new ByteArrayInputStream(("{\"name\":\"ajayramesh-testing\"}").getBytes(StandardCharsets.UTF_8));
+      InputStream fip = new ByteArrayInputStream(Util.getJson(peerFiles.getFileMetadata(fileName)).getBytes(StandardCharsets.UTF_8));
+     //todo remove this commented line -> //InputStream fip = new ByteArrayInputStream(("{\"name\":\"ajayramesh-testing\"}").getBytes(StandardCharsets.UTF_8));
       byte b[] = new byte[16 * 1024];
       int count;
       while ((count = fip.read(b)) > 0) {
@@ -620,14 +621,14 @@ public class PeerImpl implements Peer {
    * 1.Download the file PeerServer
    *  1.a) create a temp file in cache fileName_temp.json nd read the buffer content from server
    */
-  private void downloadFile(String taskType,String fileName, String host, int port ) {
+  private void downloadFile(String taskType,String fileName, String host, int port, String fname) {
     Socket peerClientSocket = null;
     try {
       peerClientSocket = new Socket(host, port);
       PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
       InputStream in = peerClientSocket.getInputStream();
       OutputStream fout = new FileOutputStream(fileName);
-      out.println(taskType + " " + fileName);
+      out.println(taskType + " " + fname);
       String message = "";
       PrintWriter p = new PrintWriter(fileName, "UTF-8");
       byte[] bytes = new byte[16 * 1024];
@@ -657,7 +658,6 @@ public class PeerImpl implements Peer {
      * read the content from json
      * store it to the meta data
      */
-
   }
 
 }

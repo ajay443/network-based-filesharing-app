@@ -39,6 +39,17 @@ public class PeerFile {
 
     }
 
+    public PeerFile(int version, boolean original, String name, int TTR,
+        Host fromAddress, boolean isStale, LocalDateTime lastUpdated) {
+        this.version = version;
+        this.original = original;
+        this.name = name;
+        this.TTR = TTR;
+        this.fromAddress = fromAddress;
+        this.isStale = isStale;
+        this.lastUpdated = lastUpdated;
+    }
+
     public PeerFile(boolean original, String name, int TTR, Host address, int version) {
         this.original = original;
         this.name = name;
