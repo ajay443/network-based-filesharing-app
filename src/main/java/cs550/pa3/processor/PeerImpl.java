@@ -13,6 +13,8 @@ import cs550.pa3.helpers.Host;
 import cs550.pa3.helpers.PeerFile;
 import cs550.pa3.helpers.PeerFiles;
 import cs550.pa3.helpers.Util;
+import org.omg.CORBA.CODESET_INCOMPATIBLE;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +57,6 @@ public class PeerImpl implements Peer {
   private Set seenInvalidationHitMessages;
   private List<Host> neighbours;
   private Host host;
-  //public  ArrayList<PeerFile> peerFiles;
   private PeerFiles myfiles;
   private PeerFiles downloadedFiles;
 
@@ -79,7 +80,7 @@ public class PeerImpl implements Peer {
     Socket sock = null;
     if (!isForward) {
       query_id = host.address() + "_" + Integer.toString(++messageID);
-      ttl = 7;
+      ttl = Constants.TTL;
     }
     try {
       for (Host neighbour : neighbours) {
@@ -125,8 +126,8 @@ public class PeerImpl implements Peer {
       byte[] bytes = new byte[16 * 1024];
 
       int count;
-      while ((count = in.read(bytes)) > 0) {
-        fout.write(bytes, 0, count);
+      while ((count = in.read(bytes)) > Constants.ZERO) {
+        fout.write(bytes, Constants.ZERO, count);
       }
       //in.wait(2);
       byte[] b = new byte[4];
@@ -159,15 +160,14 @@ public class PeerImpl implements Peer {
 
 
   @Override
-  public void returnQueryHit(String msgid, String fileName, String addr, int ttl,
-      boolean isForward) {
+  public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
     //lookup
     Socket sock = null;
     List addresses = (List) seenMessages.get(msgid);
     //System.out.printf("Sending queryhit to %d peers",ports.size());
     Iterator i = addresses.iterator();
     if (!isForward) {
-      ttl = 7;
+      ttl = Constants.TTL;
     }
 
     while (i.hasNext()) {
@@ -230,7 +230,7 @@ public class PeerImpl implements Peer {
     } catch (IOException e) {
       e.printStackTrace();
       System.err.println("Could not listen on port " + host.getUrl());
-      System.exit(-1);
+      System.exit(Constants.MINUS_ONE);
     }
 
   }
@@ -275,14 +275,14 @@ public class PeerImpl implements Peer {
             download(fileName, h.getUrl(), h.getPort());
             break;
           case 7:
-            System.exit(0);
+            System.exit(Constants.ZERO);
           default:
-            System.exit(0);
+            System.exit(Constants.ZERO);
         }
       }
     } catch (Exception e) {
       e.printStackTrace();
-      System.exit(1);
+      System.exit(Constants.MINUS_ONE);
     }
   }
 
@@ -294,6 +294,7 @@ public class PeerImpl implements Peer {
       Util.print(neighbour.address());
     }
   }
+
   private String getMasterFolderName(Host host){
     return  Util.getValue(Constants.MASTER_FOLDER, Constants.PEER_PROPERTIES_FILE) + "_" + host.getHashCode();
   }
@@ -301,7 +302,6 @@ public class PeerImpl implements Peer {
   private String getCacheFolderName(Host host){
     return  Util.getValue(Constants.CACHED_FOLDER, Constants.PEER_PROPERTIES_FILE) + "_" + host.getHashCode();
   }
-
 
   private void createFolders(Host host) {
     Util.createFolder(getMasterFolderName(host));
@@ -338,7 +338,7 @@ public class PeerImpl implements Peer {
     serverThread.start();
     clientThread.start();
     cleanUpThread.start();
-    //pullThread.start();
+    pullThread.start();
     watchThread.start();
   }
 
@@ -364,24 +364,26 @@ public class PeerImpl implements Peer {
    * 2. If not Issue Download Request
    */
   @Override
-  public void handleBroadCastEvents(String messageId, String changedFileName, int fileVersion,
-      int ttl, boolean isForward) {
+  public void handleBroadCastEvents(String originServer, String changedFileName, int fileVersion,
+      int ttl, boolean isForward, String receivedFrom) {
     Socket sock = null;
+    String messageId = host.address() + "_" + Integer.toString(++messageID);
     if (!isForward) {
-      messageId = host.address() + "_" + Integer.toString(++messageID);
-      ttl = 7;
+      ttl = Constants.TTL;
+      originServer = host.address();
     }
     for (Host h : neighbours) {
+      if(h.address().equals(receivedFrom)){
+        Util.println("Not forwarding to server from whom I received this message");
+        continue;
+      }
       try {
         sock = new Socket(h.getUrl(), h.getPort());
         PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
         out.println(Constants.INVALIDATION + " " + messageId + " " + changedFileName + " " + Integer
-            .toString(fileVersion) + " " + Integer.toString(ttl));
+            .toString(fileVersion) + " " + Integer.toString(ttl) + originServer);
         sock.close();
-        if (!seenInvalidationHitMessages.contains(messageId)) {
-          this.seenInvalidationHitMessages.add(messageId);
-        }
-      } catch (Exception e) {
+        } catch (Exception e) {
         e.printStackTrace();
         try {
           sock.close();
@@ -393,9 +395,9 @@ public class PeerImpl implements Peer {
 
   }
 
-  public void handleForwardBroadCastEvents(String messageId, String changedFileName,
-      int fileVersion, int ttl) {
-    handleBroadCastEvents(messageId, changedFileName, fileVersion, ttl, true);
+  public void handleForwardBroadCastEvents(String originServer, String changedFileName,
+      int fileVersion, int ttl,String receivedFrom) {
+    handleBroadCastEvents(originServer, changedFileName, fileVersion, ttl, true,receivedFrom);
   }
 
   /**
@@ -425,14 +427,14 @@ public class PeerImpl implements Peer {
       ttl = ttl - 1;
 
       //not searching or forwarding already seen message
-      if (!seenMessages.containsKey(params[1]) && ttl > 0) {
+      if (!seenMessages.containsKey(params[1]) && ttl > Constants.ZERO) {
 
         List addresses = new ArrayList<String>();
         addresses.add(params[3]);
         this.seenMessages.put(params[1], addresses);
         forwardQuery(params[1], params[2], ttl);
         if (myfiles.fileExists(params[2]) || downloadedFiles.fileExistsAndValid(params[2])) {
-          returnQueryHit(params[1], params[2], host.address(), 7, false);
+          returnQueryHit(params[1], params[2], host.address(), Constants.MINUS_ONE, false);
         }
       } else {
         List ports = (List) seenMessages.get(params[1]);
@@ -447,7 +449,7 @@ public class PeerImpl implements Peer {
       ttl = ttl - 1;
 
       //Not forwarding already seen query hit messages
-      if (!seenQueryHitMessages.containsKey(params[1]) && ttl > 0) {
+      if (!seenQueryHitMessages.containsKey(params[1]) && ttl > Constants.ZERO) {
         List addr = new ArrayList<String>();
         addr.add(params[3]);
         this.seenQueryHitMessages.put(params[1], addr);
@@ -482,12 +484,12 @@ public class PeerImpl implements Peer {
       ttl = ttl - 1;
 
       //not forwarding already seen message
-      if (!seenInvalidationHitMessages.contains(params[1]) && ttl > 0) {
-
-        handleForwardBroadCastEvents(params[1], params[2], Integer.parseInt(params[3]), ttl);
+      if (!seenInvalidationHitMessages.contains(params[1]) && ttl > Constants.ZERO) {
+        this.seenInvalidationHitMessages.add(params[1]);
+        handleForwardBroadCastEvents(params[5], params[2], Integer.parseInt(params[3]), ttl,params[1].split("_")[0]);
         //Util.searchInCached(params[2],Integer.parseInt(params[3]),params[1].split("_")[0],true);
         if (downloadedFiles.fileExistsAndValid(params[2], params[1].split("_")[0])) {
-          downloadedFiles.updateFileMetadata(params[2], Integer.parseInt(params[3]));
+          downloadedFiles.updateFileMetadata(params[2], Integer.parseInt(params[3]));//fileName, version
         }
       } else {
         Util.print("Not forwarding " + input);
@@ -572,7 +574,7 @@ public class PeerImpl implements Peer {
       myfiles.setLastUpdatedTime(fileName, LocalDateTime.now());
       Util.println("New version : " + myfiles.getFileMetadata(fileName).getVersion());
 
-      handleBroadCastEvents(null, fileName, oldVersion + 1, 0, false);
+      handleBroadCastEvents(null, fileName, oldVersion + 1, 0, false,null);
 
 
     } else if (eventType.equals("ENTRY_DELETE")) {

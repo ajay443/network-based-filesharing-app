@@ -31,13 +31,15 @@ public  class Constants {
     public static final String QUERYHIT = "queryhit";
     public static final String DOWNLOAD = "download";
     public static final String INVALIDATION = "INVALIDATION";
-    public static final String PEER_PROPERTIES_FILE = "peer.properties";
+    public static final String PEER_PROPERTIES_FILE = "peer1.properties";
     public static final String MASTER_FOLDER = "master.foldername";
     public static final String CACHED_FOLDER = "cache.foldername";
     public static final String PEER_NEIGHBORS = "peer.neighbors";
-    public static final String DOWNLOADED_LIST = "downloaded.folderlist";
     public static final String PULL_TTR = "pull.TTR";
     public static final String CONFIG_FILE_PREFIX = "config-";
+    public static final int TTL = 7;
+    public static final int ZERO = 0;
+    public static final int MINUS_ONE = -1;
 
     public static final String DISPLAY_MENU = "\n1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Display downloaded files info\n6 : Refresh a stale file\n7 : Exit\nEnter your choice number";
 

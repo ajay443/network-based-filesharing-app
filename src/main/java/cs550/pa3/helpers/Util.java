@@ -50,6 +50,8 @@ public  class Util {
 
     }
 
+    /*
+
     public static void downloadFile(String filePath,Socket socket){
         File f = new File(filePath);
         try(
@@ -136,7 +138,7 @@ public  class Util {
         }
         return false;
     }
-
+    */
     public static String getValue(String key) {
 
         Properties prop = new Properties();
