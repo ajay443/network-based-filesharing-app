@@ -429,7 +429,9 @@ public class PeerImpl implements Peer {
     String params[] = input.split(" ");
     if(params[0].equals(Constants.PULL)){
       Util.print("Pull Event Happened");
-      input.split(" ", 3);
+      Util.printHeader();
+      Util.print(input.split(Constants.SPACE,3)[2]);
+      Util.printFooter();
     }
     // TODO - Make it simple to read by using Switch Case and Enum datatype
     if (params[0].equals(Constants.DOWNLOAD) || params[0].equals(Constants.DOWNLOAD_METADATA) ) {
