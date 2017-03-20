@@ -62,7 +62,6 @@ public class PeerImpl implements Peer {
   //private PeerFiles myfiles;
   //private PeerFiles downloadedFiles;
   public PeerFiles peerFiles;
-
   int pullOrPush;//1 : Pull, 2 : Push
 
   //todo - iniital file contents are not indexed by watch thread
@@ -79,8 +78,6 @@ public class PeerImpl implements Peer {
     //myfiles = new PeerFiles();
     //downloadedFiles = new PeerFiles();
     peerFiles = new PeerFiles();
-
-    pullOrPush = 2;
 
   }
 
@@ -430,7 +427,45 @@ public class PeerImpl implements Peer {
 
     }
   }
-  // todo synchronized check p
+
+  private void sendPullRequest(String fileName,String address){
+    PeerFile file =  peerFiles.getFileMetadata(fileName);
+    file.setIsStale(true);
+    file.setOriginal(false);
+
+    Socket peerClientSocket = null;
+    try {
+      peerClientSocket = new Socket(address.split(":")[0], Integer.parseInt(address.split(":")[1]));
+      PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
+      out.println(Constants.PULL + " " + file.getName()+" "+Util.getJson(file));
+      out.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        peerClientSocket.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+  }
+
+  private void parsePullRequest(String input,String fileName) {
+    try{
+      PeerFile file = (PeerFile) Util.toObjectFromJson(input.split(Constants.SPACE,3)[2],PeerFile.class);
+      synchronized (peerFiles){
+        peerFiles.getFilesMetaData().remove(fileName);
+        peerFiles.getFilesMetaData().put(fileName,file);
+      }
+      Util.print("File Meta Data updated from Pull request, press 5 to see the latest meta data");
+    }catch (Exception e){
+      Util.println(e.getMessage()+"\nException Occurred while parsing the poll request\n"+input);
+    }
+
+  }
+
+  // todo synchronized ch5eck p
   private void processInput(String input, Socket socket) {
     Util.print("Received Message : " + input);
     String params[] = input.split(" ");
@@ -583,7 +618,7 @@ public class PeerImpl implements Peer {
   public void handleWatcherThreadEvents(String eventType, String fileName) {
     Util.print("Event = " + eventType + " file = " + fileName);
     if (eventType.equals("ENTRY_CREATE")) {
-      if(peerFiles.fileExists(fileName)){//file is modified
+    if(peerFiles.fileExists(fileName)){//file is modified
         PeerFile modifiedFile = peerFiles.getFileMetadata(fileName);
         modifiedFile.setVersion(modifiedFile.getVersion() + 1);
         modifiedFile.setLastUpdated(LocalDateTime.now());
@@ -702,8 +737,7 @@ public class PeerImpl implements Peer {
   }
 
   public void displayDownloadedFilesInfo() {
-
-   HashMap<String, PeerFile> peerDatabase = peerFiles.getFilesMetaData();
+    HashMap<String, PeerFile> peerDatabase = peerFiles.getFilesMetaData();
     Util.printHeader();
     Util.println("                      Peer File Information                        ");
     Util.printFooter();
@@ -712,8 +746,8 @@ public class PeerImpl implements Peer {
       Util.printHeader();
       Util.println(Util.getFormattedJson(file));
       Util.printFooter();
-   }
 
+    }
   }
 
   public String queryHitMessage(String messageID, String fileName, String address, int ttl) {
