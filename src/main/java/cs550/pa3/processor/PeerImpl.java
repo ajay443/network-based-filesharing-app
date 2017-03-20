@@ -56,8 +56,8 @@ public class PeerImpl implements Peer {
   private Set seenInvalidationHitMessages;
   private List<Host> neighbours;
   private Host host;
-  private PeerFiles myfiles;
-  private PeerFiles downloadedFiles;
+  //private PeerFiles myfiles;
+  //private PeerFiles downloadedFiles;
   private PeerFiles peerFiles;
 
   //todo - iniital file contents are not indexed by watch thread
@@ -71,8 +71,8 @@ public class PeerImpl implements Peer {
     thrash = new ArrayList<String>();
     //peerFiles = new ArrayList<PeerFile>();
     //files.setFilesMetaData(peerFiles);
-    myfiles = new PeerFiles();
-    downloadedFiles = new PeerFiles();
+    //myfiles = new PeerFiles();
+    //downloadedFiles = new PeerFiles();
     peerFiles = new PeerFiles();
 
   }
@@ -211,7 +211,7 @@ public class PeerImpl implements Peer {
           case 1:
             Util.println("Enter filename : ");
             fileName = in.next();
-            search(null, fileName, 0, false);
+            search(null, fileName, Constants.ZERO, false);
             break;
           case 2:
             Util.println("Enter filename : ");
@@ -262,7 +262,7 @@ public class PeerImpl implements Peer {
   public void initConfig(String hostName, int port) {
     host = new Host(hostName, port);
     createFolders(host);
-    readFromFile(Constants.CONFIG_FILE_PREFIX+port+Constants.PEER_PROPERTIES_FILE);
+    readFromFile(Constants.CONFIG_FILE_PREFIX + port + Constants.PEER_PROPERTIES_FILE);
     displayPeerInfo();
     serverThread = new Thread() {
       public void run() {
@@ -365,7 +365,7 @@ public class PeerImpl implements Peer {
         this.seenMessages.put(params[1], addresses);
         forwardQuery(params[1], params[2], ttl);
 
-        if (peerFiles.fileExists(params[2])) {
+        if (peerFiles.fileExists(params[2])) {//for cached files need to check if it is valid?
           returnQueryHit(params[1], params[2], host.address(), Constants.TTL, false);
         }
       } else {
@@ -420,7 +420,7 @@ public class PeerImpl implements Peer {
         this.seenInvalidationHitMessages.add(params[1]);
         handleForwardBroadCastEvents(params[5], params[2], Integer.parseInt(params[3]), ttl,params[1].split("_")[0]);
         //Util.searchInCached(params[2],Integer.parseInt(params[3]),params[1].split("_")[0],true);
-        if (peerFiles.fileExistsAndValid(params[2], params[1].split("_")[0])) {
+        if (peerFiles.fileExistsAndValid(params[2], params[1].split("_")[0])) {//filename, origin server
           peerFiles.updateFileMetadata(params[2], Integer.parseInt(params[3]));
         }
       } else {
@@ -500,7 +500,7 @@ public class PeerImpl implements Peer {
       PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
       fileModified.setVersion(fileModified.getVersion()+1);
       fileModified.setLastUpdated(LocalDateTime.now());
-      peerFiles.getFilesMetaData().remove(fileName);
+      peerFiles.getFilesMetaData().remove(fileName);//we can directly change the attributes rather than removing and adding again
       peerFiles.getFilesMetaData().put(fileName,fileModified);
       Util.print(Util.getJson(fileModified));
       handleBroadCastEvents(null, fileName, fileModified.getVersion(), Constants.ZERO, false, null);
@@ -541,8 +541,8 @@ public class PeerImpl implements Peer {
     ) {
       byte b[] = new byte[16 * 1024];
       int count;
-      while ((count = fip.read(b)) > 0) {
-        out.write(b, 0, count);
+      while ((count = fip.read(b)) > Constants.ZERO) {
+        out.write(b, Constants.ZERO, count);
       }
       out.flush();
     } catch (FileNotFoundException e) {
@@ -563,8 +563,8 @@ public class PeerImpl implements Peer {
      //todo remove this commented line -> //InputStream fip = new ByteArrayInputStream(("{\"name\":\"ajayramesh-testing\"}").getBytes(StandardCharsets.UTF_8));
       byte b[] = new byte[16 * 1024];
       int count;
-      while ((count = fip.read(b)) > 0) {
-        out.write(b, 0, count);
+      while ((count = fip.read(b)) > Constants.ZERO) {
+        out.write(b, Constants.ZERO, count);
       }
       out.flush();
     } catch (Exception e) {
@@ -648,8 +648,8 @@ public class PeerImpl implements Peer {
       byte[] bytes = new byte[16 * 1024];
 
       int count;
-      while ((count = in.read(bytes)) > 0) {
-        fout.write(bytes, 0, count);
+      while ((count = in.read(bytes)) > Constants.ZERO) {
+        fout.write(bytes, Constants.ZERO, count);
       }
       p.close();
 

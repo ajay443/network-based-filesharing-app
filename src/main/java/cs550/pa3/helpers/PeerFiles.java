@@ -75,7 +75,7 @@ public class PeerFiles {
         }
     }
 
-    public boolean fileExistsAndValid(String fileName, String originServer){
+    public boolean fileExistsAndValid(String fileName, String originServer){//checks if fileName is cached from originServer
         PeerFile file = getFileMetadata(fileName);
         if(file == null) {
             return false;
