@@ -40,7 +40,6 @@ public class PeerFiles {
         this.filesMetaData.get(fileName).setLastUpdated(time);
     }
 
-
     public void add(PeerFile newFile){
         filesMetaData.put(newFile.getName() /*+ ":" + newFile.getFromAddress().address()*/, newFile);
 
