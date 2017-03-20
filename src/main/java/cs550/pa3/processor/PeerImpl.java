@@ -311,7 +311,8 @@ public class PeerImpl implements Peer {
           case 7:
             System.exit(Constants.ZERO);
           default:
-            System.exit(Constants.ZERO);
+            Util.print("Invalid Input Try again ! ");
+            runPeerClient();
         }
       }
     } catch (InputMismatchException e){
