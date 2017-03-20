@@ -117,8 +117,16 @@ public class PeerImpl implements Peer {
     peerFiles.add((PeerFile) Util.toObjectJsonFromJson(metaDataFileName,PeerFile.class));
   }
 
+  /**
+   * TODO check synchronized p1
+   * @param msgid
+   * @param fileName
+   * @param addr
+   * @param ttl
+   * @param isForward
+   */
   @Override
-  public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
+  public synchronized void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
     //lookup
     Socket sock = null;
     List addresses = (List) seenMessages.get(msgid);
@@ -344,8 +352,8 @@ public class PeerImpl implements Peer {
 
     }
   }
-
-  private void processInput(String input, Socket socket) {
+  // todo synchronized check p
+  private synchronized  void processInput(String input, Socket socket) {
     Util.print("Received Message : " + input);
     String params[] = input.split(" ");
     // TODO - Make it simple to read by using Switch Case and Enum datatype

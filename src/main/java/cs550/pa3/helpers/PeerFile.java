@@ -124,6 +124,7 @@ public class PeerFile {
         this.isStale = isStale;
     }
 
-
-
+    public void setStale(boolean stale) {
+        isStale = stale;
+    }
 }
