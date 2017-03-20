@@ -34,7 +34,7 @@ public class Pull  implements Event {
             for (PeerFile f : peerFiles.values()) {
                 if (f.fileExpired() || f.isOriginal()==false) {
                     Util.print("File "+f.getName()+" is expired!");
-                    peerImpl.pullFile(f);
+                    peerImpl.pollRequest(f);
                 }
             }
 
