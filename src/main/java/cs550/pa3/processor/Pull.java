@@ -8,11 +8,7 @@
 
 package cs550.pa3.processor;
 
-import cs550.pa3.helpers.PeerFile;
-import cs550.pa3.helpers.PeerFiles;
 import cs550.pa3.helpers.Util;
-
-import java.util.HashMap;
 
 public class Pull  implements Event {
 
@@ -33,14 +29,14 @@ public class Pull  implements Event {
             //changed here
             if(peerImpl == null)return;
             else {
-                PeerFiles files = peerImpl.getDownloadedFiles();
+               /* //PeerFiles files = peerImpl.getDownloadedFiles();
                 if(files == null)return;
                 HashMap<String, PeerFile> peerFiles = files.getFilesMetaData();
                 for (PeerFile f : peerFiles.values()) {
                     if (f.fileExpired()) {
                         peerImpl.pullFile(f);
                     }
-                }
+                }*/
             }
         }
     }

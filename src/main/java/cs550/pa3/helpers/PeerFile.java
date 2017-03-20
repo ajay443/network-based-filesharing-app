@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 
 public class PeerFile {
     int version;
-    boolean original;
+    boolean original=true;
     String name;
     int TTR;
     Host fromAddress;
@@ -37,6 +37,17 @@ public class PeerFile {
         this.fromAddress = null; // TODO change to make peer server address .
         this.lastUpdated = LocalDateTime.now();
 
+    }
+
+    public PeerFile(int version, boolean original, String name, int TTR,
+        Host fromAddress, boolean isStale, LocalDateTime lastUpdated) {
+        this.version = version;
+        this.original = original;
+        this.name = name;
+        this.TTR = TTR;
+        this.fromAddress = fromAddress;
+        this.isStale = isStale;
+        this.lastUpdated = lastUpdated;
     }
 
     public PeerFile(boolean original, String name, int TTR, Host address, int version) {

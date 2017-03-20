@@ -16,7 +16,7 @@ import cs550.pa3.helpers.Util;
 import org.omg.CORBA.CODESET_INCOMPATIBLE;
 
 import java.io.BufferedReader;
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,8 +29,7 @@ import java.net.BindException;
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +58,9 @@ public class PeerImpl implements Peer {
   private Host host;
   private PeerFiles myfiles;
   private PeerFiles downloadedFiles;
+  private PeerFiles peerFiles;
 
+  //todo - iniital file contents are not indexed by watch thread
 
   public PeerImpl() {
     this.seenMessages = new HashMap<String, List<String>>();
@@ -72,6 +73,7 @@ public class PeerImpl implements Peer {
     //files.setFilesMetaData(peerFiles);
     myfiles = new PeerFiles();
     downloadedFiles = new PeerFiles();
+    peerFiles = new PeerFiles();
 
   }
 
@@ -111,53 +113,10 @@ public class PeerImpl implements Peer {
 
   @Override
   public void download(String fileName, String host, int port) throws IOException {
-    Socket peerClientSocket = null;
-    try {
-      peerClientSocket = new Socket(host, port);
-      PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
-      //BufferedReader in = new BufferedReader(new InputStreamReader(peerClientSocket.getInputStream()));
-      InputStream in = peerClientSocket.getInputStream();
-      OutputStream fout = new FileOutputStream(
-          getCacheFolderName(this.host)+ "/" + fileName);
-      out.println(Constants.DOWNLOAD + " " + fileName);
-      String message = "";
-      PrintWriter p = new PrintWriter(fileName, "UTF-8");
-
-      byte[] bytes = new byte[16 * 1024];
-
-      int count;
-      while ((count = in.read(bytes)) > Constants.ZERO) {
-        fout.write(bytes, Constants.ZERO, count);
-      }
-      //in.wait(2);
-      byte[] b = new byte[4];
-      in.read(b);
-      int version = ByteBuffer.wrap(b).getInt();
-      in.read(b);
-      int ttr = ByteBuffer.wrap(b).getInt();
-      in.read(bytes);
-      String origin = new String(bytes, "UTF-8");
-      String addr_params[] = origin.split(":");
-      Util.println("Version : " + Integer.toString(version) + " TTR : " + Integer.toString(ttr)
-          + " Origin : " + origin);
-      registry(fileName, new Host(addr_params[0], Integer.parseInt(addr_params[1])), ttr, version);
-      p.close();
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      peerClientSocket.close();
-    }
-
+    downloadFile(Constants.DOWNLOAD_METADATA,getCacheFolderName(this.host)+ "/" + fileName+""+Constants.TEMP_FILE,host,port,fileName);
+    downloadFile(Constants.DOWNLOAD,getCacheFolderName(this.host)+ "/" + fileName,host,port,fileName);
+    //todo update the  PeerFiles database from the
   }
-
-  private void registry(String fileName, Host host, int ttr, int version) {
-    // TODO when you download some thing from the remote peer, register it
-    if (!downloadedFiles.fileExists(fileName)) {
-      downloadedFiles.add(new PeerFile(false, fileName, ttr, host, version));
-    }
-  }
-
 
   @Override
   public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
@@ -177,7 +136,11 @@ public class PeerImpl implements Peer {
         sock = new Socket(addr_attrs[0], Integer.valueOf(addr_attrs[1]));
         PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
 
-        out.println(Constants.QUERYHIT + " " + msgid + " " + fileName + " " + addr + " " + ttl);
+        Util.print("File Information to send with QueyHit\n"+ Util.getJson(peerFiles.getFilesMetaData().get(fileName)));
+        Util.print(queryHitMessage(msgid,fileName,addr,ttl));
+        out.println(queryHitMessage(msgid,fileName,addr,ttl));
+
+        // out.println(Constants.QUERYHIT + " " + msgid + " " + fileName + " " + addr + " " + ttl);
         out.close();
 
         if (!seenQueryHitMessages.containsKey(msgid)) {
@@ -246,16 +209,16 @@ public class PeerImpl implements Peer {
         int choice = in.nextInt();
         switch (choice) {
           case 1:
-            Util.println("Enter filename : \n");
+            Util.println("Enter filename : ");
             fileName = in.next();
             search(null, fileName, 0, false);
             break;
           case 2:
-            Util.println("Enter filename : \n");
+            Util.println("Enter filename : ");
             fileName = in.next();
-            Util.println("Enter Host name of the download server : \n");
+            Util.println("Enter Host name of the download server : ");
             String host = in.next();
-            Util.println("Enter port number of of the download server : \n");
+            Util.println("Enter port number of of the download server : ");
             int hostPort = in.nextInt();
             download(fileName, host, hostPort);
             break;
@@ -271,7 +234,7 @@ public class PeerImpl implements Peer {
           case 6:
             Util.println("Enter filename : \n");
             fileName = in.next();
-            Host h = downloadedFiles.getFileMetadata(fileName).getFromAddress();
+            Host h = peerFiles.getFileMetadata(fileName).getFromAddress();
             download(fileName, h.getUrl(), h.getPort());
             break;
           case 7:
@@ -293,19 +256,6 @@ public class PeerImpl implements Peer {
     for (Host neighbour : neighbours) {
       Util.print(neighbour.address());
     }
-  }
-
-  private String getMasterFolderName(Host host){
-    return  Util.getValue(Constants.MASTER_FOLDER, Constants.PEER_PROPERTIES_FILE) + "_" + host.getHashCode();
-  }
-
-  private String getCacheFolderName(Host host){
-    return  Util.getValue(Constants.CACHED_FOLDER, Constants.PEER_PROPERTIES_FILE) + "_" + host.getHashCode();
-  }
-
-  private void createFolders(Host host) {
-    Util.createFolder(getMasterFolderName(host));
-    Util.createFolder(getCacheFolderName(host));
   }
 
   @Override
@@ -342,27 +292,6 @@ public class PeerImpl implements Peer {
     watchThread.start();
   }
 
-  public void cleanUpSeenMessages() {
-    while (true) {
-      try {
-        Thread.sleep(5000);
-        for (String qid : thrash) {
-          Util.print("Removing " + qid);
-          seenMessages.remove(qid);
-          seenQueryHitMessages.remove(qid);
-        }
-        thrash.clear();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  /**
-   * Handle Broad Cast Event here
-   * 1. Check if I have the latest file or not
-   * 2. If not Issue Download Request
-   */
   @Override
   public void handleBroadCastEvents(String originServer, String changedFileName, int fileVersion,
       int ttl, boolean isForward, String receivedFrom) {
@@ -395,6 +324,7 @@ public class PeerImpl implements Peer {
 
   }
 
+
   public void handleForwardBroadCastEvents(String originServer, String changedFileName,
       int fileVersion, int ttl,String receivedFrom) {
     handleBroadCastEvents(originServer, changedFileName, fileVersion, ttl, true,receivedFrom);
@@ -404,6 +334,7 @@ public class PeerImpl implements Peer {
    * 1. Create a Pull->thread and let that run in background when peerserver starts.
    * 2.
    */
+
   @Override
   public void runPullProcess() {
     Util.print("Pull Thread Started Running.");
@@ -419,10 +350,10 @@ public class PeerImpl implements Peer {
     Util.print("Received Message : " + input);
     String params[] = input.split(" ");
     // TODO - Make it simple to read by using Switch Case and Enum datatype
-    if (params[0].equals(Constants.DOWNLOAD)) {
-      serveDownloadRequest(params[1], socket);
+    if (params[0].equals(Constants.DOWNLOAD) || params[0].equals(Constants.DOWNLOAD_METADATA) ) {
+      Util.print("Serving request of the type = "+params[0]);
+      serveDownloadRequest(params[0], params[1], socket);
     } else if (params[0].equals(Constants.QUERY)) {
-      //DisplaySeenMessages(params[0]);
       int ttl = Integer.valueOf(params[4]);
       ttl = ttl - 1;
 
@@ -433,8 +364,9 @@ public class PeerImpl implements Peer {
         addresses.add(params[3]);
         this.seenMessages.put(params[1], addresses);
         forwardQuery(params[1], params[2], ttl);
-        if (myfiles.fileExists(params[2]) || downloadedFiles.fileExistsAndValid(params[2])) {
-          returnQueryHit(params[1], params[2], host.address(), Constants.MINUS_ONE, false);
+
+        if (peerFiles.fileExists(params[2])) {
+          returnQueryHit(params[1], params[2], host.address(), Constants.TTL, false);
         }
       } else {
         List ports = (List) seenMessages.get(params[1]);
@@ -488,8 +420,8 @@ public class PeerImpl implements Peer {
         this.seenInvalidationHitMessages.add(params[1]);
         handleForwardBroadCastEvents(params[5], params[2], Integer.parseInt(params[3]), ttl,params[1].split("_")[0]);
         //Util.searchInCached(params[2],Integer.parseInt(params[3]),params[1].split("_")[0],true);
-        if (downloadedFiles.fileExistsAndValid(params[2], params[1].split("_")[0])) {
-          downloadedFiles.updateFileMetadata(params[2], Integer.parseInt(params[3]));//fileName, version
+        if (peerFiles.fileExistsAndValid(params[2], params[1].split("_")[0])) {
+          peerFiles.updateFileMetadata(params[2], Integer.parseInt(params[3]));
         }
       } else {
         Util.print("Not forwarding " + input);
@@ -560,113 +492,186 @@ public class PeerImpl implements Peer {
   }
 
   public void handleWatcherThreadEvents(String eventType, String fileName) {
-    Util.println("Event : " + eventType + " file : " + fileName);
+    Util.print("Event = " + eventType + " file = " + fileName);
     if (eventType.equals("ENTRY_CREATE")) {
-      //add file to the peerFiles list
-      PeerFile newFile = new PeerFile(true, fileName, 0, host, 1);
-      myfiles.add(newFile);
+      peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 3600, host,false,LocalDateTime.now()));
+      Util.print(Util.getJson(peerFiles));
     } else if (eventType.equals("ENTRY_MODIFY")) {
-      //modify file metadata in peerFiles and send out INVALIDATION message to all neighbors
-      PeerFile toModify = myfiles.getFileMetadata(fileName);
-      int oldVersion = toModify.getVersion();
-      Util.println("Old version : " + Integer.toString(oldVersion));
-      myfiles.setVersion(fileName, oldVersion + 1);
-      myfiles.setLastUpdatedTime(fileName, LocalDateTime.now());
-      Util.println("New version : " + myfiles.getFileMetadata(fileName).getVersion());
-
-      handleBroadCastEvents(null, fileName, oldVersion + 1, 0, false,null);
-
-
+      PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
+      fileModified.setVersion(fileModified.getVersion()+1);
+      fileModified.setLastUpdated(LocalDateTime.now());
+      peerFiles.getFilesMetaData().remove(fileName);
+      peerFiles.getFilesMetaData().put(fileName,fileModified);
+      Util.print(Util.getJson(fileModified));
+      handleBroadCastEvents(null, fileName, fileModified.getVersion(), Constants.ZERO, false, null);
     } else if (eventType.equals("ENTRY_DELETE")) {
-      //remove file from peerFiles list
-      PeerFile toDelete = new PeerFile(true, fileName, 0, host, 0);
-      myfiles.remove(toDelete);
+      peerFiles.getFilesMetaData().remove(fileName);
     }
-
   }
 
-  public void serveDownloadRequest(String fileName, Socket socket) {
-    boolean myaddr = false;
-    File sourceFile = null;
-    if (myfiles.fileExists(fileName)) {
-      sourceFile = new File(
-          getMasterFolderName(this.host) + "/" + fileName);
-      myaddr = true;
-    } else {
-      sourceFile = new File(
-          getCacheFolderName(this.host) + "/" + fileName);
+  public void serveDownloadRequest(String taskType, String fileName, Socket socket) {
+    /**
+     * 1.Search in peerFiles
+     * 2.Check filename.stale == true if true return "Invalid Message"
+     * 3.If above condition fails, then send the file
+     *  3.a Send File MetaData
+     *  3.b Send FIle content
+     */
+    Util.print(fileName);
+    if (isPeerFileOutdated(fileName)) {
+       Util.print("File is outdated");
+      // todo send invalid message
+      return;
     }
+    switch (taskType){
+      case Constants.DOWNLOAD:
+        sendFileData(fileName,socket);
+        break;
+      case Constants.DOWNLOAD_METADATA:
+        sendFileMetadata(fileName,socket);
+        break;
+    }
+  }
 
+  private void sendFileData(String fileName, Socket socket) {
+    Util.print("Sending File Data");
     try (
-        InputStream fip = new FileInputStream(sourceFile);
+        InputStream fip = new FileInputStream(getFilePath(fileName));
         OutputStream out = socket.getOutputStream();
-    ) {   //int content = 0;
+    ) {
       byte b[] = new byte[16 * 1024];
       int count;
       while ((count = fip.read(b)) > 0) {
         out.write(b, 0, count);
       }
-      //fetch the file details from peerFiles object
-      //out.wait(2);
       out.flush();
-
-      //send file attributes : version, origin server, TTR and last modified time
-      ByteBuffer bb = ByteBuffer.allocate(8);
-
-      if (myaddr) {
-        bb.putInt(myfiles.getFileMetadata(fileName).getVersion());
-        byte[] b_i = bb.array();
-        out.write(b_i);
-
-        bb.putInt(
-            Integer.parseInt(Util.getValue(Constants.PULL_TTR, Constants.PEER_PROPERTIES_FILE)));
-        b_i = bb.array();
-        out.write(b_i);
-
-        String origin = host.getUrl() + ":" + host.getPort();
-        byte[] b_o = origin.getBytes(Charset.forName("UTF-8"));
-        out.write(b_o);
-      } else {
-        bb.putInt(downloadedFiles.getFileMetadata(fileName).getVersion());
-        byte[] b_i = bb.array();
-        out.write(b_i);
-
-        bb.putInt(
-            Integer.parseInt(Util.getValue(Constants.PULL_TTR, Constants.PEER_PROPERTIES_FILE)));
-        b_i = bb.array();
-        out.write(b_i);
-
-        Host addr = downloadedFiles.getFileMetadata(fileName).getFromAddress();
-        String origin = addr.getUrl() + ":" + addr.getPort();
-        byte[] b_o = origin.getBytes(Charset.forName("UTF-8"));
-        out.write(b_o);
-      }
-
-
-    } catch(FileNotFoundException e){
-      Util.error("File is not present below locations: \n"+getCacheFolderName(this.host)+"\n"+getMasterFolderName(this.host));
+    } catch (FileNotFoundException e) {
+      Util.error("File is not present below locations: \n" + getCacheFolderName(this.host) + "\n"
+          + getMasterFolderName(this.host));
       return;
-    }catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public PeerFiles getMyfiles() {
-    return myfiles;
+  private void sendFileMetadata(String fileName, Socket socket) {
+    Util.print("Sending Meta Data.");
+    try (
+        OutputStream out = socket.getOutputStream();
+    ) {
+      InputStream fip = new ByteArrayInputStream(Util.getJson(peerFiles.getFileMetadata(fileName)).getBytes(StandardCharsets.UTF_8));
+     //todo remove this commented line -> //InputStream fip = new ByteArrayInputStream(("{\"name\":\"ajayramesh-testing\"}").getBytes(StandardCharsets.UTF_8));
+      byte b[] = new byte[16 * 1024];
+      int count;
+      while ((count = fip.read(b)) > 0) {
+        out.write(b, 0, count);
+      }
+      out.flush();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
-  public PeerFiles getDownloadedFiles() {
-    return downloadedFiles;
+  private boolean isPeerFileOutdated(String fileName) {
+    return peerFiles.getFilesMetaData().get(fileName).checkIsStale();
+  }
+
+  private String getFilePath(String fileName) {
+    if(peerFiles.getFilesMetaData().get(fileName).isOriginal())
+      return  getMasterFolderName(this.host) + "/" + fileName;
+    return getCacheFolderName(this.host) + "/" + fileName;
   }
 
   public void displayDownloadedFilesInfo() {
-    HashMap<String, PeerFile> hm = downloadedFiles.getFilesMetaData();
+    HashMap<String, PeerFile> hm = peerFiles.getFilesMetaData();
     Util.println("Name | version | last update time | ");
     for (PeerFile file : hm.values()) {
       Util.println(
           file.getName() + " " + file.getVersion() + " " + file.getLastUpdated().toString() + " "
               + file.getFromAddress().address() + " " + file.checkIsStale());
     }
+  }
+
+  public  String queryHitMessage(String messageID, String fileName, String address, int ttl) {
+    return
+        Constants.QUERYHIT + " "
+            + messageID + " " +
+            fileName + " " +
+            address + " " +
+            ttl + " " +
+            Util.getJson(peerFiles.getFilesMetaData().get(fileName));
+  }
+
+  public void cleanUpSeenMessages() {
+    while (true) {
+      try {
+        Thread.sleep(5000);
+        for (String qid : thrash) {
+          Util.print("Removing " + qid);
+          seenMessages.remove(qid);
+          seenQueryHitMessages.remove(qid);
+        }
+        thrash.clear();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private String getMasterFolderName(Host host){
+    return  Util.getValue(Constants.MASTER_FOLDER, Constants.PEER_PROPERTIES_FILE) + "_" + host.getHashCode();
+  }
+
+  private String getCacheFolderName(Host host){
+    return  Util.getValue(Constants.CACHED_FOLDER, Constants.PEER_PROPERTIES_FILE) + "_" + host.getHashCode();
+  }
+
+  private void createFolders(Host host) {
+    Util.createFolder(getMasterFolderName(host));
+    Util.createFolder(getCacheFolderName(host));
+  }
+
+  /**
+   * 1.Download the file PeerServer
+   *  1.a) create a temp file in cache fileName_temp.json nd read the buffer content from server
+   */
+  private void downloadFile(String taskType,String fileName, String host, int port, String fname) {
+    Socket peerClientSocket = null;
+    try {
+      peerClientSocket = new Socket(host, port);
+      PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
+      InputStream in = peerClientSocket.getInputStream();
+      OutputStream fout = new FileOutputStream(fileName);
+      out.println(taskType + " " + fname);
+      String message = "";
+      PrintWriter p = new PrintWriter(fileName, "UTF-8");
+      byte[] bytes = new byte[16 * 1024];
+
+      int count;
+      while ((count = in.read(bytes)) > 0) {
+        fout.write(bytes, 0, count);
+      }
+      p.close();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        peerClientSocket.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+  }
+
+  private void updatePeerFilesList(String fileName) {
+    Util.print("File Name for json "+fileName);
+    //todo
+    /**
+     * read the content from json
+     * store it to the meta data
+     */
   }
 
 }
