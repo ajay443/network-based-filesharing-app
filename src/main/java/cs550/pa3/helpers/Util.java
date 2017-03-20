@@ -287,6 +287,8 @@ public  class Util {
 
 
   public static void main(String[] args) {
+
+        Util.print(new String("query Test json:{f}").split(Constants.SPACE,3)[2]);
         Util.printHeader();
         Util.println("                      Peer Display Menu                           ");
         Util.printFooter();
@@ -303,5 +305,7 @@ public  class Util {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+
     }
 }

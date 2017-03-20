@@ -33,6 +33,7 @@ public class Pull  implements Event {
             HashMap<String, PeerFile> peerFiles = files.getFilesMetaData();
             for (PeerFile f : peerFiles.values()) {
                 if (f.fileExpired() || f.isOriginal()==false) {
+                    Util.print("File "+f.getName()+" is expired!");
                     peerImpl.pullFile(f);
                 }
             }
