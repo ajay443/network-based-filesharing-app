@@ -42,7 +42,9 @@ public  class Constants {
     public static final int ZERO = 0;
     public static final int MINUS_ONE = -1;
     public static final String TEMP_FILE="__temp.json";
+    public static final String PULL="pull";
 
-    public static final String DISPLAY_MENU = "\n1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Display downloaded files info\n6 : Refresh a stale file\n7 : Exit\nEnter your choice number";
+
+    public static final String DISPLAY_MENU = "1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Display downloaded files info\n6 : Refresh a stale file\n7 : Exit\nEnter your choice number";
 
 }
