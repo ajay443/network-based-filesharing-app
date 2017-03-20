@@ -626,8 +626,7 @@ public class PeerImpl implements Peer {
   public void handleWatcherThreadEvents(String eventType, String fileName) {
     Util.print("Event = " + eventType + " file = " + fileName);
     if (eventType.equals("ENTRY_CREATE")) {
-<<<<<<< 703ba75ec4f0d0ddbee267ac625eb5276348ff70
-    if(peerFiles.fileExists(fileName)){//file is modified
+      if(peerFiles.fileExists(fileName)){//file is modified
         PeerFile modifiedFile = peerFiles.getFileMetadata(fileName);
         modifiedFile.setVersion(modifiedFile.getVersion() + 1);
         modifiedFile.setLastUpdated(LocalDateTime.now());
@@ -640,11 +639,8 @@ public class PeerImpl implements Peer {
         handleBroadCastEvents(null, fileName, modifiedFile.getVersion(), Constants.ZERO, false, null);
       }//file is created
       else
-        peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 10, host,false,LocalDateTime.now()));
-=======
-      peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 90, host,false,LocalDateTime.now()));
->>>>>>> POLL and PULL event fix
-      Util.print(Util.getJson(peerFiles));
+        peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 90, host,false,LocalDateTime.now()));
+        Util.print(Util.getJson(peerFiles));
     } else if (eventType.equals("ENTRY_MODIFY")) {
       //PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
       //fileModified.setVersion(fileModified.getVersion()+1);
