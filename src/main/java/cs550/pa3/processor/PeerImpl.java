@@ -73,11 +73,8 @@ public class PeerImpl implements Peer {
     this.seenInvalidationHitMessages = new HashSet();
 
     thrash = new ArrayList<String>();
-    //peerFiles = new ArrayList<PeerFile>();
-    //files.setFilesMetaData(peerFiles);
-    //myfiles = new PeerFiles();
-    //downloadedFiles = new PeerFiles();
     peerFiles = new PeerFiles();
+    pullOrPush = 1;
 
   }
 
@@ -190,13 +187,17 @@ public class PeerImpl implements Peer {
   public void returnQueryHit(String msgid, String fileName, String addr, int ttl, boolean isForward) {
     //lookup
     Socket sock = null;
+    for(String address: getSeenMessages(msgid)){
+      Util.print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+      Util.print(address);
+
+    }
     List addresses = getSeenMessages(msgid);
     //System.out.printf("Sending queryhit to %d peers",ports.size());
     Iterator i = addresses.iterator();
     if (!isForward) {
       ttl = Constants.TTL;
     }
-
     while (i.hasNext()) {
       try {
         String toSendAddr = (String) i.next();//got concurrent modification error
@@ -304,7 +305,7 @@ public class PeerImpl implements Peer {
             displayDownloadedFilesInfo();
             break;
           case 6:
-            Util.println("Enter filename : \n");
+            System.out.print("Enter filename : \n");
             fileName = in.next();
             Host h = peerFiles.getFileMetadata(fileName).getFromAddress();
             download(fileName, h.getUrl(), h.getPort());
@@ -366,10 +367,9 @@ public class PeerImpl implements Peer {
     serverThread.start();
     clientThread.start();
     cleanUpThread.start();
-    if(pullOrPush == 1)
-      pullThread.start();
-    else
-     watchThread.start();
+    pullThread.start();
+    watchThread.start();
+
   }
 
   @Override
@@ -475,7 +475,7 @@ public class PeerImpl implements Peer {
       return;
     }
     if(params[0].equals(Constants.PULL)){
-      Util.print("POLL Event Happened");
+      Util.print("Sending PUll  Event Metadata");
       parsePullRequest(input,params[1]);
       return;
     }
@@ -639,7 +639,7 @@ public class PeerImpl implements Peer {
         handleBroadCastEvents(null, fileName, modifiedFile.getVersion(), Constants.ZERO, false, null);
       }//file is created
       else
-        peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 90, host,false,LocalDateTime.now()));
+        peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, Integer.parseInt(Util.getValue("TTR")), host,false,LocalDateTime.now()));
         Util.print(Util.getJson(peerFiles));
     } else if (eventType.equals("ENTRY_MODIFY")) {
       //PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
@@ -731,11 +731,13 @@ public class PeerImpl implements Peer {
 
   private boolean isPeerFileOutdated(String fileName) {
     try{
-      return peerFiles.getFilesMetaData().get(fileName).isStale();
+      if(peerFiles.getFilesMetaData().get(fileName).isOriginal() == true) return false;
+      if(peerFiles.getFilesMetaData().get(fileName).isStale() == true) return true;
+      return false;
     }catch (NullPointerException e) {
-      Util.error("File is not present");
+      Util.error("Peer Data is corrupted please restart again.");
+      return true;
     }
-    return true;
   }
 
   private String getFilePath(String fileName) {
