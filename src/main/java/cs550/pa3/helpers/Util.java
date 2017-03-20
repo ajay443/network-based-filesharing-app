@@ -211,7 +211,8 @@ public  class Util {
     }
 
     public static void println(String input){
-         System.out.println(new Date().toString()+" >>>> PA3 -  Information ::  "+ input);
+         System.out.println(input);
+         //System.out.println(new Date().toString()+" >>>> PA3 -  Information ::  "+ input);
     }
 
     public  static void sleep(int seconds){
@@ -240,6 +241,17 @@ public  class Util {
         return "";
     }
 
+   public static String getFormattedJson(Object obj){
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    try {
+      return  mapper.writeValueAsString(obj);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    return "";
+   }
+
     public static Object toObjectFromJson(String json, Class classObject){
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -260,8 +272,24 @@ public  class Util {
         }
         return null;
     }
+    public static void printHeader(){
+      Util.println(" ---------------------------------------------------------------- ");
+      Util.println("/                                                                \\");
 
-    public static void main(String[] args) {
+
+
+    }
+  public static void printFooter(){
+    Util.println("\\                                                                /");
+    Util.println(" ---------------------------------------------------------------- ");
+
+  }
+
+
+  public static void main(String[] args) {
+        Util.printHeader();
+        Util.println("                      Peer Display Menu                           ");
+        Util.printFooter();
         Util.print("Hello World");
         Util.createFolder("test/test");
         System.out.println(Util.getValue(Constants.MASTER_FOLDER));

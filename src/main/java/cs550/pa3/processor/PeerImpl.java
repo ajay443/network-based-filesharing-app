@@ -28,10 +28,15 @@ import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +61,7 @@ public class PeerImpl implements Peer {
   private Host host;
   //private PeerFiles myfiles;
   //private PeerFiles downloadedFiles;
-  private PeerFiles peerFiles;
+  public PeerFiles peerFiles;
 
   //todo - iniital file contents are not indexed by watch thread
 
@@ -114,8 +119,11 @@ public class PeerImpl implements Peer {
     String metaDataFileName  = getCacheFolderName(this.host)+ "/" + fileName+""+Constants.TEMP_FILE;
     downloadFile(Constants.DOWNLOAD_METADATA,metaDataFileName,host,port,fileName);
     downloadFile(Constants.DOWNLOAD,getCacheFolderName(this.host)+ "/" + fileName,host,port,fileName);
-    peerFiles.add((PeerFile) Util.toObjectJsonFromJson(metaDataFileName,PeerFile.class));
-  }
+    PeerFile cacheFile = (PeerFile) Util.toObjectJsonFromJson(metaDataFileName,PeerFile.class);
+    cacheFile.setOriginal(false);
+    peerFiles.add(cacheFile);
+    deleteMetaDataFile(metaDataFileName);
+ }
 
   /**
    * TODO check synchronized p1
@@ -211,7 +219,11 @@ public class PeerImpl implements Peer {
     String fileName = "";
     try {
       while (true) {
+        Util.println("********************************************************");
+        Util.println("Peer Display Menu **************************************");
         Util.println(Constants.DISPLAY_MENU);
+        Util.println("********************************************************");
+
         Scanner in = new Scanner(System.in);
         int choice = in.nextInt();
         switch (choice) {
@@ -250,7 +262,11 @@ public class PeerImpl implements Peer {
             System.exit(Constants.ZERO);
         }
       }
-    } catch (Exception e) {
+    } catch (InputMismatchException e){
+      Util.print("Invalid Input Try again ! ");
+      runPeerClient();
+
+    }catch (Exception e) {
       e.printStackTrace();
       System.exit(Constants.MINUS_ONE);
     }
@@ -347,8 +363,10 @@ public class PeerImpl implements Peer {
     Util.print("Pull Thread Started Running.");
     Pull pullEvent = new Pull(this);
     while (true) {
+      int ttr = Integer.parseInt(Util.getValue("pull.TTR"));
       pullEvent.trigger();
-      Util.sleep(Integer.parseInt(Util.getValue("pull.TTR")));
+      Util.print("Pull thread will awake in "+ttr+" seconds");
+      Util.sleep(ttr);
 
     }
   }
@@ -356,6 +374,10 @@ public class PeerImpl implements Peer {
   private synchronized  void processInput(String input, Socket socket) {
     Util.print("Received Message : " + input);
     String params[] = input.split(" ");
+    if(params[0].equals(Constants.PULL)){
+      Util.print("Pull Event Happened");
+      input.split(" ", 3);
+    }
     // TODO - Make it simple to read by using Switch Case and Enum datatype
     if (params[0].equals(Constants.DOWNLOAD) || params[0].equals(Constants.DOWNLOAD_METADATA) ) {
       Util.print("Serving request of the type = "+params[0]);
@@ -475,17 +497,8 @@ public class PeerImpl implements Peer {
       Host from = f.getFromAddress();
       peerClientSocket = new Socket(from.getUrl(), from.getPort());
       PrintWriter out = new PrintWriter(peerClientSocket.getOutputStream(), true);
-      InputStream in = peerClientSocket.getInputStream();
-      String filePath = Util.getValue("cache.folderName") + "/" + f.getName();
-      OutputStream fileOutputStream = new FileOutputStream(filePath);
-      out.println(Constants.DOWNLOAD + " " + f.getName());
-      PrintWriter p = new PrintWriter(filePath, "UTF-8");
-      byte[] bytes = new byte[16 * 1024];
-      int count;
-      while ((count = in.read(bytes)) > 0) {
-        fileOutputStream.write(bytes, 0, count);
-      }
-      p.close();
+      out.println(Constants.PULL + " " + f.getName()+" "+Util.getJson(f));
+      out.close();
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
@@ -495,13 +508,12 @@ public class PeerImpl implements Peer {
         e.printStackTrace();
       }
     }
-
   }
 
   public void handleWatcherThreadEvents(String eventType, String fileName) {
     Util.print("Event = " + eventType + " file = " + fileName);
     if (eventType.equals("ENTRY_CREATE")) {
-      peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 3600, host,false,LocalDateTime.now()));
+      peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, 10, host,false,LocalDateTime.now()));
       Util.print(Util.getJson(peerFiles));
     } else if (eventType.equals("ENTRY_MODIFY")) {
       PeerFile fileModified = peerFiles.getFilesMetaData().get(fileName);
@@ -582,7 +594,12 @@ public class PeerImpl implements Peer {
   }
 
   private boolean isPeerFileOutdated(String fileName) {
-    return peerFiles.getFilesMetaData().get(fileName).isStale();
+    try{
+      return peerFiles.getFilesMetaData().get(fileName).isStale();
+    }catch (NullPointerException e) {
+      Util.error("File is not present");
+    }
+    return true;
   }
 
   private String getFilePath(String fileName) {
@@ -592,13 +609,18 @@ public class PeerImpl implements Peer {
   }
 
   public void displayDownloadedFilesInfo() {
-    HashMap<String, PeerFile> hm = peerFiles.getFilesMetaData();
-    Util.println("Name | version | last update time | ");
-    for (PeerFile file : hm.values()) {
-      Util.println(
-          file.getName() + " " + file.getVersion() + " " + file.getLastUpdated().toString() + " "
-              + file.getFromAddress().address() + " " + file.isStale());
+
+   HashMap<String, PeerFile> peerDatabase = peerFiles.getFilesMetaData();
+    Util.printHeader();
+    Util.println("                      Peer File Information                        ");
+    Util.printFooter();
+
+    for (PeerFile file : peerDatabase.values()) {
+      Util.printHeader();
+      Util.println(Util.getFormattedJson(file));
+      Util.printFooter();
     }
+
   }
 
   public String queryHitMessage(String messageID, String fileName, String address, int ttl) {
@@ -683,6 +705,19 @@ public class PeerImpl implements Peer {
      * read the content from json
      * store it to the meta data
      */
+  }
+
+  private void deleteMetaDataFile(String filePath){
+    try {
+      Files.delete(Paths.get(filePath));
+    } catch (NoSuchFileException x) {
+      System.err.format("%s: no such" + " file or directory%n", filePath);
+    } catch (DirectoryNotEmptyException x) {
+      System.err.format("%s not empty%n", filePath);
+    } catch (IOException x) {
+      // File permission problems are caught here.
+      System.err.println(x);
+    }
   }
 
 }
