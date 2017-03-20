@@ -225,7 +225,7 @@ public  class Util {
 
     public static String getJson(Object obj){
         ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        //mapper.enable(SerializationFeature.INDENT_OUTPUT);
         try {
             return  mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
