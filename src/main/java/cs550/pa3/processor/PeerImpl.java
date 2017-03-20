@@ -126,19 +126,7 @@ public class PeerImpl implements Peer {
       while ((count = in.read(bytes)) > 0) {
         fout.write(bytes, 0, count);
       }
-      //in.wait(2);
-      /*byte[] b = new byte[4];
-      in.read(b);
-      int version = ByteBuffer.wrap(b).getInt();
-      in.read(b);
-      int ttr = ByteBuffer.wrap(b).getInt();
-      in.read(bytes);
-      String origin = new String(bytes, "UTF-8");
-      String addr_params[] = origin.split(":");
-      Util.println("Version : " + Integer.toString(version) + " TTR : " + Integer.toString(ttr)
-          + " Origin : " + origin);
-      registry(fileName, new Host(addr_params[0], Integer.parseInt(addr_params[1])), ttr, version);
-      */p.close();
+      p.close();
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -570,6 +558,11 @@ public class PeerImpl implements Peer {
   }
 
   public void serveDownloadRequest(String fileName, Socket socket) {
+    /**
+     * 1.Search in peerFiles
+     * 2.Check filename.stale == true if true return "Invalid Message"
+     * 3.If above condition fails, then send the file
+     */
     boolean myaddr = false;
     File sourceFile = null;
     if (peerFiles.fileExists(fileName)) {
