@@ -74,7 +74,7 @@ public class PeerImpl implements Peer {
 
     thrash = new ArrayList<String>();
     peerFiles = new PeerFiles();
-    pullOrPush = 2;
+    pullOrPush = 1;
 
   }
 
