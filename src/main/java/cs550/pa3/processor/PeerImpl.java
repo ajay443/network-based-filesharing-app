@@ -325,10 +325,14 @@ public class PeerImpl implements Peer {
             refresh(fileName, h.getUrl(), h.getPort());
             break;
           case 7:
+            System.out.print("Enter filename : \n");
+            fileName = in.next();
+            Util.modifyFile(getMasterFolderName(this.host) + "/" + fileName);
+            break;
+          case 8:
             System.exit(Constants.ZERO);
           default:
             Util.print("Invalid Input Try again ! ");
-            //runPeerClient();
             continue;
         }
       }

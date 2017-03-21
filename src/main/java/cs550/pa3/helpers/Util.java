@@ -18,11 +18,8 @@ package cs550.pa3.helpers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -285,6 +282,29 @@ public  class Util {
 
   }
 
+  public static void modifyFile(String filePath){
+      FileWriter fw = null;
+      BufferedWriter bw = null;
+      try{
+          fw = new FileWriter(filePath, true);
+          bw = new BufferedWriter(fw);
+          bw.write("I am changed");
+                }
+      catch (Exception e){
+          e.printStackTrace();
+      }
+      finally {
+
+          try {
+              if (bw != null)
+                  bw.close();
+              if (fw != null)
+                  fw.close();
+          } catch (IOException ex) {
+              ex.printStackTrace();
+          }
+      }
+  }
 
   public static void main(String[] args) {
 
