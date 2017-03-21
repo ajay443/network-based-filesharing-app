@@ -47,6 +47,6 @@ public  class Constants {
     public static final String SPACE=" ";
 
 
-    public static final String DISPLAY_MENU = "1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Display downloaded files info\n6 : Refresh a stale file\n7 : Modify one of the files held by me\n8 : Exit\nEnter your choice number";
+    public static final String DISPLAY_MENU = "1 : Lookup a file\n2 : Download file from a peer\n3 : Display seen query messages\n4 : Display seen queryhit messages\n5 : Display Peer files info\n6 : Refresh a stale file\n7 : Modify one of the files held by me\n8 : Exit\nEnter your choice number";
 
 }

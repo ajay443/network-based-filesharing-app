@@ -74,7 +74,7 @@ public class PeerImpl implements Peer {
 
     thrash = new ArrayList<String>();
     peerFiles = new PeerFiles();
-    pullOrPush = 1;
+    pullOrPush = 2;
 
   }
 
@@ -385,7 +385,7 @@ public class PeerImpl implements Peer {
     serverThread.start();
     clientThread.start();
     cleanUpThread.start();
-    pullThread.start();
+    //pullThread.start();
     watchThread.start();
 
   }
@@ -513,9 +513,17 @@ public class PeerImpl implements Peer {
         addToSeenMessages(params[1], params[3]);
         forwardQuery(params[1], params[2], ttl);
 
+        /*
         if (( peerFiles.fileExists(params[2]) && (peerFiles.getFileMetadata(params[2]).isOriginal() || (!peerFiles.getFileMetadata(params[2]).isStale())))) {//for cached files need to check if it is valid?
           returnQueryHit(params[1], params[2], host.address(), Constants.TTL, false);
         }
+        */
+
+        //only to collect experiment results
+        if ( peerFiles.fileExists(params[2])) {
+          returnQueryHit(params[1], params[2], host.address(), Constants.TTL, false);
+        }
+
       } else {
         //List ports = (List) seenMessages.get(params[1]);
         //if (!ports.contains(params[3])) {
@@ -578,7 +586,7 @@ public class PeerImpl implements Peer {
         handleForwardBroadCastEvents(params[5], params[2], Integer.parseInt(params[3]), ttl,params[1].split("_")[0]);
         //Util.searchInCached(params[2],Integer.parseInt(params[3]),params[1].split("_")[0],true);
         if (peerFiles.fileExistsAndValid(params[2], params[5])){//filename, origin server
-          Util.println("Updating as Stale");
+          //Util.println("Updating as Stale");
           peerFiles.updateFileMetadata(params[2], Integer.parseInt(params[3]));
         }
       } else {
@@ -762,7 +770,9 @@ public class PeerImpl implements Peer {
             fileName + " " +
             address + " " +
             ttl + " " +
-            Util.getJson(peerFiles.getFilesMetaData().get(fileName));
+            Util.getJson(peerFiles.getFilesMetaData().get(fileName)) +
+                " " + peerFiles.getFileMetadata(fileName).getLastUpdated() +
+                " " + ((peerFiles.getFileMetadata(fileName).isOriginal())?1:0);
   }
 
   public void cleanUpSeenMessages() {
