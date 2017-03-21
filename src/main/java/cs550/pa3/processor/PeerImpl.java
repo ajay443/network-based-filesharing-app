@@ -449,7 +449,7 @@ public class PeerImpl implements Peer {
   private void sendPullRequest(String fileName,String address){
     PeerFile file =  peerFiles.getFileMetadata(fileName);
     file.setIsStale(false);
-    file.setOriginal(false);
+    if(!file.isOriginal())  file.setOriginal(false);
 
     Socket peerClientSocket = null;
     try {
@@ -471,12 +471,16 @@ public class PeerImpl implements Peer {
 
   private void parsePullRequest(String input,String fileName) {
     try{
-      PeerFile file = (PeerFile) Util.toObjectFromJson(input.split(Constants.SPACE,3)[2],PeerFile.class);
-      synchronized (peerFiles){
-        peerFiles.getFilesMetaData().remove(fileName);
-        peerFiles.getFilesMetaData().put(fileName,file);
+
+      synchronized (peerFiles){PeerFile file = (PeerFile) Util.toObjectFromJson(input.split(Constants.SPACE,3)[2],PeerFile.class);
+        if(peerFiles.getFilesMetaData().get(fileName).getVersion() != file.getVersion()){
+          peerFiles.getFilesMetaData().remove(fileName);
+          file.setIsStale(true);
+          peerFiles.getFilesMetaData().put(fileName,file);
+          Util.println("File Meta Data out-dated");
+        }
       }
-      Util.print("File Meta Data updated from Pull request, press 5 to see the latest meta data");
+
     }catch (Exception e){
       Util.println(e.getMessage()+"\nException Occurred while parsing the poll request\n"+input);
     }
@@ -486,18 +490,18 @@ public class PeerImpl implements Peer {
   // todo synchronized ch5eck p
   private void processInput(String input, Socket socket) {
     Util.print("Received Message : " + input);
+
     String params[] = input.split(Constants.SPACE);
     if(params[0].equals(Constants.POLL)){
-      Util.print("Poll Event request client received");
       sendPullRequest(params[1],params[2]);
       return;
     }
+
     if(params[0].equals(Constants.PULL)){
-      Util.print("Sending PUll  Event Metadata");
       parsePullRequest(input,params[1]);
       return;
     }
-    // TODO - Make it simple to read by using Switch Case and Enum datatype
+
     if (params[0].equals(Constants.DOWNLOAD) || params[0].equals(Constants.DOWNLOAD_METADATA) ) {
       Util.print("Serving request of the type = "+params[0]);
       serveDownloadRequest(params[0], params[1], socket);
@@ -641,7 +645,8 @@ public class PeerImpl implements Peer {
 
   public void handleWatcherThreadEvents(String eventType, String fileName) {
     Util.print("Event = " + eventType + " file = " + fileName);
-    if (eventType.equals("ENTRY_CREATE")) {
+    if (eventType.equals("ENTRY_CREATE") ||
+         (eventType.equals("ENTRY_MODIFY") &&   Util.isMac())) {
       if(peerFiles.fileExists(fileName)){//file is modified
         PeerFile modifiedFile = peerFiles.getFileMetadata(fileName);
         modifiedFile.setVersion(modifiedFile.getVersion() + 1);
@@ -686,7 +691,8 @@ public class PeerImpl implements Peer {
   }
 
   private void sendFileData(String fileName, Socket socket) {
-    Util.print("Sending File Data");
+    Util.print("Sending File Data " + getFilePath(fileName));
+
     try (
         InputStream fip = new FileInputStream(getFilePath(fileName));
         OutputStream out = socket.getOutputStream();
@@ -698,7 +704,7 @@ public class PeerImpl implements Peer {
       }
       out.flush();
     } catch (FileNotFoundException e) {
-      Util.error("File is not present in any below locations: \n" + getCacheFolderName(this.host) + "\n"
+      Util.print("File is not present in any below locations: \n" + getCacheFolderName(this.host) + "\n"
           + getMasterFolderName(this.host));
       return;
     } catch (Exception e) {
@@ -712,7 +718,6 @@ public class PeerImpl implements Peer {
         OutputStream out = socket.getOutputStream();
     ) {
       InputStream fip = new ByteArrayInputStream(Util.getJson(peerFiles.getFileMetadata(fileName)).getBytes(StandardCharsets.UTF_8));
-     //todo remove this commented line -> //InputStream fip = new ByteArrayInputStream(("{\"name\":\"ajayramesh-testing\"}").getBytes(StandardCharsets.UTF_8));
       byte b[] = new byte[16 * 1024];
       int count;
       while ((count = fip.read(b)) > Constants.ZERO) {

@@ -26,13 +26,16 @@ public class Pull  implements Event {
         pull();
     }
 
+    /**
+     * If PeerServer.TTR wait is over, then it will send the poll request to all the peers
+     */
     public void pull() {
         if (Util.getValue("pull.switch").equals("on")) {
             if(peerImpl == null) {Util.error("Peer Server is not configured properly!");}
             PeerFiles files = peerImpl.peerFiles;
             HashMap<String, PeerFile> peerFiles = files.getFilesMetaData();
             for (PeerFile f : peerFiles.values()) {
-                if (f.fileExpired() && f.isOriginal() == false && f.isStale() == false ) {
+                if (f.isOriginal() == false && f.isStale() == false ) {
                     Util.print("File "+f.getName()+" is expired!");
                     peerImpl.pollRequest(f);
                 }
