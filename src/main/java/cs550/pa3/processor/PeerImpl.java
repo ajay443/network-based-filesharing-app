@@ -509,7 +509,7 @@ public class PeerImpl implements Peer {
         addToSeenMessages(params[1], params[3]);
         forwardQuery(params[1], params[2], ttl);
 
-        if (peerFiles.fileExists(params[2])) {//for cached files need to check if it is valid?
+        if (( peerFiles.fileExists(params[2]) && (peerFiles.getFileMetadata(params[2]).isOriginal() || (!peerFiles.getFileMetadata(params[2]).isStale())))) {//for cached files need to check if it is valid?
           returnQueryHit(params[1], params[2], host.address(), Constants.TTL, false);
         }
       } else {
@@ -583,8 +583,6 @@ public class PeerImpl implements Peer {
     }
   }
 
-
-
   public void displaySeenMessages(String type) {
     Util.print("Displaying seen " + type + " messages");
     Set set = null;
@@ -647,7 +645,8 @@ public class PeerImpl implements Peer {
         modifiedFile.setIsStale(false);
         peerFiles.add(modifiedFile);
         Util.print(Util.getJson(modifiedFile));
-        handleBroadCastEvents(null, fileName, modifiedFile.getVersion(), Constants.ZERO, false, null);
+        if(pullOrPush == 2)
+          handleBroadCastEvents(null, fileName, modifiedFile.getVersion(), Constants.ZERO, false, null);
       }//file is created
       else
         peerFiles.getFilesMetaData().put(fileName,new PeerFile(1,true, fileName, Integer.parseInt(Util.getValue("TTR")), host,false,LocalDateTime.now()));
