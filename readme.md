@@ -7,30 +7,6 @@
 ![Push sequence-0](docs/pa3-push-squence.png)
 
 
-### Todo list
-- [ ] @ajayramesh23 Code Clea Up of PA2
-- [ ] @ajayramesh23 Diagrams
-- [ ] @ajayramesh23 Pull Based
-- [ ] Chandra Push Based
-- [ ]
----
-
-
-
-### Tasks
-
-- [ ] Inline Comments
-- [ ] Test Case
-- [ ] Sync across threads
-- [ ] Refactor code
-
-
-### Test Case
-
-- [ ] Peer Test case
-- [ ] Index Test case
-
-
 ### To create Jar file
 ```
 mvn package
